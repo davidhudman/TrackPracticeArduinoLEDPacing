@@ -443,7 +443,7 @@ void setPixelColorBasedOnTime()
 		strip.setPixelColor(i, Color(0,0,0));
 	}
 
-	for (int j=0; j < getHighestActivePacerIndex(); j++)		// This can be changed to j < inputPacer (test with actual lights to be sure)
+	for (int j=0; j < getHighestActivePacerIndex()+1; j++)		// This can be changed to j < inputPacer (test with actual lights to be sure)
 	{
 		if (pacer[j].getSecondsPerLap() > 0)
 		{
@@ -478,7 +478,7 @@ void checkClearFlags()
 		else // If the user sends the clear all text string
 		{
 			// set all pacers' secondsPerLap variable to 0
-			for (int i = 0; i < getHighestActivePacerIndex(); i++)
+			for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 			{
 				pacer[i].setSecondsPerLap(0);
 			}

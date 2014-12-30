@@ -466,41 +466,45 @@ void checkClearFlags()
 		if (serialStringInput.length() > 1)
 		{
 			serialStringInput = serialStringInput.substring(1);
-			int initialSerialInputInstance = serialInputPacerInstance = serialStringInput.toInt();
-			pacer[serialInputPacerInstance].setSecondsPerLap(0);		// If the user sends the clear pacer i text string, clear pacer i and reset it to 0
+			serialInputPacerInstance = serialStringInput.toInt();
+			//int initialSerialInputInstance = serialInputPacerInstance;
 			
-			if (serialInputPacerInstance < inputPacer)		// Are we sure that we've cleared a pacer that is smaller than the inputPacer?
+			if (serialInputPacerInstance < getHighestActivePacerIndexOrZero())		// Are we sure that we've cleared a pacer that is smaller than the inputPacer?
 			{
-				if (serialInputPacerInstance != pacer[0].getNumberPacers()-1)	// Is there a Pacer with a higher index that we can copy from?
-				{
-					for (;serialInputPacerInstance < inputPacer-1; serialInputPacerInstance++)
-					{
-						pacer[serialInputPacerInstance] = pacer[serialInputPacerInstance+1];
-						if (serialInputPacerInstance == inputPacer - 2)
-						{
-							serialInputPacerInstance++;	// increment the Pacer Instance to avoid confusion in the next few lines of code; the loop will be exited after this run anyway
-							pacer[serialInputPacerInstance].setSecondsPerLap(0);
-							if (initialSerialInputInstance != inputPacer-1)
-							{
-								for (; serialInputPacerInstance < pacer[0].getNumberPacers()-2; serialInputPacerInstance++)
-								{
-									pacer[serialInputPacerInstance].setShade(pacer[serialInputPacerInstance+1].getShade());
-									if (serialInputPacerInstance == pacer[0].getNumberPacers()-3)
-									{
-										pacer[serialInputPacerInstance].setShade(pacer[3].getShade());	// This should really be the "next" color in the array of colors, but I don't feel like making that right now
-									}
-								}
-							}
-						}
-					}
 
-					// shift inputPacer variable down if a pacer is cleared (it could be placed above, but this ensures that inputPacer is not shifted down if someone accidentally clears a pacer that is already at 0 seconds per Lap)
-					inputPacer--;
-				}
-				else
-				{
-					inputPacer--;
-				}
+				pacer[serialInputPacerInstance].setSecondsPerLap(0);		// If the user sends the clear pacer i text string, clear pacer i and reset it to 0
+			
+			
+				//if (serialInputPacerInstance != pacer[0].getNumberPacers()-1)	// Is there a Pacer with a higher index that we can copy from?
+				//{
+				//	for (;serialInputPacerInstance < inputPacer-1; serialInputPacerInstance++)
+				//	{
+				//		pacer[serialInputPacerInstance] = pacer[serialInputPacerInstance+1];
+				//		if (serialInputPacerInstance == inputPacer - 2)
+				//		{
+				//			serialInputPacerInstance++;	// increment the Pacer Instance to avoid confusion in the next few lines of code; the loop will be exited after this run anyway
+				//			pacer[serialInputPacerInstance].setSecondsPerLap(0);
+				//			if (initialSerialInputInstance != inputPacer-1)
+				//			{
+				//				for (; serialInputPacerInstance < pacer[0].getNumberPacers()-2; serialInputPacerInstance++)
+				//				{
+				//					pacer[serialInputPacerInstance].setShade(pacer[serialInputPacerInstance+1].getShade());
+				//					if (serialInputPacerInstance == pacer[0].getNumberPacers()-3)
+				//					{
+				//						pacer[serialInputPacerInstance].setShade(pacer[3].getShade());	// This should really be the "next" color in the array of colors, but I don't feel like making that right now
+				//					}
+				//				}
+				//			}
+				//		}
+				//	}
+
+				//	// shift inputPacer variable down if a pacer is cleared (it could be placed above, but this ensures that inputPacer is not shifted down if someone accidentally clears a pacer that is already at 0 seconds per Lap)
+				//	inputPacer--;
+				//}
+				//else
+				//{
+				//	inputPacer--;
+				//}
 			}
 			return;
 		}
@@ -569,8 +573,24 @@ void checkLightFlags()
 	}
 }
 
+// Returns the lowest available (empty) pacer or return the highest index; returns the index of the lowest pacer instance with getSecondsPerLap() == 0 unless all are greater than 0, in which case it will return the int associated with the instance of the highest pacer
+int getLowestUnusedPacerIndex()
+{
+	for (int i = 0; i < pacer[0].getNumberPacers(); i++)
+	{
+		if (pacer[i].getSecondsPerLap() == 0)
+		{
+			return i;
+			break;
+		}
+	}
+
+	// Return the index of the highest pacer if a lower empty one was not found
+	return pacer[0].getNumberPacers()-1;
+}
+
 // Returns the index of the highest pacer instance with getSecondsPerLap() > 0 or returns 0 if no pacers have getSecondsPerLap > 0
-int getHighestPacerIndexOrZero()
+int getHighestActivePacerIndexOrZero()
 {
 	for (int i = pacer[0].getNumberPacers()-1; i > -1; i--)
 	{

@@ -217,8 +217,8 @@ Pacer pacer[10] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0
 	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
 	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS) };
 double secondsPerLapHolder;
-int inputPacer = 0;				// This allows the user to control this number's pacer's secondsPerLap through the serial connection
-int highestPacer = 0;
+//int inputPacer = 0;				// This allows the user to control this number's pacer's secondsPerLap through the serial connection
+//int highestPacer = 0;
 String serialStringInput;		// Holds the raw, unformatted serial input from user
 String mode = "track";			// This mode String has two possible values: "track" and "party". Each value will result in different function calls
 int partyInt = 10;				// This integer controls what party functions will be run; 0 indicates all will be run
@@ -339,9 +339,8 @@ void setSerialInput()
 			secondsPerLapHolder = atof(serialStringInput.c_str());
 			if (secondsPerLapHolder > 0)
 			{
-				pacer[inputPacer].setStartTimeToNow();
-				pacer[inputPacer].setSecondsPerLap (secondsPerLapHolder);
-				inputPacer++;
+				pacer[getLowestUnusedPacerIndex()].setStartTimeToNow();
+				pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (secondsPerLapHolder);
 			}
 			secondsPerLapHolder = 0;
 
@@ -349,11 +348,6 @@ void setSerialInput()
 			checkResetFlags();
 			checkLightFlags();
 			checkPartyModeFlags();
-
-			if (pacer[inputPacer].getSecondsPerLap() > 0 && inputPacer < pacer[0].getNumberPacers())
-			{
-				inputPacer++;
-			}
 
 			serial1FeedbackIterator = serialCountTo;
 			getSerialFeedback();
@@ -393,15 +387,18 @@ void getSerialFeedback()
 	if (serialFeedbackIterator >= serialCountTo / 5)
 	{
 		Serial.print("\ninputPacer = ");
-		Serial.print(inputPacer);
-		for (int i=0; i < (inputPacer+1); i++) // changed from i < pacer[0].getNumberPacers();
+		Serial.print(getLowestUnusedPacerIndex());
+		for (int i=0; i < (getHighestActivePacerIndex()+1); i++) // changed from i < pacer[0].getNumberPacers();
 		{
-			Serial.print(" Lap[");
-			Serial.print(i);
-			Serial.print("] = ");
-			Serial.print(pacer[i].getSecondsPerLap());
-			Serial.print(" c = ");
-			Serial.print(pacer[i].getShade());
+			if (pacer[i].getSecondsPerLap() > 0)
+			{
+				Serial.print(" Lap[");
+				Serial.print(i);
+				Serial.print("] = ");
+				Serial.print(pacer[i].getSecondsPerLap());
+				Serial.print(" c = ");
+				Serial.print(pacer[i].getShade());
+			}
 		}
 		Serial.print(" LEDs ");
 		Serial.print(pacer[0].getTotalPacingPanels());
@@ -416,13 +413,16 @@ void getSerialFeedback()
 	if (serial1FeedbackIterator == serialCountTo)
 	{
 		Serial1.print("\ninputPacer = ");
-		Serial1.print(inputPacer);
-		for (int i=0; i < (inputPacer+1); i++) // changed from i < pacer[0].getNumberPacers();
+		Serial1.print(getLowestUnusedPacerIndex());
+		for (int i=0; i < (getHighestActivePacerIndex()+1); i++) // changed from i < pacer[0].getNumberPacers();
 		{
-			Serial1.print(" Lap[");
-			Serial1.print(i);
-			Serial1.print("] = ");
-			Serial1.print(pacer[i].getSecondsPerLap());
+			if (pacer[i].getSecondsPerLap() > 0)
+			{
+				Serial1.print(" Lap[");
+				Serial1.print(i);
+				Serial1.print("] = ");
+				Serial1.print(pacer[i].getSecondsPerLap());
+			}
 		}
 		Serial1.print(" LEDs ");
 		Serial1.print(pacer[0].getTotalPacingPanels());
@@ -443,7 +443,7 @@ void setPixelColorBasedOnTime()
 		strip.setPixelColor(i, Color(0,0,0));
 	}
 
-	for (int j=0; j < inputPacer; j++)		// This can be changed to j < inputPacer (test with actual lights to be sure)
+	for (int j=0; j < getHighestActivePacerIndex(); j++)		// This can be changed to j < inputPacer (test with actual lights to be sure)
 	{
 		if (pacer[j].getSecondsPerLap() > 0)
 		{
@@ -469,54 +469,20 @@ void checkClearFlags()
 			serialInputPacerInstance = serialStringInput.toInt();
 			//int initialSerialInputInstance = serialInputPacerInstance;
 			
-			if (serialInputPacerInstance < getHighestActivePacerIndexOrZero())		// Are we sure that we've cleared a pacer that is smaller than the inputPacer?
+			if (serialInputPacerInstance <= getHighestActivePacerIndex())		// Are we sure that we've cleared a pacer that is smaller than the inputPacer?
 			{
-
 				pacer[serialInputPacerInstance].setSecondsPerLap(0);		// If the user sends the clear pacer i text string, clear pacer i and reset it to 0
-			
-			
-				//if (serialInputPacerInstance != pacer[0].getNumberPacers()-1)	// Is there a Pacer with a higher index that we can copy from?
-				//{
-				//	for (;serialInputPacerInstance < inputPacer-1; serialInputPacerInstance++)
-				//	{
-				//		pacer[serialInputPacerInstance] = pacer[serialInputPacerInstance+1];
-				//		if (serialInputPacerInstance == inputPacer - 2)
-				//		{
-				//			serialInputPacerInstance++;	// increment the Pacer Instance to avoid confusion in the next few lines of code; the loop will be exited after this run anyway
-				//			pacer[serialInputPacerInstance].setSecondsPerLap(0);
-				//			if (initialSerialInputInstance != inputPacer-1)
-				//			{
-				//				for (; serialInputPacerInstance < pacer[0].getNumberPacers()-2; serialInputPacerInstance++)
-				//				{
-				//					pacer[serialInputPacerInstance].setShade(pacer[serialInputPacerInstance+1].getShade());
-				//					if (serialInputPacerInstance == pacer[0].getNumberPacers()-3)
-				//					{
-				//						pacer[serialInputPacerInstance].setShade(pacer[3].getShade());	// This should really be the "next" color in the array of colors, but I don't feel like making that right now
-				//					}
-				//				}
-				//			}
-				//		}
-				//	}
-
-				//	// shift inputPacer variable down if a pacer is cleared (it could be placed above, but this ensures that inputPacer is not shifted down if someone accidentally clears a pacer that is already at 0 seconds per Lap)
-				//	inputPacer--;
-				//}
-				//else
-				//{
-				//	inputPacer--;
-				//}
 			}
 			return;
 		}
 		else // If the user sends the clear all text string
 		{
 			// set all pacers' secondsPerLap variable to 0
-			for (int i = 0; i < pacer[0].getNumberPacers(); i++)
+			for (int i = 0; i < getHighestActivePacerIndex(); i++)
 			{
 				pacer[i].setSecondsPerLap(0);
 			}
 
-			inputPacer = 0;				// set inputPacer to 0 because the next number entered needs to be assigned to the 0th Pacer instance because they were just all removed
 			return;
 		}
 	}
@@ -589,8 +555,8 @@ int getLowestUnusedPacerIndex()
 	return pacer[0].getNumberPacers()-1;
 }
 
-// Returns the index of the highest pacer instance with getSecondsPerLap() > 0 or returns 0 if no pacers have getSecondsPerLap > 0
-int getHighestActivePacerIndexOrZero()
+// Returns the index of the highest pacer instance with getSecondsPerLap() > 0 or returns -1 if no pacers have getSecondsPerLap > 0
+int getHighestActivePacerIndex()
 {
 	for (int i = pacer[0].getNumberPacers()-1; i > -1; i--)
 	{
@@ -600,7 +566,7 @@ int getHighestActivePacerIndexOrZero()
 			break;
 		}
 	}
-	return 0;
+	return -1;
 }
 
 //***************************

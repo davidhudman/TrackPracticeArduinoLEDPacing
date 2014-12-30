@@ -218,6 +218,7 @@ Pacer pacer[10] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0
 	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS) };
 double secondsPerLapHolder;
 int inputPacer = 0;				// This allows the user to control this number's pacer's secondsPerLap through the serial connection
+int highestPacer = 0;
 String serialStringInput;		// Holds the raw, unformatted serial input from user
 String mode = "track";			// This mode String has two possible values: "track" and "party". Each value will result in different function calls
 int partyInt = 10;				// This integer controls what party functions will be run; 0 indicates all will be run
@@ -566,6 +567,20 @@ void checkLightFlags()
 
 		return;
 	}
+}
+
+// Returns the index of the highest pacer instance with getSecondsPerLap() > 0 or returns 0 if no pacers have getSecondsPerLap > 0
+int getHighestPacerIndexOrZero()
+{
+	for (int i = pacer[0].getNumberPacers()-1; i > -1; i--)
+	{
+		if (pacer[i].getSecondsPerLap() > 0)
+		{
+			return i;
+			break;
+		}
+	}
+	return 0;
 }
 
 //***************************

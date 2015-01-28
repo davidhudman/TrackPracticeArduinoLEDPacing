@@ -217,7 +217,7 @@ Pacer pacer[10] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0
 	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
 	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS) };
 double secondsPerLapHolder;
-//int inputPacer = 0;				// This allows the user to control this number's pacer's secondsPerLap through the serial connection
+//int inputPacer = 0;				//This allows the user to control this number's pacer's secondsPerLap through the serial connection
 //int highestPacer = 0;
 String serialStringInput;		// Holds the raw, unformatted serial input from user
 String mode = "track";			// This mode String has two possible values: "track" and "party". Each value will result in different function calls

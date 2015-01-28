@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "prac090914aTrackPractice", "prac090914aTrackPractice.vcxproj", "{DE382A08-AB50-433E-AAC3-B77B2C4609AD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrackPracticeWS2801", "..\TrackPracticeWS2801\TrackPracticeWS2801.vcxproj", "{733B64E5-9805-4BC6-8EC6-594FE9814DBD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrackPracticeLPD8806", "..\TrackPracticeLPD8806\TrackPracticeLPD8806.vcxproj", "{2B6AB4F7-592E-4E2C-952E-8CB6B7BF7693}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE382A08-AB50-433E-AAC3-B77B2C4609AD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DE382A08-AB50-433E-AAC3-B77B2C4609AD}.Debug|Win32.Build.0 = Debug|Win32
+		{DE382A08-AB50-433E-AAC3-B77B2C4609AD}.Release|Win32.ActiveCfg = Release|Win32
+		{DE382A08-AB50-433E-AAC3-B77B2C4609AD}.Release|Win32.Build.0 = Release|Win32
+		{733B64E5-9805-4BC6-8EC6-594FE9814DBD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{733B64E5-9805-4BC6-8EC6-594FE9814DBD}.Debug|Win32.Build.0 = Debug|Win32
+		{733B64E5-9805-4BC6-8EC6-594FE9814DBD}.Release|Win32.ActiveCfg = Release|Win32
+		{733B64E5-9805-4BC6-8EC6-594FE9814DBD}.Release|Win32.Build.0 = Release|Win32
+		{2B6AB4F7-592E-4E2C-952E-8CB6B7BF7693}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2B6AB4F7-592E-4E2C-952E-8CB6B7BF7693}.Debug|Win32.Build.0 = Debug|Win32
+		{2B6AB4F7-592E-4E2C-952E-8CB6B7BF7693}.Release|Win32.ActiveCfg = Release|Win32
+		{2B6AB4F7-592E-4E2C-952E-8CB6B7BF7693}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

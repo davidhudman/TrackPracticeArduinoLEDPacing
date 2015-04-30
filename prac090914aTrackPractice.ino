@@ -4,7 +4,7 @@
 	I orginally ordered a 50-light strip of these lights off amazon for $31 (http://www.amazon.com/gp/product/B00LYRI1KY/).
 	A similar 25-light strip is also sold by Adafruit for $40 (https://www.adafruit.com/product/738).
 
-	This program contains only the track pacing features, not the "party" features
+	This program contains both the track pacing features and the "party" features
 
 */
 

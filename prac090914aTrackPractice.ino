@@ -228,7 +228,7 @@ Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
 
 SoftwareSerial swerial(8,9);	// RX, TX
 int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0;
-int serialCountTo = 10000;
+int serialCountTo = 2000;
 
 void setup()
 {
@@ -252,6 +252,8 @@ void loop()
 	//getArdudroidInputFromUser();
 
 	//setArdudroidTextCommandToArduinoSerialInput();
+
+	setSerialInput();
 
 	if (mode == "track")
 	{
@@ -317,7 +319,7 @@ void loop()
 }
 
 // send input from user via the Serial Monitor Tool to send to the Arduino device
-void serialEvent()
+void setSerialInput()
 {
 	// This could be an if statement or a while statement; an if statement will run the main loop between each serial input, but a while loop will process all the serial input and then return to the main loop
 
@@ -614,7 +616,7 @@ void colorWipe(uint32_t c, uint8_t wait) {
       strip.show();
       delay(wait);
   }
-  serialEvent();
+  setSerialInput();
 }
 
 /* Helper functions */

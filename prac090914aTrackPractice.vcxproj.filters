@@ -15,11 +15,23 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="prac090914aTrackPractice.ino" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Visual Micro\.prac090914aTrackPractice.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libraries\Pacer\Pacer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="prac090914aTrackPractice.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="prac090914aTrackPractice.ino" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

@@ -41,4 +41,5 @@ extern "C" void __cxa_pure_virtual() {;}
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\micro\pins_arduino.h" 
 #include "C:\Users\david\Documents\Arduino\prac090914aTrackPractice\prac090914aTrackPractice.ino"
+#include "C:\Users\david\Documents\Arduino\prac090914aTrackPractice\resource.h"
 #endif

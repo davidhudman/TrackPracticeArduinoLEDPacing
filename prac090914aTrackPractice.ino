@@ -13,7 +13,6 @@
 #include <Time.h>
 #include "LPD8806.h"
 #include "SPI.h"
-// #include <Pacer.h>
 
 class Stopwatch{
 private:
@@ -60,7 +59,159 @@ public:
     }
 };
 
-// int Pacer::numberPacers = 0;
+/**
+*	Pacer Class - public in java program
+*	Holds all information about each individual pacer object (lap time, color, delay, starting postition, etc)
+*/
+class Pacer {
+private:
+	double initialDelay, 					//UI// How long each pacer should wait before starting
+				secondsPerLap;				//UI// The number of seconds that it will take for the pacing panels to complete one lap
+	int initialHighlightedPanel, 			//UI// This determines where the pacer starts from
+				numMeters,						// This determines how many meters the pacing lights will run for
+				totalPacingPanels,				// This is passed as an argument from JpanelPractice
+				lightTrainLength;			//UI// This determines how many lights wide this pacer will be
+	uint32_t shade;		//Color shade;		//UI// This determines the color of the pacer's pacing lights
+	bool isStopwatchStarted;
+	long startTime;
+	static int numberPacers; // static
+	int currentHighlightedPacingPanel;	// This determines which pacing panel is currently lit up
+
+public:
+	// variables
+	
+	// classes
+	Pacer(double lapSecs, double initDelay, int firstHighlightedPanel, int meters, int light_Train_Length, int total_Pacing_Panels) // Constructor
+	{
+		Adafruit_WS2801 strip1 = Adafruit_WS2801();
+
+		uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)}; 
+		// white, red, yellow, green, cyan, blue, magenta
+
+		secondsPerLap = lapSecs;
+		initialDelay = initDelay;
+		currentHighlightedPacingPanel = firstHighlightedPanel;
+		initialHighlightedPanel = firstHighlightedPanel;
+		numMeters = meters;
+		shade = color[numberPacers%7];
+		lightTrainLength = light_Train_Length;
+		isStopwatchStarted = false;
+		totalPacingPanels = total_Pacing_Panels;
+		numberPacers++;
+		startTime = millis() + (long)initialDelay;
+	};
+	int getNumberPacers()
+	{
+		return numberPacers;
+	};
+	bool getIsStopwatchStarted()
+	{
+		return isStopwatchStarted;
+	};
+	double getSecondsPerLap()
+	{
+		return secondsPerLap;
+	};
+	int getTotalPacingPanels()
+	{
+		return totalPacingPanels;
+	};
+	int getLightTrainLength()
+	{
+		return lightTrainLength;
+	};
+	double getInitialDelay()
+	{
+		return initialDelay;
+	};
+	int getInitialHighlightedPanel()
+	{
+		return initialHighlightedPanel;
+	};
+	int getNumMeters()
+	{
+		return numMeters;
+	};
+	double getNextLightDelay()			// The delay between pacing panels lighting up. This is derived from the number of seconds that it takes for the pacing panels to complete a lap and the total number of pacing panels
+	{
+		return ((getSecondsPerLap() / (double)getTotalPacingPanels()*1000));
+	};
+	int getCurrentHighlightedPacingPanel ()
+	{
+		currentHighlightedPacingPanel = (int)(((getRunningTime()%(long)((int)getSecondsPerLap()*(double)1000))/getNextLightDelay())+initialHighlightedPanel)%getTotalPacingPanels();
+		return currentHighlightedPacingPanel;
+	};
+	long getStartTime()
+	{
+		return startTime;
+	};
+	long getRunningTime()
+	{
+		// This if statement is meant to solve the problem of pacing panels running before their delay
+		if (millis() > getStartTime())
+		return millis() - getStartTime();		// if the fix doesn't work, just leave this line
+		else
+		return 0;
+	};
+	uint32_t getShade()
+	{
+		return shade;
+	};
+	void setShade(uint32_t new_Shade)
+	{
+		shade = new_Shade;
+	}
+	void setTotalPacingPanels(int total_Pacing_Panels_)
+	{
+		totalPacingPanels = total_Pacing_Panels_;
+	};
+	void setStartTimeToNow()
+	{
+		startTime = millis();
+	};
+	void setStartTimeToNowPlusDelay(long delayMillis)
+	{
+		startTime = millis() + delayMillis;
+	};
+	void setStartTime(long start_Time)
+	{
+		startTime = start_Time;
+	}
+	void setCurrentHighlightedPacingPanel (int current_Highlighted_Pacing_Panel)
+	{
+		currentHighlightedPacingPanel = current_Highlighted_Pacing_Panel;
+	};
+	void setIsStopwatchStarted(boolean is_Stopwatch_Started)
+	{
+		isStopwatchStarted = is_Stopwatch_Started;
+	};
+	void setNumberPacers(int number_Pacers)
+	{
+		numberPacers = number_Pacers;
+	};
+	void setSecondsPerLap(double seconds_Per_Lap)
+	{
+		secondsPerLap = seconds_Per_Lap;
+	};
+	void setInitialDelay(int initDelay)
+	{
+		initialDelay = initDelay;
+	};
+	void setInitialHighlightedPanel(int firstHighlightedPanel)
+	{
+		initialHighlightedPanel = firstHighlightedPanel;
+	};
+	void setNumMeters(int meters)
+	{
+		numMeters = meters;
+	};
+	void setC(uint32_t c)
+	{
+		shade = c;
+	};
+};
+
+int Pacer::numberPacers = 0;
 
 int dataPin = 2;
 int clockPin = 3;
@@ -332,7 +483,7 @@ void checkClearFlags()
 		else // If the user sends the clear all text string
 		{
 			// set all pacers' secondsPerLap variable to 0
-			for (int i = 0; i < (sizeof(pacer)/sizeof(*pacer)); i++)
+			for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 			{
 				pacer[i].setSecondsPerLap(0);
 			}
@@ -350,8 +501,31 @@ void checkResetFlags()
 	// If the user sends a string that starts with "r"
 	if (serialStringInput.startsWith("r") == true)
 	{
+		if (serialStringInput.indexOf("d") == 1)
+		{
+			if (serialStringInput.length() > 2)
+			{
+				serialStringInput = serialStringInput.substring(2);
+				serialInputPacerInstance = serialStringInput.toInt();	// I need to change these variable names to reflect what they actually do. I'm just being lazy copy-pasting code from another section
+				// call all pacers' setStartTimeToNowPlusDelay() function
+				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
+				{
+					pacer[i].setStartTimeToNowPlusDelay(serialInputPacerInstance*1000);
+				}
+				return;
+			}
+			else
+			{
+				// call all pacers' setStartTimeToNowPlusDelay() function
+				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
+				{
+					pacer[i].setStartTimeToNowPlusDelay(5000);
+				}
+				return;
+			}
+		}
 		// If the user sends a string that is longer than 1 character
-		if (serialStringInput.length() > 1)
+		else if (serialStringInput.length() > 1)
 		{
 			serialStringInput = serialStringInput.substring(1);
 			serialInputPacerInstance = serialStringInput.toInt();
@@ -361,7 +535,7 @@ void checkResetFlags()
 		else
 		{
 			// call all pacers' setStartTimeToNow() function
-			for (int i = 0; i < (sizeof(pacer)/sizeof(*pacer)); i++)
+			for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 			{
 				pacer[i].setStartTimeToNow();
 			}
@@ -383,7 +557,7 @@ void checkLightFlags()
 		newPacingPanels = serialStringInput.toInt();
 
 		// call all pacers' setTotalPacingPanels function and pass it the value received from the user to set the number of lights on the track
-		for (int i = 0; i < (sizeof(pacer)/sizeof(*pacer)); i++)
+		for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 		{
 			pacer[i].setTotalPacingPanels(newPacingPanels);
 		}
@@ -396,7 +570,7 @@ void checkLightFlags()
 // Returns the lowest available (empty) pacer or return the highest index; returns the index of the lowest pacer instance with getSecondsPerLap() == 0 unless all are greater than 0, in which case it will return the int associated with the instance of the highest pacer
 int getLowestUnusedPacerIndex()
 {
-	for (int i = 0; i < (sizeof(pacer)/sizeof(*pacer)); i++)
+	for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 	{
 		if (pacer[i].getSecondsPerLap() == 0)
 		{
@@ -406,13 +580,13 @@ int getLowestUnusedPacerIndex()
 	}
 
 	// Return the index of the highest pacer if a lower empty one was not found
-	return (sizeof(pacer)/sizeof(*pacer))-1;
+	return pacer[0].getNumberPacers()-1;
 }
 
 // Returns the index of the highest pacer instance with getSecondsPerLap() > 0 or returns -1 if no pacers have getSecondsPerLap > 0
 int getHighestActivePacerIndex()
 {
-	for (int i = (sizeof(pacer)/sizeof(*pacer))-1; i > -1; i--)
+	for (int i = pacer[0].getNumberPacers()-1; i > -1; i--)
 	{
 		if (pacer[i].getSecondsPerLap() > 0)
 		{

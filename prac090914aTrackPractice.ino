@@ -292,58 +292,7 @@ void loop()
 	}
 	else if (mode == "party")
 	{
-		// switch statement with party int as the value for choosing cases that calls different party functions based on its value
-		switch(partyInt)
-		{
-			case 0:
-				//scannerSequence();
-				colorWipe(Color(255, 0, 0), 20);	// red
-				colorWipe(Color(0, 0, 0), 20);
-				break;
-			case 1:
-				//colorChaseSequence();
-				colorWipe(Color(0, 255, 0), 20);	// green
-				colorWipe(Color(0, 0, 0), 20);
-				break;
-			case 2:
-				//colorWipeSequence();
-				colorWipe(Color(0, 0, 255), 20);	// blue
-				colorWipe(Color(0, 0, 0), 20);
-				break;
-			case 3:
-				//ditherSequence
-				rainbow(10);
-				break;
-			case 4:
-				//rainbowCycleSequence();
-				rainbowCycle(10);
-				break;
-			case 5:
-				//waveSequence();
-				colorWipe(Color(255, 0, 0), 20);	// red
-				colorWipe(Color(0, 0, 0), 20);
-				break;
-			case 6:
-				//partyCycle();
-				colorWipe(Color(255, 0, 0), 20);	// red
-				colorWipe(Color(0, 0, 0), 20);
-				break;
-			default:
-				//partyInt = 0;
-				colorWipe(Color(255, 0, 0), 20);	// red
-				colorWipe(Color(0, 0, 0), 20);
-				colorWipe(Color(0, 255, 0), 20);	// green
-				colorWipe(Color(0, 0, 0), 20);
-				colorWipe(Color(0, 0, 255), 20);	// blue
-				colorWipe(Color(0, 0, 0), 20);
-				colorWipe(Color(255, 255, 0), 20);	// orange
-				colorWipe(Color(0, 0, 0), 20);
-				colorWipe(Color(255, 0, 255), 20);	// purple
-				colorWipe(Color(0, 0, 0), 20);
-				colorWipe(Color(0, 255, 255), 20);	// aqua
-				colorWipe(Color(0, 0, 0), 20);
-				break;
-		}
+		partyFunctions();
 	}
 }
 
@@ -698,7 +647,61 @@ void delayedPacerTrafficLightCountdown()
 //****Party Functions
 //***************************
 
-
+void partyFunctions()
+{
+	// switch statement with party int as the value for choosing cases that calls different party functions based on its value
+	switch(partyInt)
+	{
+		case 0:
+			//scannerSequence();
+			colorWipe(Color(255, 0, 0), 20);	// red
+			colorWipe(Color(0, 0, 0), 20);
+			break;
+		case 1:
+			//colorChaseSequence();
+			colorWipe(Color(0, 255, 0), 20);	// green
+			colorWipe(Color(0, 0, 0), 20);
+			break;
+		case 2:
+			//colorWipeSequence();
+			colorWipe(Color(0, 0, 255), 20);	// blue
+			colorWipe(Color(0, 0, 0), 20);
+			break;
+		case 3:
+			//ditherSequence
+			rainbow(10);
+			break;
+		case 4:
+			//rainbowCycleSequence();
+			rainbowCycle(10);
+			break;
+		case 5:
+			//waveSequence();
+			colorWipe(Color(255, 0, 0), 20);	// red
+			colorWipe(Color(0, 0, 0), 20);
+			break;
+		case 6:
+			//partyCycle();
+			colorWipe(Color(255, 0, 0), 20);	// red
+			colorWipe(Color(0, 0, 0), 20);
+			break;
+		default:
+			//partyInt = 0;
+			colorWipe(Color(255, 0, 0), 20);	// red
+			colorWipe(Color(0, 0, 0), 20);
+			colorWipe(Color(0, 255, 0), 20);	// green
+			colorWipe(Color(0, 0, 0), 20);
+			colorWipe(Color(0, 0, 255), 20);	// blue
+			colorWipe(Color(0, 0, 0), 20);
+			colorWipe(Color(255, 255, 0), 20);	// orange
+			colorWipe(Color(0, 0, 0), 20);
+			colorWipe(Color(255, 0, 255), 20);	// purple
+			colorWipe(Color(0, 0, 0), 20);
+			colorWipe(Color(0, 255, 255), 20);	// aqua
+			colorWipe(Color(0, 0, 0), 20);
+			break;
+	}
+}
 void rainbow(uint8_t wait) {
   int i, j;
    

@@ -108,6 +108,30 @@ public:
 	{
 		return isStopwatchStarted;
 	};
+	bool isCurrentlyDelayed()
+	{
+		if ((startTime - millis()) > 0)
+		{
+			return true;
+		}
+		else return false;
+	};
+	bool isStartTimeWithinXSecondsAndGreaterThanZero(int seconds)
+	{
+		if (((startTime - millis()) > 0) && ((startTime - millis()) < (seconds*1000)))
+		{
+			return true;
+		}
+		else return false;
+	};
+	bool isStartTimeWithinXSecondsOnly(int seconds)
+	{
+		if ((startTime - millis()) < (seconds*1000))
+		{
+			return true;
+		}
+		else return false;
+	};
 	double getSecondsPerLap()
 	{
 		return secondsPerLap;
@@ -231,8 +255,9 @@ int partyInt = 10;				// This integer controls what party functions will be run;
 Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
 
 SoftwareSerial swerial(8,9);	// RX, TX
-int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0;
-int serialCountTo = 2000;
+int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightInterator = 0;
+int serialCountTo = 2000, trafficLightCountTo = 200;
+int tempLowestDelayedPacerIndex = -1;
 
 void setup()
 {
@@ -443,11 +468,15 @@ void getSerialFeedback()
 // Set Each Pixel's color based on what the what the current highlighted pixel (formerly, pacing panel) should be
 void setPixelColorBasedOnTime()
 {
+	// *** Need to change the count to variables in these for loops to variables so it's not calling that function on every loop
+
+	// Turn every light off
 	for (int i=0; i < strip.numPixels(); i++) 
 	{
 		strip.setPixelColor(i, Color(0,0,0));
 	}
 
+	// Place the pacers where they are supposed to be with the correct color
 	for (int j=0; j < getHighestActivePacerIndex()+1; j++)		// This can be changed to j < inputPacer (test with actual lights to be sure)
 	{
 		if (pacer[j].getSecondsPerLap() > 0)
@@ -455,6 +484,10 @@ void setPixelColorBasedOnTime()
 			strip.setPixelColor(pacer[j].getCurrentHighlightedPacingPanel(), pacer[j].getShade()); // set one pixel
 		}
 	}
+
+	// Traffic Light Countdown for delayed pacers
+	delayedPacerTrafficLightCountdown();
+
 	strip.show();              // refresh strip display
 
 }
@@ -606,6 +639,59 @@ int getHighestActivePacerIndex()
 		}
 	}
 	return -1;
+}
+
+// Computes the Lowest Delayed Pacer only one time per trafficLightCountTo times that the main loop runs
+void computeLowestDelayedPacer()
+{
+	if (trafficLightInterator >= trafficLightCountTo)
+	{
+		int highest_Active_Pacer_Panel = getHighestActivePacerIndex();
+		for (int i=0; i <= highest_Active_Pacer_Panel; i++)	// used with the if statement to get the lowest delayed pacer index
+		{
+			if (pacer[i].isCurrentlyDelayed() == true)
+			{
+				tempLowestDelayedPacerIndex = i;
+				return;
+			}
+		}
+		trafficLightInterator++;
+	}
+}
+
+// Give delayed pacers a traffic light countdown
+void delayedPacerTrafficLightCountdown()
+{
+	if (tempLowestDelayedPacerIndex <= -1)
+	{
+		computeLowestDelayedPacer();
+		return;
+	}
+	else if (tempLowestDelayedPacerIndex > -1)
+	{
+		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(7) == true)
+		{
+			if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(4) == true)
+			{
+				if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(2) == true)
+				{
+					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed() == false)
+					{
+						trafficLightInterator = 0;
+						tempLowestDelayedPacerIndex = -1;
+						return;
+					}
+					strip.setPixelColor(0, Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+					return;
+				}
+				strip.setPixelColor(1, Color(255,255,0)); // yellow
+				return;
+			}
+			strip.setPixelColor(2, Color(255,0,0));	// red
+			return;
+		}
+		return;
+	}
 }
 
 //***************************

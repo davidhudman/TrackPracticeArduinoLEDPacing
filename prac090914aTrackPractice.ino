@@ -462,7 +462,7 @@ void setPixelColorBasedOnTime()
 // Check to see if the user sent a clear flag that signifies that one or all pacers needs to be cleared
 void checkClearFlags()
 {
-	int serialInputPacerInstance;	// Holds the integer on the end of the string that the user input, such as "c1" or "r2"
+	int serialInputInt;	// Holds the integer on the end of the string that the user input, such as "c1" or "r2"
 
 	// If the user sends a string that starts with "c"
 	if (serialStringInput.startsWith("c") == true)
@@ -471,12 +471,12 @@ void checkClearFlags()
 		if (serialStringInput.length() > 1)
 		{
 			serialStringInput = serialStringInput.substring(1);
-			serialInputPacerInstance = serialStringInput.toInt();
-			//int initialSerialInputInstance = serialInputPacerInstance;
+			serialInputInt = serialStringInput.toInt();
+			//int initialSerialInputInstance = serialInputInt;
 			
-			if (serialInputPacerInstance <= getHighestActivePacerIndex())		// Are we sure that we've cleared a pacer that is smaller than the inputPacer?
+			if (serialInputInt <= getHighestActivePacerIndex())		// Are we sure that we've cleared a pacer that is smaller than the inputPacer?
 			{
-				pacer[serialInputPacerInstance].setSecondsPerLap(0);		// If the user sends the clear pacer i text string, clear pacer i and reset it to 0
+				pacer[serialInputInt].setSecondsPerLap(0);		// If the user sends the clear pacer i text string, clear pacer i and reset it to 0
 			}
 			return;
 		}
@@ -496,21 +496,32 @@ void checkClearFlags()
 // Check to see if the user sent a reset flag that signifies that one or all pacers needs to be reset
 void checkResetFlags()
 {
-	int serialInputPacerInstance;	// Holds the integer on the end of the string that the user input, such as "c1" or "r2"
+	int serialInputInt;	// Holds the integer on the end of the string that the user input, such as "c1", "r2", "r", "rd", or "c"
 
 	// If the user sends a string that starts with "r"
 	if (serialStringInput.startsWith("r") == true)
 	{
-		if (serialStringInput.indexOf("d") == 1)
+		if (serialStringInput.startsWith("rd") == 1)
 		{
-			if (serialStringInput.length() > 2)
+			if (serialStringInput.startsWith("rdp") == 1)
+			{
+				if (serialStringInput.length() > 3)
+				{
+					serialStringInput = serialStringInput.substring(3);
+					serialInputInt = serialStringInput.toInt();	
+					// call this pacer's setStartTimeToNowPlusDelay() function
+					pacer[serialInputInt].setStartTimeToNowPlusDelay(5000); // This will always be 5 seconds unless I want to change it
+					return;
+				}
+			}
+			else if (serialStringInput.length() > 2)
 			{
 				serialStringInput = serialStringInput.substring(2);
-				serialInputPacerInstance = serialStringInput.toInt();	// I need to change these variable names to reflect what they actually do. I'm just being lazy copy-pasting code from another section
+				serialInputInt = serialStringInput.toInt();	
 				// call all pacers' setStartTimeToNowPlusDelay() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTimeToNowPlusDelay(serialInputPacerInstance*1000);
+					pacer[i].setStartTimeToNowPlusDelay(serialInputInt*1000);
 				}
 				return;
 			}
@@ -528,8 +539,8 @@ void checkResetFlags()
 		else if (serialStringInput.length() > 1)
 		{
 			serialStringInput = serialStringInput.substring(1);
-			serialInputPacerInstance = serialStringInput.toInt();
-			pacer[serialInputPacerInstance].setStartTimeToNow();
+			serialInputInt = serialStringInput.toInt();
+			pacer[serialInputInt].setStartTimeToNow();
 			return;
 		}
 		else

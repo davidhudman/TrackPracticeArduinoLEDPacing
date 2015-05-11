@@ -593,16 +593,22 @@ int getHighestActivePacerIndex()
 // Computes the Lowest Delayed Pacer only one time per trafficLightCountTo times that the main loop runs
 void computeLowestDelayedPacer()
 {
-	int highest_Active_Pacer_Panel = getHighestActivePacerIndex();
-	for (int i=0; i <= highest_Active_Pacer_Panel; i++)	// used with the if statement to get the lowest delayed pacer index
+	if (trafficLightInterator >= trafficLightCountTo)
 	{
-		if (pacer[i].isCurrentlyDelayed() == true)
+		int highest_Active_Pacer_Panel = getHighestActivePacerIndex();
+		for (int i=0; i <= highest_Active_Pacer_Panel; i++)	// used with the if statement to get the lowest delayed pacer index
 		{
-			tempLowestDelayedPacerIndex = i;
-			return;
+			if (pacer[i].isCurrentlyDelayed() == true)
+			{
+				tempLowestDelayedPacerIndex = i;
+				return;
+			}
 		}
 	}
-	trafficLightInterator++;
+	else
+	{
+		trafficLightInterator++;
+	}
 }
 
 // Give delayed pacers a traffic light countdown

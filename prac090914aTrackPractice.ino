@@ -73,6 +73,7 @@ private:
 				lightTrainLength;			//UI// This determines how many lights wide this pacer will be
 	uint32_t shade;		//Color shade;		//UI// This determines the color of the pacer's pacing lights
 	bool isStopwatchStarted;
+	bool isBackwards;
 	long startTime;
 	static int numberPacers; // static
 	int currentHighlightedPacingPanel;	// This determines which pacing panel is currently lit up
@@ -96,6 +97,7 @@ public:
 		shade = color[numberPacers%7];
 		lightTrainLength = light_Train_Length;
 		isStopwatchStarted = false;
+		isBackwards = false;
 		totalPacingPanels = total_Pacing_Panels;
 		numberPacers++;
 		startTime = millis() + (long)initialDelay;
@@ -132,6 +134,10 @@ public:
 		}
 		else return false;
 	};
+	bool isBackwards()
+	{
+		return isBackwards;
+	};
 	long getDelayRemaining()
 	{
 		return startTime - millis();
@@ -166,8 +172,16 @@ public:
 	};
 	int getCurrentHighlightedPacingPanel ()
 	{
-		currentHighlightedPacingPanel = (int)(((getRunningTime()%(long)((int)getSecondsPerLap()*(double)1000))/getNextLightDelay())+initialHighlightedPanel)%getTotalPacingPanels();
-		return currentHighlightedPacingPanel;
+		if (isBackwards == false)
+		{
+			currentHighlightedPacingPanel = (int)(((getRunningTime()%(long)((int)getSecondsPerLap()*(double)1000))/getNextLightDelay())+initialHighlightedPanel)%getTotalPacingPanels();
+			return currentHighlightedPacingPanel;
+		}
+		else
+		{
+			currentHighlightedPacingPanel = (getTotalPacingPanels()-1) - (int)(((getRunningTime()%(long)((int)getSecondsPerLap()*(double)1000))/getNextLightDelay())+initialHighlightedPanel)%getTotalPacingPanels();
+			return currentHighlightedPacingPanel;
+		}
 	};
 	long getStartTime()
 	{
@@ -212,6 +226,10 @@ public:
 	void setIsStopwatchStarted(boolean is_Stopwatch_Started)
 	{
 		isStopwatchStarted = is_Stopwatch_Started;
+	};
+	void setIsBackwards(boolean is_Backwards)
+	{
+		isBackwards = is_Backwards;
 	};
 	void setNumberPacers(int number_Pacers)
 	{
@@ -329,6 +347,7 @@ void setSerialInput()
 			checkClearFlags();
 			checkResetFlags();
 			checkLightFlags();
+			checkBackwardsFlags();
 			checkPartyModeFlags();
 
 			serial1FeedbackIterator = serialCountTo;
@@ -561,6 +580,55 @@ void checkLightFlags()
 		strip.updateLength(newPacingPanels);
 
 		return;
+	}
+}
+
+// Check to see if the user sent a backwards flag that signifies that one or all of the pacers need to run backwards
+void checkBackwardsFlags()
+{
+	int serialInputInt;	// Holds the integer on the end of the string that the user input, such as the "1" from "b1"
+
+	// If the user sends a string that starts with "b". The flag is the same whether switching from frontwards to backwards or from backwards to frontwards.
+	if (serialStringInput.startsWith("b") == true)
+	{
+		// If the user sends a string that is longer than 1
+		if (serialStringInput.length() > 1)
+		{
+			serialStringInput = serialStringInput.substring(1);
+			serialInputInt = serialStringInput.toInt();
+			//int initialSerialInputInstance = serialInputInt;
+			
+			if (pacer[serialInputInt].isBackwards() == false)		// If the user sends the backwards flag for pacer i text string and it ISN'T currently backwards
+			{
+				pacer[serialInputInt].setIsBackwards(true);		// Make pacer i backwards
+			}
+			else		// If the user sends the backwards flag for pacer i text string and it IS currently backwards
+			{
+				pacer[serialInputInt].setIsBackwards(false);		// Make pacer i forwards
+			}
+			return;
+		}
+		else // If the user sends the set all backwards text string. When switching the backwards-ness of all pacers, this function looks at the first pacer and flips it and then flips all the others the same way.
+		{
+			if (pacer[0].isBackwards == false)
+			{
+				// set all pacers is backwards to false
+				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
+				{
+					pacer[i].setIsBackwards(true);
+				}
+			}
+			else
+			{
+				// set all pacers is backwards to true
+				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
+				{
+					pacer[i].setIsBackwards(false);
+				}
+			}
+
+			return;
+		}
 	}
 }
 

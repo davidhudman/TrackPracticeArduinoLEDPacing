@@ -259,7 +259,7 @@ int partyInt = 10;				// This integer controls what party functions will be run;
 Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
 
 SoftwareSerial swerial(8,9);	// RX, TX
-int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightInterator = 0;
+int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0;
 int serialCountTo = 2000, trafficLightCountTo = 100;
 int tempLowestDelayedPacerIndex = -1;
 
@@ -597,7 +597,7 @@ int getHighestActivePacerIndex()
 // Computes the Lowest Delayed Pacer only one time per trafficLightCountTo times that the main loop runs
 void computeLowestDelayedPacer()
 {
-	if (trafficLightInterator >= trafficLightCountTo)
+	if (trafficLightIterator >= trafficLightCountTo)
 	{
 		int highest_Active_Pacer_Panel = getHighestActivePacerIndex();
 		for (int i=0; i <= highest_Active_Pacer_Panel; i++)	// used with the if statement to get the lowest delayed pacer index
@@ -611,7 +611,7 @@ void computeLowestDelayedPacer()
 	}
 	else
 	{
-		trafficLightInterator++;
+		trafficLightIterator++;
 	}
 }
 
@@ -633,7 +633,7 @@ void delayedPacerTrafficLightCountdown()
 				{
 					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed() == false)
 					{
-						trafficLightInterator = 0;
+						trafficLightIterator = 0;
 						tempLowestDelayedPacerIndex = -1;
 						return;
 					}

@@ -625,83 +625,29 @@ void delayedPacerTrafficLightCountdown()
 	}
 	else if (tempLowestDelayedPacerIndex > -1)
 	{
-		int mappedValue = (int)map(constrain(pacer[tempLowestDelayedPacerIndex].getDelayRemaining(),1,7000),0,7000,0,14);
-		switch (mappedValue)
+		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(7) == true)
 		{
-		case 0:
-			strip.setPixelColor(0, Color(0,0,0));	// black or "off"
-			strip.setPixelColor(1, Color(0,0,0));	// black or "off"
-			strip.setPixelColor(2, Color(0,0,0));	// black or "off"
-			trafficLightInterator = 0;
-			tempLowestDelayedPacerIndex = -1;
-			break;
-		case 1:
-			strip.setPixelColor(0, Color(0,0,0));	// black or "off"
-			strip.setPixelColor(1, Color(0,0,0));	// black or "off"
-			strip.setPixelColor(2, Color(0,0,0));	// black or "off"
-		case 2:
-			strip.setPixelColor(0, Color(0,0,0));	// black or "off"
-			strip.setPixelColor(1, Color(255,255,0));	// yellow
-			strip.setPixelColor(2, Color(255,255,0));	// yellow
-			break;
-		case 3:
-			strip.setPixelColor(0, Color(0,0,0));	// black or "off"
-			strip.setPixelColor(1, Color(0,0,0));	// black or "off"
-			strip.setPixelColor(2, Color(0,0,0));	// black or "off"
-			break;
-		case 4:
-			strip.setPixelColor(0, Color(0,0,0));	// black or "off"
-			strip.setPixelColor(1, Color(255,0,0));	// red
+			if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(4) == true)
+			{
+				if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(2) == true)
+				{
+					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed() == false)
+					{
+						trafficLightInterator = 0;
+						tempLowestDelayedPacerIndex = -1;
+						return;
+					}
+					strip.setPixelColor(0, Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+					return;
+				}
+				strip.setPixelColor(1, Color(255,255,0)); // yellow
+				return;
+			}
 			strip.setPixelColor(2, Color(255,0,0));	// red
-			break;
-		case 5:
-		case 6:
-		case 7:
-			strip.setPixelColor(0, Color(0,0,0));	// black or "off"
-			strip.setPixelColor(1, Color(255,255,0)); // yellow
-			break;
-		case 8:
-		case 9:
-		case 10:
-		case 11:
-		case 12:
-		case 13:
-			strip.setPixelColor(0, Color(0,0,0));	// black or "off"
-			strip.setPixelColor(2, Color(255,0,0));	// red
-		case 14:
-			break;
-		default:
-			strip.setPixelColor(0, Color(0,0,0));	// black or "off"
-			trafficLightInterator = 0;
-			tempLowestDelayedPacerIndex = -1;
-			break;
+			return;
 		}
+		return;
 	}
-	//if (tempLowestDelayedPacerIndex > -1)
-	//{
-	//	if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(7) == true)
-	//	{
-	//		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(4) == true)
-	//		{
-	//			if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(2) == true)
-	//			{
-	//				if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed() == false)
-	//				{
-	//					trafficLightInterator = 0;
-	//					tempLowestDelayedPacerIndex = -1;
-	//					return;
-	//				}
-	//				strip.setPixelColor(0, Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
-	//				return;
-	//			}
-	//			strip.setPixelColor(1, Color(255,255,0)); // yellow
-	//			return;
-	//		}
-	//		strip.setPixelColor(2, Color(255,0,0));	// red
-	//		return;
-	//	}
-	//	return;
-	//}
 }
 
 //***************************

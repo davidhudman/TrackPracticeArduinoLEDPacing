@@ -692,6 +692,30 @@ void partyFunctions()
 			colorWipe(Color(255, 0, 0), 20);	// red
 			colorWipe(Color(0, 0, 0), 20);
 			break;
+		case 7:
+			// scanner
+			scanner(127,0,0, 30);        // red, slow
+			scanner(0,0,127, 15);        // blue, fast
+			break;
+		case 8:
+			// dither
+			dither(Color(0,127,127), 50);       // cyan, slow
+			dither(Color(0,0,0), 15);           // black, fast
+			dither(Color(127,0,127), 50);       // magenta, slow
+			dither(Color(0,0,0), 15);           // black, fast
+			dither(Color(127,127,0), 50);       // yellow, slow
+			dither(Color(0,0,0), 15);           // black, fast
+			break;
+		case 9:
+			// color chase
+			colorChase(Color(127,127,127), 20); // white
+			colorChase(Color(127,0,0), 20);     // red
+			colorChase(Color(127,127,0), 20);   // yellow
+			colorChase(Color(0,127,0), 20);     // green
+			colorChase(Color(0,127,127), 20);   // cyan
+			colorChase(Color(0,0,127), 20);     // blue
+			colorChase(Color(127,0,127), 20);   // magenta
+			break;
 		default:
 			//partyInt = 0;
 			colorWipe(Color(255, 0, 0), 20);	// red
@@ -709,48 +733,149 @@ void partyFunctions()
 			break;
 	}
 }
-void rainbow(uint8_t wait) {
-  int i, j;
+
+// Chase a dot down the strip
+// good for testing purposes
+void colorChase(uint32_t c, uint8_t wait) 
+{
+	int i;
+
+	for (i=0; i < strip.numPixels(); i++) 
+	{
+		strip.setPixelColor(i, 0);  // turn all pixels off
+	}
+
+	for (i=0; i < strip.numPixels(); i++) 
+	{
+		strip.setPixelColor(i, c); // set one pixel
+		strip.show();              // refresh strip display
+		delay(wait);               // hold image for a moment
+		strip.setPixelColor(i, 0); // erase pixel (but don't refresh yet)
+	}
+	strip.show(); // for last erased pixel
+}
+
+// An "ordered dither" fills every pixel in a sequence that looks
+// sparkly and almost random, but actually follows a specific order.
+void dither(uint32_t c, uint8_t wait) 
+{
+	// Determine highest bit needed to represent pixel index
+	int hiBit = 0;
+	int n = strip.numPixels() - 1;
+	for(int bit=1; bit < 0x8000; bit <<= 1) 
+	{
+		if(n & bit) hiBit = bit;
+	}
+
+	int bit, reverse;
+	for(int i=0; i<(hiBit << 1); i++) 
+	{
+		// Reverse the bits in i to create ordered dither:
+		reverse = 0;
+		for(bit=1; bit <= hiBit; bit <<= 1) 
+		{
+			reverse <<= 1;
+			if(i & bit) reverse |= 1;
+		}
+		strip.setPixelColor(reverse, c);
+		strip.show();
+		delay(wait);
+	}
+	delay(250); // Hold image for 1/4 sec
+}
+
+// "Larson scanner" = Cylon/KITT bouncing light effect
+void scanner(uint8_t r, uint8_t g, uint8_t b, uint8_t wait) 
+{
+	int i, j, pos, dir;
+
+	pos = 0;
+	dir = 1;
+
+	for(i=0; i<((strip.numPixels()-1) * 8); i++) 
+	{
+		// Draw 5 pixels centered on pos.  setPixelColor() will clip
+		// any pixels off the ends of the strip, no worries there.
+		// we'll make the colors dimmer at the edges for a nice pulse
+		// look
+		strip.setPixelColor(pos - 2, Color(r/4, g/4, b/4));
+		strip.setPixelColor(pos - 1, Color(r/2, g/2, b/2));
+		strip.setPixelColor(pos, Color(r, g, b));
+		strip.setPixelColor(pos + 1, Color(r/2, g/2, b/2));
+		strip.setPixelColor(pos + 2, Color(r/4, g/4, b/4));
+
+		strip.show();
+		delay(wait);
+		// If we wanted to be sneaky we could erase just the tail end
+		// pixel, but it's much easier just to erase the whole thing
+		// and draw a new one next time.
+		for(j=-2; j<= 2; j++)
+		{
+			strip.setPixelColor(pos+j, Color(0,0,0));
+		}
+		// Bounce off ends of strip
+		pos += dir;
+		if(pos < 0) 
+		{
+			pos = 1;
+			dir = -dir;
+		} 
+		else if(pos >= strip.numPixels()) 
+		{
+			pos = strip.numPixels() - 2;
+			dir = -dir;
+		}
+	}
+}
+void rainbow(uint8_t wait) 
+{
+	int i, j;
    
-  for (j=0; j < 256; j++) {     // 3 cycles of all 256 colors in the wheel
-    for (i=0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, Wheel( (i + j) % 255));
-    }  
-    strip.show();   // write all the pixels out
-    delay(wait);
-  }
+	for (j=0; j < 256; j++)     // 3 cycles of all 256 colors in the wheel
+	{
+		for (i=0; i < strip.numPixels(); i++) 
+		{
+			strip.setPixelColor(i, Wheel( (i + j) % 255));
+		}  
+		strip.show();   // write all the pixels out
+		delay(wait);
+	}
 }
 
 // Slightly different, this one makes the rainbow wheel equally distributed 
 // along the chain
-void rainbowCycle(uint8_t wait) {
-  int i, j;
+void rainbowCycle(uint8_t wait)
+{
+	int i, j;
   
-  for (j=0; j < 256 * 5; j++) {     // 5 cycles of all 25 colors in the wheel
-    for (i=0; i < strip.numPixels(); i++) 
+	for (j=0; j < 256 * 5; j++)     // 5 cycles of all 25 colors in the wheel
 	{
-      // tricky math! we use each pixel as a fraction of the full 96-color wheel
-      // (thats the i / strip.numPixels() part)
-      // Then add in j which makes the colors go around per pixel
-      // the % 96 is to make the wheel cycle around
-      strip.setPixelColor(i, Wheel( ((i * 256 / strip.numPixels()) + j) % 256) );
-    }  
-    strip.show();   // write all the pixels out
-    delay(wait);
-  }
+		for (i=0; i < strip.numPixels(); i++) 
+		{
+			// tricky math! we use each pixel as a fraction of the full 96-color wheel
+			// (thats the i / strip.numPixels() part)
+			// Then add in j which makes the colors go around per pixel
+			// the % 96 is to make the wheel cycle around
+			strip.setPixelColor(i, Wheel( ((i * 256 / strip.numPixels()) + j) % 256) );
+		}  
+		strip.show();   // write all the pixels out
+		delay(wait);
+	}
 }
 
 // fill the dots one after the other with said color
 // good for testing purposes
-void colorWipe(uint32_t c, uint8_t wait) {
-  int i;
+void colorWipe(uint32_t c, uint8_t wait) 
+{
+	int i;
   
-  for (i=0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, c);
-      strip.show();
-      delay(wait);
-  }
-  setSerialInput();
+	for (i=0; i < strip.numPixels(); i++) 
+	{
+		strip.setPixelColor(i, c);
+		strip.show();
+		delay(wait);
+	}
+	setSerialInput();
 }
 
 /* Helper functions */

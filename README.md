@@ -12,7 +12,7 @@ These are Microsoft Visual Studio project files, but the main one is the .ino fi
 
 This setup requires the following items:
 - Arduino Micro
-- HC-05 Bluetooth Module - Setup Explained: http://www.instructables.com/id/Arduino-AND-Bluetooth-HC-05-Connecting-easily/
+- HC-05 Bluetooth Module - [Setup Explained](http://www.instructables.com/id/Arduino-AND-Bluetooth-HC-05-Connecting-easily/)
 - WS2801 Addressable RGB LEDs
 
 ### How do I get set up? ###

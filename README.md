@@ -8,7 +8,7 @@
 * Version
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
-These are Microsoft Visual Studio project files, but the main one is the .ino file. This .ino file is uploaded via your USB port to the Arduino Micro. 
+This allows for lights to pace runners as they go around a running track. It allows for users to send inputs (paces - like 70 seconds per lap) to the lights through their smartphones. These are Microsoft Visual Studio project files, but the main one is the .ino file. This .ino file is uploaded via your USB port to the Arduino Micro. 
 
 This setup requires the following items:
 

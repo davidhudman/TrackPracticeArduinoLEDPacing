@@ -11,6 +11,7 @@
 These are Microsoft Visual Studio project files, but the main one is the .ino file. This .ino file is uploaded via your USB port to the Arduino Micro. 
 
 This setup requires the following items:
+
 * Arduino Micro
 * HC-05 Bluetooth Module - [Setup Explained](http://www.instructables.com/id/Arduino-AND-Bluetooth-HC-05-Connecting-easily/)
 * WS2801 Addressable RGB LEDs

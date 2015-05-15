@@ -97,7 +97,7 @@ public:
 		shade = color[numberPacers%7];
 		lightTrainLength = light_Train_Length;
 		isStopwatchStarted = false;
-		isBackwards = false;
+		isBackwards = true;
 		totalPacingPanels = total_Pacing_Panels;
 		numberPacers++;
 		startTime = millis() + (long)initialDelay;
@@ -134,7 +134,7 @@ public:
 		}
 		else return false;
 	};
-	bool isBackwards()
+	bool getIsBackwards()
 	{
 		return isBackwards;
 	};
@@ -591,14 +591,14 @@ void checkBackwardsFlags()
 	// If the user sends a string that starts with "b". The flag is the same whether switching from frontwards to backwards or from backwards to frontwards.
 	if (serialStringInput.startsWith("b") == true)
 	{
-		// If the user sends a string that is longer than 1
+		// If the user sends a string that is longer than 1 
 		if (serialStringInput.length() > 1)
 		{
 			serialStringInput = serialStringInput.substring(1);
 			serialInputInt = serialStringInput.toInt();
 			//int initialSerialInputInstance = serialInputInt;
 			
-			if (pacer[serialInputInt].isBackwards() == false)		// If the user sends the backwards flag for pacer i text string and it ISN'T currently backwards
+			if (pacer[serialInputInt].getIsBackwards() == false)		// If the user sends the backwards flag for pacer i text string and it ISN'T currently backwards
 			{
 				pacer[serialInputInt].setIsBackwards(true);		// Make pacer i backwards
 			}
@@ -610,7 +610,7 @@ void checkBackwardsFlags()
 		}
 		else // If the user sends the set all backwards text string. When switching the backwards-ness of all pacers, this function looks at the first pacer and flips it and then flips all the others the same way.
 		{
-			if (pacer[0].isBackwards == false)
+			if (pacer[0].getIsBackwards() == false)
 			{
 				// set all pacers is backwards to false
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)

@@ -693,6 +693,39 @@ void delayedPacerTrafficLightCountdown()
 	}
 	else if (tempLowestDelayedPacerIndex > -1)
 	{
+		forwardBackwardsPacerCountdown();
+		return;
+	}
+}
+
+void forwardBackwardsPacerCountdown()
+{
+	if (pacer[tempLowestDelayedPacerIndex].getIsBackwards == true)
+	{
+		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(7) == true)
+		{
+			if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(4) == true)
+			{
+				if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(2) == true)
+				{
+					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed() == false)
+					{
+						trafficLightIterator = 0;
+						tempLowestDelayedPacerIndex = -1;
+						return;
+					}
+					strip.setPixelColor(pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()-1, Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+					return;
+				}
+				strip.setPixelColor(pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()-2, Color(255,255,0)); // yellow
+				return;
+			}
+			strip.setPixelColor(pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()-3, Color(255,0,0));	// red
+			return;
+		}
+	}
+	else
+	{
 		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(7) == true)
 		{
 			if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(4) == true)
@@ -714,7 +747,6 @@ void delayedPacerTrafficLightCountdown()
 			strip.setPixelColor(2, Color(255,0,0));	// red
 			return;
 		}
-		return;
 	}
 }
 

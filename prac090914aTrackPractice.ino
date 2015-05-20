@@ -338,11 +338,11 @@ void checkTrackModeFlags()
 // Print the output that Arduino has in the Serial Monitor Tool
 void getSerialFeedback()
 {
-	if (serialFeedbackIterator >= serialCountTo)
+	if (serialFeedbackIterator >= serialCountTo)				// desktop direct wired connection feedback
 	{
 		Serial.print("\ninputPacer = ");
 		Serial.print(getLowestUnusedPacerIndex());
-		for (int i=0; i < (getHighestActivePacerIndex()+1); i++) // changed from i < pacer[0].getNumberPacers();
+		for (int i=0; i < (getHighestActivePacerIndex()+1); i++)
 		{
 			if (pacer[i].getSecondsPerLap() > 0)
 			{
@@ -364,11 +364,11 @@ void getSerialFeedback()
 		serialFeedbackIterator++;
 	}
 
-	if (serial1FeedbackIterator == serialCountTo)
+	if (serial1FeedbackIterator >= serialCountTo)				// bluetooth mobile feedback
 	{
 		Serial1.print("\ninputPacer = ");
 		Serial1.print(getLowestUnusedPacerIndex());
-		for (int i=0; i < (getHighestActivePacerIndex()+1); i++) // changed from i < pacer[0].getNumberPacers();
+		for (int i=0; i < (getHighestActivePacerIndex()+1); i++)
 		{
 			if (pacer[i].getSecondsPerLap() > 0)
 			{
@@ -468,7 +468,7 @@ void checkResetFlags()
 					serialStringInput = serialStringInput.substring(3);
 					serialInputInt = serialStringInput.toInt();	
 					// call this pacer's setStartTimeToNowPlusDelay() function
-					pacer[serialInputInt].setStartTimeToNowPlusDelay(5000); // This will always be 5 seconds unless I want to change it
+					pacer[serialInputInt].setStartTimeToNowPlusDelay(10000); // This will always be 5 seconds unless I want to change it
 					return;
 				}
 			}
@@ -476,19 +476,21 @@ void checkResetFlags()
 			{
 				serialStringInput = serialStringInput.substring(2);
 				serialInputInt = serialStringInput.toInt();	
-				// call all pacers' setStartTimeToNowPlusDelay() function
+				// call all pacers' setStartTime() function
+				tempMillisTime = millis();								// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTimeToNowPlusDelay(serialInputInt*1000);
+					pacer[i].setStartTime(tempMillisTime + serialInputInt*1000);
 				}
 				return;
 			}
 			else
 			{
+				tempMillisTime = millis();								// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				// call all pacers' setStartTimeToNowPlusDelay() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTimeToNowPlusDelay(5000);
+					pacer[i].setStartTime(tempMillisTime + 10000);
 				}
 				return;
 			}
@@ -503,10 +505,11 @@ void checkResetFlags()
 		}
 		else
 		{
+			tempMillisTime = millis();								// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
 			// call all pacers' setStartTimeToNow() function
 			for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 			{
-				pacer[i].setStartTimeToNow();
+				pacer[i].setStartTime(tempMillisTime);
 			}
 			return;
 		}

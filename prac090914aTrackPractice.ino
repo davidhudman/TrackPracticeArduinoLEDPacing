@@ -52,7 +52,7 @@ public:
 		shade = color[numberPacers%7];
 		lightTrainLength = light_Train_Length;
 		isStopwatchStarted = false;
-		isBackwards = true;
+		isBackwards = false;
 		totalPacingPanels = total_Pacing_Panels;
 		numberPacers++;
 		startTime = millis() + (long)initialDelay;
@@ -335,7 +335,7 @@ void checkTrackModeFlags()
 	}
 }
 
-// Print the input that Arduino has in the Serial Monitor Tool
+// Print the output that Arduino has in the Serial Monitor Tool
 void getSerialFeedback()
 {
 	if (serialFeedbackIterator >= serialCountTo)
@@ -454,6 +454,7 @@ void checkClearFlags()
 void checkResetFlags()
 {
 	int serialInputInt;	// Holds the integer on the end of the string that the user input, such as "c1", "r2", "r", "rd", or "c"
+	long tempMillisTime;
 
 	// If the user sends a string that starts with "r"
 	if (serialStringInput.startsWith("r") == true)
@@ -652,7 +653,7 @@ void delayedPacerTrafficLightCountdown()
 
 void forwardBackwardsPacerCountdown()
 {
-	if (pacer[tempLowestDelayedPacerIndex].getIsBackwards == true)
+	if (pacer[tempLowestDelayedPacerIndex].getIsBackwards() == true)
 	{
 		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(7) == true)
 		{

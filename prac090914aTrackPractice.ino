@@ -14,51 +14,6 @@
 #include "LPD8806.h"
 #include "SPI.h"
 
-class Stopwatch{
-private:
-	long startTime;
-
-public:
-	Stopwatch() //(int constant_Delay_Seconds)
-    {
-    	//constantDelaySeconds = constant_Delay_Seconds;
-    }
-    
-    void start()
-    {
-    	startTime = millis(); // + (constantDelaySeconds * 1000);
-    }
-    
-	long getStartTime()
-    {
-    	return startTime;
-    }
-    
-	long getEstimatedTime()
-    {
-    	return millis() - startTime;
-    }
-    
-	short getMilliSeconds()
-    {
-    	return (short)((millis() - startTime) % 1000);
-    }
-    
-	byte getSeconds()
-    {
-    	return (byte)(((millis() - startTime) / 1000) % 60);
-    }
-    
-	byte getMinutes()
-    {
-    	return (byte)(((millis() - startTime) / 60000) % 60);
-    }
-	long getHours()
-    {
-    	return (millis() - startTime) / 3600000;
-    }
-};
-
 /**
 *	Pacer Class - public in java program
 *	Holds all information about each individual pacer object (lap time, color, delay, starting postition, etc)
@@ -358,10 +313,7 @@ void setSerialInput()
 		else // if (mode == "party")
 		{
 			checkTrackModeFlags();
-			if (mode != "track")
-			{
-				partyInt = atoi(serialStringInput.c_str());
-			}
+			partyInt = atoi(serialStringInput.c_str());
 		}
 		serialStringInput = NULL;
 	}

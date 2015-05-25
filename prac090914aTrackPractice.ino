@@ -429,10 +429,8 @@ void checkClearFlags()
 		// If the user sends a string that is longer than 1
 		if (serialStringInput.length() > 1)
 		{
-			serialStringInput = serialStringInput.substring(1);
-			serialInputInt = serialStringInput.toInt();
-			//int initialSerialInputInstance = serialInputInt;
-			
+			serialInputInt = serialStringInput.substring(1).toInt();	// Make a string out of everything past the 1th character (string starts at 0th) onward, then Convert that string to an integer
+
 			if (serialInputInt <= getHighestActivePacerIndex())		// Are we sure that we've cleared a pacer that is smaller than the inputPacer?
 			{
 				pacer[serialInputInt].setSecondsPerLap(0);		// If the user sends the clear pacer i text string, clear pacer i and reset it to 0
@@ -467,8 +465,7 @@ void checkResetFlags()
 			{
 				if (serialStringInput.length() > 3)
 				{
-					serialStringInput = serialStringInput.substring(3);
-					serialInputInt = serialStringInput.toInt();	
+					serialInputInt = serialStringInput.substring(3).toInt();	// Make a string out of everything past the 1th character (string starts at 0th) onward, then Convert that string to an integer
 					// call this pacer's setStartTimeToNowPlusDelay() function
 					pacer[serialInputInt].setStartTimeToNowPlusDelay(10000); // This will always be 5 seconds unless I want to change it
 					return;
@@ -476,8 +473,8 @@ void checkResetFlags()
 			}
 			else if (serialStringInput.length() > 2)
 			{
-				serialStringInput = serialStringInput.substring(2);
-				serialInputInt = serialStringInput.toInt();	
+				serialInputInt = serialStringInput.substring(2).toInt();		// Make a string out of everything past the 1th character (string starts at 0th) onward, then Convert that string to an integer
+
 				// call all pacers' setStartTime() function
 				tempMillisTime = millis();								// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
@@ -501,8 +498,7 @@ void checkResetFlags()
 		// If the user sends a string that is longer than 1 character
 		else if (serialStringInput.length() > 1)
 		{
-			serialStringInput = serialStringInput.substring(1);
-			serialInputInt = serialStringInput.toInt();
+			serialInputInt = serialStringInput.substring(1).toInt();	// Make a string out of everything past the 1th character (string starts at 0th) onward, then Convert that string to an integer
 			pacer[serialInputInt].setStartTimeToNow();
 			return;
 		}
@@ -528,8 +524,7 @@ void checkLightFlags()
 	if (serialStringInput.startsWith("l") && serialStringInput.length() > 1)
 	{
 
-		serialStringInput = serialStringInput.substring(1);
-		newPacingPanels = serialStringInput.toInt();
+		newPacingPanels = serialStringInput.substring(1).toInt();	// Make a string out of everything past the 1th character (string starts at 0th) onward, then Convert that string to an integer
 
 		// call all pacers' setTotalPacingPanels function and pass it the value received from the user to set the number of lights on the track
 		for (int i = 0; i < pacer[0].getNumberPacers(); i++)
@@ -551,8 +546,7 @@ void checkBackwardsFlags()
 		// If the user sends a string that is longer than 1 
 		if (serialStringInput.length() > 1)
 		{
-			serialStringInput = serialStringInput.substring(1);	// Make a string out of everything past the 1th character (string starts at 0th) onward
-			serialInputInt = serialStringInput.toInt();			// Convert that string to an integer
+			serialInputInt = serialStringInput.substring(1).toInt();	// Make a string out of everything past the 1th character (string starts at 0th) onward, then Convert that string to an integer
 			
 			if (!pacer[serialInputInt].getIsBackwards())		// If the user sends the backwards flag for pacer i text string and it ISN'T currently backwards
 			{

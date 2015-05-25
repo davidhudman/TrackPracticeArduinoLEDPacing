@@ -486,6 +486,7 @@ void checkResetFlags()
 				}
 				return;
 			}
+			// 
 			else
 			{
 				tempMillisTime = millis();								// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
@@ -536,8 +537,6 @@ void checkLightFlags()
 			pacer[i].setTotalPacingPanels(newPacingPanels);
 		}
 		strip.updateLength(newPacingPanels);
-
-		return;
 	}
 }
 
@@ -552,19 +551,17 @@ void checkBackwardsFlags()
 		// If the user sends a string that is longer than 1 
 		if (serialStringInput.length() > 1)
 		{
-			serialStringInput = serialStringInput.substring(1);
-			serialInputInt = serialStringInput.toInt();
-			//int initialSerialInputInstance = serialInputInt;
+			serialStringInput = serialStringInput.substring(1);	// Make a string out of everything past the 1th character (string starts at 0th) onward
+			serialInputInt = serialStringInput.toInt();			// Convert that string to an integer
 			
 			if (!pacer[serialInputInt].getIsBackwards())		// If the user sends the backwards flag for pacer i text string and it ISN'T currently backwards
 			{
 				pacer[serialInputInt].setIsBackwards(true);		// Make pacer i backwards
 			}
-			else		// If the user sends the backwards flag for pacer i text string and it IS currently backwards
+			else												// If the user sends the backwards flag for pacer i text string and it IS currently backwards
 			{
-				pacer[serialInputInt].setIsBackwards(false);		// Make pacer i forwards
+				pacer[serialInputInt].setIsBackwards(false);	// Make pacer i forwards
 			}
-			return;
 		}
 		else // If the user sends the set all backwards text string. When switching the backwards-ness of all pacers, this function looks at the first pacer and flips it and then flips all the others the same way.
 		{
@@ -584,8 +581,6 @@ void checkBackwardsFlags()
 					pacer[i].setIsBackwards(false);
 				}
 			}
-
-			return;
 		}
 	}
 }
@@ -598,7 +593,6 @@ int getLowestUnusedPacerIndex()
 		if (pacer[i].getSecondsPerLap() == 0)
 		{
 			return i;
-			break;
 		}
 	}
 
@@ -614,7 +608,6 @@ int getHighestActivePacerIndex()
 		if (pacer[i].getSecondsPerLap() > 0)
 		{
 			return i;
-			break;
 		}
 	}
 	return -1;
@@ -647,12 +640,10 @@ void delayedPacerTrafficLightCountdown()
 	if (tempLowestDelayedPacerIndex <= -1)
 	{
 		computeLowestDelayedPacer();
-		return;
 	}
 	else if (tempLowestDelayedPacerIndex > -1)
 	{
 		forwardBackwardsPacerCountdown();
-		return;
 	}
 }
 

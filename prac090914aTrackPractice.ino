@@ -127,7 +127,7 @@ public:
 	};
 	int getCurrentHighlightedPacingPanel ()
 	{
-		if (isBackwards == false)
+		if (!isBackwards)	// if isBackwards is not true
 		{
 			currentHighlightedPacingPanel = (int)(((getRunningTime()%(long)((int)getSecondsPerLap()*(double)1000))/getNextLightDelay())+initialHighlightedPanel)%getTotalPacingPanels();
 			return currentHighlightedPacingPanel;
@@ -227,6 +227,8 @@ double secondsPerLapHolder;
 String serialStringInput;		// Holds the raw, unformatted serial input from user
 String mode = "track";			// This mode String has two possible values: "track" and "party". Each value will result in different function calls
 int partyInt = 10;				// This integer controls what party functions will be run; 0 indicates all will be run
+
+double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
 
 // Set the first variable to the NUMBER of pixels. 32 = 32 pixels in a row
 Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
@@ -422,7 +424,7 @@ void checkClearFlags()
 	int serialInputInt;	// Holds the integer on the end of the string that the user input, such as "c1" or "r2"
 
 	// If the user sends a string that starts with "c"
-	if (serialStringInput.startsWith("c") == true)
+	if (serialStringInput.startsWith("c"))
 	{
 		// If the user sends a string that is longer than 1
 		if (serialStringInput.length() > 1)
@@ -457,11 +459,11 @@ void checkResetFlags()
 	long tempMillisTime;
 
 	// If the user sends a string that starts with "r"
-	if (serialStringInput.startsWith("r") == true)
+	if (serialStringInput.startsWith("r"))
 	{
-		if (serialStringInput.startsWith("rd") == 1)
+		if (serialStringInput.startsWith("rd"))
 		{
-			if (serialStringInput.startsWith("rdp") == 1)
+			if (serialStringInput.startsWith("rdp"))
 			{
 				if (serialStringInput.length() > 3)
 				{
@@ -522,7 +524,7 @@ void checkLightFlags()
 	int newPacingPanels;
 
 	// If the user sends a string that starts with "l" (lowercase L) and the user sends a string that is longer than 1 character
-	if (serialStringInput.startsWith("l") == true && serialStringInput.length() > 1)
+	if (serialStringInput.startsWith("l") && serialStringInput.length() > 1)
 	{
 
 		serialStringInput = serialStringInput.substring(1);
@@ -545,7 +547,7 @@ void checkBackwardsFlags()
 	int serialInputInt;	// Holds the integer on the end of the string that the user input, such as the "1" from "b1"
 
 	// If the user sends a string that starts with "b". The flag is the same whether switching from frontwards to backwards or from backwards to frontwards.
-	if (serialStringInput.startsWith("b") == true)
+	if (serialStringInput.startsWith("b"))
 	{
 		// If the user sends a string that is longer than 1 
 		if (serialStringInput.length() > 1)
@@ -554,7 +556,7 @@ void checkBackwardsFlags()
 			serialInputInt = serialStringInput.toInt();
 			//int initialSerialInputInstance = serialInputInt;
 			
-			if (pacer[serialInputInt].getIsBackwards() == false)		// If the user sends the backwards flag for pacer i text string and it ISN'T currently backwards
+			if (!pacer[serialInputInt].getIsBackwards())		// If the user sends the backwards flag for pacer i text string and it ISN'T currently backwards
 			{
 				pacer[serialInputInt].setIsBackwards(true);		// Make pacer i backwards
 			}
@@ -566,7 +568,7 @@ void checkBackwardsFlags()
 		}
 		else // If the user sends the set all backwards text string. When switching the backwards-ness of all pacers, this function looks at the first pacer and flips it and then flips all the others the same way.
 		{
-			if (pacer[0].getIsBackwards() == false)
+			if (!pacer[0].getIsBackwards())
 			{
 				// set all pacers is backwards to false
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
@@ -626,7 +628,7 @@ void computeLowestDelayedPacer()
 		int highest_Active_Pacer_Panel = getHighestActivePacerIndex();
 		for (int i=0; i <= highest_Active_Pacer_Panel; i++)	// used with the if statement to get the lowest delayed pacer index
 		{
-			if (pacer[i].isCurrentlyDelayed() == true)
+			if (pacer[i].isCurrentlyDelayed())
 			{
 				tempLowestDelayedPacerIndex = i;
 				return;
@@ -656,22 +658,25 @@ void delayedPacerTrafficLightCountdown()
 
 void forwardBackwardsPacerCountdown()
 {
-	if (pacer[tempLowestDelayedPacerIndex].getIsBackwards() == true)
+	if (pacer[tempLowestDelayedPacerIndex].getIsBackwards())
 	{
-		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(7) == true)
+		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds))
 		{
-			if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(4) == true)
+			if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds))
 			{
-				if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(2) == true)
+				if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds))
 				{
-					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed() == false)
+					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed())
+					{
+						strip.setPixelColor(pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()-1, Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+						return;
+					}
+					else
 					{
 						trafficLightIterator = 0;
 						tempLowestDelayedPacerIndex = -1;
 						return;
 					}
-					strip.setPixelColor(pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()-1, Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
-					return;
 				}
 				strip.setPixelColor(pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()-2, Color(255,255,0)); // yellow
 				return;
@@ -682,20 +687,23 @@ void forwardBackwardsPacerCountdown()
 	}
 	else
 	{
-		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(7) == true)
+		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds))
 		{
-			if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(4) == true)
+			if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds))
 			{
-				if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(2) == true)
+				if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds))
 				{
-					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed() == false)
+					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed())
+					{
+						strip.setPixelColor(0, Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+						return;
+					}
+					else
 					{
 						trafficLightIterator = 0;
 						tempLowestDelayedPacerIndex = -1;
 						return;
 					}
-					strip.setPixelColor(0, Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
-					return;
 				}
 				strip.setPixelColor(1, Color(255,255,0)); // yellow
 				return;

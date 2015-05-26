@@ -229,6 +229,7 @@ String mode = "track";			// This mode String has two possible values: "track" an
 int partyInt = 10;				// This integer controls what party functions will be run; 0 indicates all will be run
 
 double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
+const String flags[6] = {"c", "r", "l", "b", "rd", "rdp"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
 
 // Set the first variable to the NUMBER of pixels. 32 = 32 pixels in a row
 Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
@@ -415,6 +416,18 @@ void setPixelColorBasedOnTime()
 	delayedPacerTrafficLightCountdown();
 
 	strip.show();              // refresh strip display
+
+}
+
+// Returns an integer that represents the array index of a string so that it can be used in a switch statement
+int getDesiredFlagIndex(String s)
+{
+	for (int i=0; i < flags[0].length(); i++)	// For each index of the flags array
+	{
+		if (s.equals(flags[i]))					// If the string sent by the user equals a particular string in the array
+			return i;							// Return that string's index
+	}
+	return -1;									// If no index matches, return -1;
 
 }
 

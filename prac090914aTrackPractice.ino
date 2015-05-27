@@ -229,7 +229,7 @@ String mode = "track";			// This mode String has two possible values: "track" an
 int partyInt = 10;				// This integer controls what party functions will be run; 0 indicates all will be run
 
 double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
-const String flags[6] = {"c", "r", "l", "b", "rd", "rdp"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
+const String flags[8] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
 
 // Set the first variable to the NUMBER of pixels. 32 = 32 pixels in a row
 Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
@@ -417,6 +417,40 @@ void setPixelColorBasedOnTime()
 
 	strip.show();              // refresh strip display
 
+}
+
+// checks for all flags in the user's input with a switch statement
+void checkAllFlags()
+{
+	// parse the letters from the numbers and put the letters into parsedString
+	int inChar;					// a temporary variable for holding a character to decide if it equals a digit or not
+	String parsedLetterString;	// a temporary string for holding the user's non-digit string input
+	String parsedNumericString;	// a temporary string for holding the user's digit string input
+
+	for (int i = serialStringInput.length()-1; i > 0; i--)	// Bug: I might need to reconsider the starting point because of the space that the user will usually enter
+	{
+		inChar = serialStringInput.charAt(i);
+		if (isDigit(inChar))
+		{
+			continue;
+		}
+		else
+		{
+			parsedLetterString = serialStringInput.substring(0,i+1);	// Bug: if "i+1" is greater than the string length, I suspect that this could cause problems, but I don't know
+			parsedNumericString = serialStringInput.substring(i+1);		// Bug: see above
+			break;
+		}
+	}
+
+	// switch statement to that uses the index of the flag as the integer for the switch statement; flags[8] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};
+	switch(getDesiredFlagIndex(parsedLetterString))
+	{
+		case -1: 
+			break; // there isn't any input from the user
+		case 0:
+			break;
+
+	}
 }
 
 // Returns an integer that represents the array index of a string so that it can be used in a switch statement

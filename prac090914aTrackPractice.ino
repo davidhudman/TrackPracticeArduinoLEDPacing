@@ -294,19 +294,7 @@ void setSerialInput()
 
 		if (mode == "track")
 		{
-			secondsPerLapHolder = atof(serialStringInput.c_str());		// change: try using String.toFloat() here
-			if (secondsPerLapHolder > 0)
-			{
-				pacer[getLowestUnusedPacerIndex()].setStartTimeToNow();
-				pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (secondsPerLapHolder);
-			}
-			secondsPerLapHolder = 0;
-
-			checkClearFlags();
-			checkResetFlags();
-			checkLightFlags();
-			checkBackwardsFlags();
-			checkPartyModeFlags();
+			checkAllUserInput();
 
 			serial1FeedbackIterator = serialCountTo;
 			serialFeedbackIterator = serialCountTo;
@@ -316,7 +304,7 @@ void setSerialInput()
 		else // if (mode == "party")
 		{
 			checkTrackModeFlags();
-			partyInt = atoi(serialStringInput.c_str());
+			partyInt = serialStringInput.toInt();
 		}
 		serialStringInput = NULL;
 	}
@@ -420,7 +408,7 @@ void setPixelColorBasedOnTime()
 }
 
 // checks for all flags in the user's input with a switch statement
-void checkAllFlags()
+void checkAllUserInput()
 {
 	// parse the letters from the numbers and put the letters into parsedString
 	int inChar;					// a temporary variable for holding a character to decide if it equals a digit or not
@@ -429,6 +417,21 @@ void checkAllFlags()
 	int serialInputInt = -1;	// Holds the integer on the end of the string that the user input, such as "c1", "r2", "r", "rd", or "c"; It is equal to negative one because the user will never enter that value and can be used to determine bad input
 	long tempMillisTime;
 
+	// Check if the user sent a lap time
+	secondsPerLapHolder = atof(serialStringInput.c_str());		// change: try using String.toFloat() here
+	if (secondsPerLapHolder > 0)
+	{
+		pacer[getLowestUnusedPacerIndex()].setStartTimeToNow();
+		pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (secondsPerLapHolder);
+		secondsPerLapHolder = 0;
+		return;												// This allows me to skip the checks for all the other flags if the user sent this input
+	}
+	else
+	{
+		secondsPerLapHolder = 0;
+	}
+
+	// Parse the string that the user sent into characters and numbers (optional)
 	for (int i = serialStringInput.length()-1; i > 0; i--)	// Bug: I might need to reconsider the starting point because of the space that the user will usually enter
 	{
 		inChar = serialStringInput.charAt(i);
@@ -445,7 +448,7 @@ void checkAllFlags()
 		}
 	}
 
-	// switch statement to that uses the index of the flag as the integer for the switch statement; flags[8] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};
+	// See if the parsedLetterString flag the user sent matches any of the flags above. If it does, do the tasks associated with that flag: flags[8] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};
 	switch(getDesiredFlagIndex(parsedLetterString))
 	{
 		case -1:	// there isn't any input from the user

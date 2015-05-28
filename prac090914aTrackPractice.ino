@@ -294,7 +294,7 @@ void setSerialInput()
 
 		if (mode == "track")
 		{
-			secondsPerLapHolder = atof(serialStringInput.c_str());
+			secondsPerLapHolder = atof(serialStringInput.c_str());		// change: try using String.toFloat() here
 			if (secondsPerLapHolder > 0)
 			{
 				pacer[getLowestUnusedPacerIndex()].setStartTimeToNow();
@@ -504,11 +504,9 @@ void checkAllFlags()
 			}
 			break; 
 		case 3: // "b"
-			// If the user sends a string that is longer than 1 
-			if (serialInputInt > 0 && serialInputInt <= pacer[0].getNumberPacers())
+			// If the user sends an int that is in the range of the indexes for the pacer array
+			if (serialInputInt >= 0 && serialInputInt < pacer[0].getNumberPacers())
 			{
-				serialInputInt = serialStringInput.substring(1).toInt();	// Make a string out of everything past the 1th character (string starts at 0th) onward, then Convert that string to an integer
-			
 				if (!pacer[serialInputInt].getIsBackwards())		// If the user sends the backwards flag for pacer i text string and it ISN'T currently backwards
 				{
 					pacer[serialInputInt].setIsBackwards(true);		// Make pacer i backwards
@@ -561,15 +559,17 @@ void checkAllFlags()
 			}
 			break; 
 		case 5: // "rdp"
-			if (serialStringInput.length() > 3)
+			if (serialInputInt >= 0 && serialInputInt < pacer[0].getNumberPacers())
 			{
 				// call this pacer's setStartTimeToNowPlusDelay() function
 				pacer[serialInputInt].setStartTimeToNowPlusDelay(10000); // This will always be 10 seconds unless I want to change it
 			}
 			break; 
-		case 6: // "party" 
+		case 6: // "party"
+			mode = "party";
 			break; 
-		case 7: // "track" 
+		case 7: // "track"
+			mode = "track";
 			break;
 		default:
 			break;

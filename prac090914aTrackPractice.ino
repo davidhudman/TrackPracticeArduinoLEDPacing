@@ -224,12 +224,13 @@ Pacer pacer[10] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0
 double secondsPerLapHolder;
 //int inputPacer = 0;				//This allows the user to control this number's pacer's secondsPerLap through the serial connection
 //int highestPacer = 0;
-String serialStringInput;		// Holds the raw, unformatted serial input from user
-String mode = "track";			// This mode String has two possible values: "track" and "party". Each value will result in different function calls
-int partyInt = 10;				// This integer controls what party functions will be run; 0 indicates all will be run
+String serialStringInput;			// Holds the raw, unformatted serial input from user
+String mode = "track";				// This mode String has two possible values: "track" and "party". Each value will result in different function calls
+int partyInt = 10;					// This integer controls what party functions will be run; 0 indicates all will be run
 
 double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
 const String flags[8] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
+long resetDelayDefaultDelayTimeMillis = 10000;
 
 // Set the first variable to the NUMBER of pixels. 32 = 32 pixels in a row
 Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
@@ -557,7 +558,7 @@ void checkAllUserInput()
 				// call all pacers' setStartTimeToNowPlusDelay() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillisTime + 10000);
+					pacer[i].setStartTime(tempMillisTime + resetDelayDefaultDelayTimeMillis);
 				}
 			}
 			break; 
@@ -565,7 +566,7 @@ void checkAllUserInput()
 			if (serialInputInt >= 0 && serialInputInt < pacer[0].getNumberPacers())
 			{
 				// call this pacer's setStartTimeToNowPlusDelay() function
-				pacer[serialInputInt].setStartTimeToNowPlusDelay(10000); // This will always be 10 seconds unless I want to change it
+				pacer[serialInputInt].setStartTimeToNowPlusDelay(resetDelayDefaultDelayTimeMillis); // This will always be 10 seconds unless I want to change it
 			}
 			break; 
 		case 6: // "party"
@@ -641,7 +642,7 @@ void checkResetFlags()
 				{
 					serialInputInt = serialStringInput.substring(3).toInt();	// Make a string out of everything past the 1th character (string starts at 0th) onward, then Convert that string to an integer
 					// call this pacer's setStartTimeToNowPlusDelay() function
-					pacer[serialInputInt].setStartTimeToNowPlusDelay(10000); // This will always be 10 seconds unless I want to change it
+					pacer[serialInputInt].setStartTimeToNowPlusDelay(resetDelayDefaultDelayTimeMillis); // This will always be 10 seconds unless I want to change it
 					return;
 				}
 			}
@@ -664,7 +665,7 @@ void checkResetFlags()
 				// call all pacers' setStartTimeToNowPlusDelay() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillisTime + 10000);
+					pacer[i].setStartTime(tempMillisTime + resetDelayDefaultDelayTimeMillis);
 				}
 				return;
 			}

@@ -229,7 +229,8 @@ String mode = "track";				// This mode String has two possible values: "track" a
 int partyInt = 10;					// This integer controls what party functions will be run; 0 indicates all will be run
 
 double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
-const String flags[8] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
+const String trackFlags[8] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
+const String partyFlags[11] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
 long resetDelayDefaultDelayTimeMillis = 10000;
 
 // Set the first variable to the NUMBER of pixels. 32 = 32 pixels in a row
@@ -237,7 +238,7 @@ Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
 
 SoftwareSerial swerial(8,9);	// RX, TX
 int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0;
-int serialCountTo = 2000, trafficLightCountTo = 100;
+int serialCountTo = 2000, trafficLightCountTo = 100, partySerialCountTo = 5;
 int tempLowestDelayedPacerIndex = -1;
 
 void setup()
@@ -245,11 +246,9 @@ void setup()
 	Serial.begin(9600);			// Allows Arduino to communicate with computer through Serial monitor tool window
 	Serial1.begin(9600);		// Allows Arduino to communicate with mobile devices through bluetooth connection
 
-	// Start up the LED strip
-	strip.begin();
+	strip.begin();				// Start up the LED strip
 
-	// Update the strip, to start they are all 'off'
-	strip.show();
+	strip.show();				// Update the strip, to start they are all 'off'
 
 	Serial.flush();
 	Serial1.flush();
@@ -259,10 +258,6 @@ void setup()
 
 void loop()
 {
-	//getArdudroidInputFromUser();
-
-	//setArdudroidTextCommandToArduinoSerialInput();
-
 	setSerialInput();
 
 	if (mode == "track")
@@ -274,6 +269,7 @@ void loop()
 	else if (mode == "party")
 	{
 		partyFunctions();
+		getPartySerialFeedback();
 	}
 }
 
@@ -324,6 +320,56 @@ void checkTrackModeFlags()
 	if (serialStringInput == "track")
 	{
 		mode = "track";
+	}
+}
+
+// Print user output that pertains to party functions
+void getPartySerialFeedback()
+{
+	if (serialFeedbackIterator >= partySerialCountTo)				// desktop direct wired connection feedback
+	{
+		for (int i=0; i < partyFlags[0].length(); i++)			// Bug: potential bug because this .length may just return the length of the string, not the array; If it does, you can use something like sizeOf(partyFlags) / sizeOf(partyFlags[0]
+		{
+			if (i == partyInt)
+			{
+				Serial.print("\nx" + i );						// "x" marks the party function that is currently running
+				Serial.print(": "+ partyFlags[i]);
+			}
+			else
+			{
+				Serial.print("\n" + i );
+				Serial.print(": "+ partyFlags[i]);
+			}
+		}
+		
+		serialFeedbackIterator = 0;
+	}
+	else
+	{
+		serialFeedbackIterator++;
+	}
+
+	if (serial1FeedbackIterator >= partySerialCountTo)				// bluetooth mobile feedback
+	{
+		for (int i=0; i < partyFlags[0].length(); i++)			// Bug: potential bug because this .length may just return the length of the string, not the array; If it does, you can use something like sizeOf(partyFlags) / sizeOf(partyFlags[0]
+		{
+			if (i == partyInt)
+			{
+				Serial1.print("\nx" + i );						// "x" marks the party function that is currently running
+				Serial1.print(": "+ partyFlags[i]);
+			}
+			else
+			{
+				Serial1.print("\n" + i );
+				Serial1.print(": "+ partyFlags[i]);
+			}
+		}
+
+		serial1FeedbackIterator = 0;
+	}
+	else
+	{
+		serial1FeedbackIterator++;
 	}
 }
 
@@ -584,9 +630,9 @@ void checkAllUserInput()
 // Returns an integer that represents the array index of a string so that it can be used in a switch statement
 int getDesiredFlagIndex(String s)
 {
-	for (int i=0; i < flags[0].length(); i++)	// For each index of the flags array
+	for (int i=0; i < trackFlags[0].length(); i++)	// For each index of the flags array
 	{
-		if (s.equals(flags[i]))					// If the string sent by the user equals a particular string in the array
+		if (s.equals(trackFlags[i]))					// If the string sent by the user equals a particular string in the array
 			return i;							// Return that string's index
 	}
 	return -1;									// If no index matches, return -1;
@@ -884,6 +930,7 @@ void partyFunctions()
 	// switch statement with party int as the value for choosing cases that calls different party functions based on its value
 	switch(partyInt)
 	{
+		// {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"}
 		case 0:
 			//scannerSequence();
 			colorWipe(Color(255, 0, 0), 20);	// red

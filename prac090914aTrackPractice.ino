@@ -229,8 +229,9 @@ String mode = "track";				// This mode String has two possible values: "track" a
 int partyInt = 10;					// This integer controls what party functions will be run; 0 indicates all will be run
 
 double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
-const String trackFlags[8] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
-const String partyFlags[11] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
+const int TRACK_FLAG_SIZE = 8, PARTY_FLAG_SIZE = 11;
+const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
+const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
 long resetDelayDefaultDelayTimeMillis = 10000;
 
 // Set the first variable to the NUMBER of pixels. 32 = 32 pixels in a row
@@ -328,7 +329,7 @@ void getPartySerialFeedback()
 {
 	if (serialFeedbackIterator >= partySerialCountTo)				// desktop direct wired connection feedback
 	{
-		for (int i=0; i < partyFlags[0].length(); i++)			// Bug: potential bug because this .length may just return the length of the string, not the array; If it does, you can use something like sizeOf(partyFlags) / sizeOf(partyFlags[0]
+		for (int i=0; i < PARTY_FLAG_SIZE; i++)			// Bug: potential bug because this .length may just return the length of the string, not the array; If it does, you can use something like sizeOf(partyFlags) / sizeOf(partyFlags[0]
 		{
 			if (i == partyInt)
 			{
@@ -351,7 +352,7 @@ void getPartySerialFeedback()
 
 	if (serial1FeedbackIterator >= partySerialCountTo)				// bluetooth mobile feedback
 	{
-		for (int i=0; i < partyFlags[0].length(); i++)			// Bug: potential bug because this .length may just return the length of the string, not the array; If it does, you can use something like sizeOf(partyFlags) / sizeOf(partyFlags[0]
+		for (int i=0; i < PARTY_FLAG_SIZE; i++)			// Bug: potential bug because this .length may just return the length of the string, not the array; If it does, you can use something like sizeOf(partyFlags) / sizeOf(partyFlags[0]
 		{
 			if (i == partyInt)
 			{
@@ -630,7 +631,7 @@ void checkAllUserInput()
 // Returns an integer that represents the array index of a string so that it can be used in a switch statement
 int getDesiredFlagIndex(String s)
 {
-	for (int i=0; i < trackFlags[0].length(); i++)	// For each index of the flags array
+	for (int i=0; i < TRACK_FLAG_SIZE; i++)	// For each index of the flags array
 	{
 		if (s.equals(trackFlags[i]))					// If the string sent by the user equals a particular string in the array
 			return i;							// Return that string's index

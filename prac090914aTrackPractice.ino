@@ -284,10 +284,12 @@ void setSerialInput()
 		if (Serial1.available())
 		{
 			serialStringInput = Serial1.readStringUntil(' ');	// Serial1 processes serial input data from a mobile bluetooth connection
+			//serialStringInput.trim();
 		}
 		else
 		{
 			serialStringInput = Serial.readStringUntil(' ');	// Serial processes serial data input from a USB connection
+			//serialStringInput.trim();
 		}
 
 		if (mode == "track")
@@ -480,18 +482,38 @@ void checkAllUserInput()
 	}
 
 	// Parse the string that the user sent into characters and numbers (optional)
-	for (int i = serialStringInput.length()-1; i > 0; i--)	// Bug: I might need to reconsider the starting point because of the space that the user will usually enter
+	for (int i = 0; i < serialStringInput.length(); i++)	// Bug: I might need to reconsider the starting point because of the space that the user will usually enter
 	{
 		inChar = serialStringInput.charAt(i);
-		if (isDigit(inChar))
+		if (!isDigit(inChar))
 		{
+			if (i == serialStringInput.length()-1)
+			{
+				parsedLetterString = serialStringInput.substring(0);
+				Serial.println("LetterString: " + parsedLetterString);
+				Serial1.println("LetterString: " + parsedLetterString);
+				break;
+			}
 			continue;
 		}
 		else
 		{
-			parsedLetterString = serialStringInput.substring(0,i+1);	// Bug: if "i+1" is greater than the string length, I suspect that this could cause problems, but I don't know
-			if (isDigit(serialStringInput.charAt(i+1)))
-			serialInputInt = serialStringInput.substring(i+1).toInt();	// Make a string out of everything past the nth character (string starts at 0th) onward, then Convert that string to an integer
+			if (i == serialStringInput.length()-1)
+			{
+				parsedLetterString = serialStringInput.substring(0);
+				Serial.println("LetterString: " + parsedLetterString);
+				Serial1.println("LetterString: " + parsedLetterString);
+				break;
+			}
+			parsedLetterString = serialStringInput.substring(0,i);	// Bug: if "i+1" is greater than the string length, I suspect that this could cause problems, but I don't know
+			Serial.println("LetterString: " + parsedLetterString);
+			Serial1.println("LetterString: " + parsedLetterString);
+			if (isDigit(serialStringInput.charAt(i)))
+			{
+				serialInputInt = serialStringInput.substring(i).toInt();	// Make a string out of everything past the nth character (string starts at 0th) onward, then Convert that string to an integer
+				Serial.println("serialInputInt: "+serialInputInt);
+				Serial1.println("serialInputInt: "+serialInputInt);
+			}
 			break;
 		}
 	}

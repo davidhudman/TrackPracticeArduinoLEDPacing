@@ -335,12 +335,13 @@ void getPartySerialFeedback()
 		{
 			if (i == partyInt)
 			{
-				Serial.print("\nx" + i );						// "x" marks the party function that is currently running
+				Serial.print("x");						// "x" marks the party function that is currently running
+				Serial.print(i);
 				Serial.print(": "+ partyFlags[i]);
 			}
 			else
 			{
-				Serial.print("\n" + i );
+				Serial.print(i);
 				Serial.print(": "+ partyFlags[i]);
 			}
 		}
@@ -358,12 +359,13 @@ void getPartySerialFeedback()
 		{
 			if (i == partyInt)
 			{
-				Serial1.print("\nx" + i );						// "x" marks the party function that is currently running
+				Serial1.print("x");						// "x" marks the party function that is currently running
+				Serial1.print(i);
 				Serial1.print(": "+ partyFlags[i]);
 			}
 			else
 			{
-				Serial1.print("\n" + i );
+				Serial1.print(i);
 				Serial1.print(": "+ partyFlags[i]);
 			}
 		}
@@ -485,38 +487,42 @@ void checkAllUserInput()
 	for (int i = 0; i < serialStringInput.length(); i++)	// Bug: I might need to reconsider the starting point because of the space that the user will usually enter
 	{
 		inChar = serialStringInput.charAt(i);
-		if (!isDigit(inChar))
+		// if it's a letter
+		if (isAlpha(inChar))
 		{
+			// if it's the last character of the string
 			if (i == serialStringInput.length()-1)
 			{
-				parsedLetterString = serialStringInput.substring(0);
-				Serial.println("LetterString: " + parsedLetterString);
-				Serial1.println("LetterString: " + parsedLetterString);
-				break;
+				parsedLetterString = serialStringInput.substring(0);		// take the whole string
+				break;														// break out of the loop
 			}
 			continue;
 		}
+		// if it's anything besides a letter
 		else
 		{
+			// if it's the last character of the string
 			if (i == serialStringInput.length()-1)
 			{
-				parsedLetterString = serialStringInput.substring(0);
-				Serial.println("LetterString: " + parsedLetterString);
-				Serial1.println("LetterString: " + parsedLetterString);
+				parsedLetterString = serialStringInput.substring(0,i);		// Bug: there might need to just be one parameter - 0
+				serialInputInt = serialStringInput.substring(i).toInt();	// Make a string out of everything past the nth character (string starts at 0th) onward, then Convert that string to an integer
 				break;
 			}
 			parsedLetterString = serialStringInput.substring(0,i);	// Bug: if "i+1" is greater than the string length, I suspect that this could cause problems, but I don't know
-			Serial.println("LetterString: " + parsedLetterString);
-			Serial1.println("LetterString: " + parsedLetterString);
+
+			// not totally sure that this if statement is necessary
 			if (isDigit(serialStringInput.charAt(i)))
 			{
 				serialInputInt = serialStringInput.substring(i).toInt();	// Make a string out of everything past the nth character (string starts at 0th) onward, then Convert that string to an integer
-				Serial.println("serialInputInt: "+serialInputInt);
-				Serial1.println("serialInputInt: "+serialInputInt);
 			}
 			break;
 		}
 	}
+
+	Serial.println("serialInputInt: " + serialInputInt);
+	Serial1.println("serialInputInt: " + serialInputInt);
+	Serial.println("LetterString: " + parsedLetterString);
+	Serial1.println("LetterString: " + parsedLetterString);
 
 	// See if the parsedLetterString flag the user sent matches any of the flags above. If it does, do the tasks associated with that flag: flags[8] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};
 	switch(getDesiredFlagIndex(parsedLetterString))
@@ -525,7 +531,7 @@ void checkAllUserInput()
 			break;
 		case 0:		// "c"
 			// If the user sends a string that is longer than 1
-			if (serialInputInt >= getHighestActivePacerIndex());
+			if (serialInputInt > getHighestActivePacerIndex());
 				// do nothing
 			// If the user didn't enter anything after the string, serialInputInt will still be -1
 			else
@@ -635,7 +641,7 @@ void checkAllUserInput()
 			if (serialInputInt >= 0 && serialInputInt < pacer[0].getNumberPacers())
 			{
 				// call this pacer's setStartTimeToNowPlusDelay() function
-				pacer[serialInputInt].setStartTimeToNowPlusDelay(resetDelayDefaultDelayTimeMillis); // This will always be 10 seconds unless I want to change it
+				pacer[serialInputInt].setStartTimeToNowPlusDelay(resetDelayDefaultDelayTimeMillis);
 			}
 			break; 
 		case 6: // "party"

@@ -21,6 +21,7 @@ This setup requires the following items:
 ### End User Instructions ###
 
 Commands:
+
 * "c" - **C**lear all pacers that are currently running
 
 * "r" - **R**eset all pacers that are currently running and start them immediately

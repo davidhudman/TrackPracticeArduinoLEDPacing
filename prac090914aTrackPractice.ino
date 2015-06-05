@@ -274,6 +274,25 @@ void loop()
 	}
 }
 
+// changed the Velocity of the Pacer To (command "vpt")
+void changePacerPace(int index, double new_SecondsPerLap)
+{
+	long tempMillis, startTime = pacer[index].getStartTime(), new_startTime;
+	int getTotalPacingPanels = pacer[index].getTotalPacingPanels(), initialHighlightedPanel = pacer[index].getInitialHighlightedPanel();
+	double getSecondsPerLap = pacer[index].getSecondsPerLap();
+	int secondFromNowHighlightedPacingPanel = (pacer[index].getCurrentHighlightedPacingPanel+2)%pacer[index].getTotalPacingPanels();
+
+	// use currentHighlightedPacingPanel + 2 and solve for getRunningTime (what millis() will be when it hits that panel)
+	tempMillis = ((((secondFromNowHighlightedPacingPanel + getTotalPacingPanels) - initialHighlightedPanel)*(getSecondsPerLap / getTotalPacingPanels * 1000))+(getSecondsPerLap*1000)) + startTime;
+	// tempMillis probably needs to be verified bigger than millis()
+
+	// then use the new getRunningTime (actually tempMillis and the new_SecondsPerLap to solve for startTime
+	new_startTime = -(((((secondFromNowHighlightedPacingPanel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - tempMillis);
+
+	// we need to return the new_startTime to change the pacer's start time, but we need to do this after millis() > tempMillis;
+	return;
+}
+
 // send input from user via the Serial Monitor Tool to send to the Arduino device
 void setSerialInput()
 {

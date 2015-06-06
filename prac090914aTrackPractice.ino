@@ -21,7 +21,8 @@
 class Pacer {
 private:
 	double initialDelay, 					//UI// How long each pacer should wait before starting
-				secondsPerLap;				//UI// The number of seconds that it will take for the pacing panels to complete one lap
+				secondsPerLap,				//UI// The number of seconds that it will take for the pacing panels to complete one lap
+				futureSecondsPerLap;			// The number of seconds per lap that the pacer will be set to
 	int initialHighlightedPanel, 			//UI// This determines where the pacer starts from
 				numMeters,						// This determines how many meters the pacing lights will run for
 				totalPacingPanels,				// This is passed as an argument from JpanelPractice
@@ -29,7 +30,8 @@ private:
 	uint32_t shade;		//Color shade;		//UI// This determines the color of the pacer's pacing lights
 	bool isStopwatchStarted;
 	bool isBackwards;
-	long startTime;
+	bool isGoingToChangeSpeed;				// indicates whether the pacer is about to change its speed
+	long startTime, futureStartTime;
 	static int numberPacers; // static
 	int currentHighlightedPacingPanel;	// This determines which pacing panel is currently lit up
 
@@ -53,6 +55,7 @@ public:
 		lightTrainLength = light_Train_Length;
 		isStopwatchStarted = false;
 		isBackwards = false;
+		isGoingToChangeSpeed = false;
 		totalPacingPanels = total_Pacing_Panels;
 		numberPacers++;
 		startTime = millis() + (long)initialDelay;
@@ -64,6 +67,10 @@ public:
 	bool getIsStopwatchStarted()
 	{
 		return isStopwatchStarted;
+	};
+	bool getIsGoingToChangeSpeed()
+	{
+		return isGoingToChangeSpeed;
 	};
 	bool isCurrentlyDelayed()
 	{
@@ -100,6 +107,10 @@ public:
 	double getSecondsPerLap()
 	{
 		return secondsPerLap;
+	};
+	double getFutureSecondsPerLap()
+	{
+		return futureSecondsPerLap;
 	};
 	int getTotalPacingPanels()
 	{
@@ -142,6 +153,10 @@ public:
 	{
 		return startTime;
 	};
+	long getFutureStartTime()
+	{
+		return futureStartTime;
+	};
 	long getRunningTime()
 	{
 		// This if statement is meant to solve the problem of pacing panels running before their delay
@@ -157,7 +172,7 @@ public:
 	void setShade(uint32_t new_Shade)
 	{
 		shade = new_Shade;
-	}
+	};
 	void setTotalPacingPanels(int total_Pacing_Panels_)
 	{
 		totalPacingPanels = total_Pacing_Panels_;
@@ -173,6 +188,10 @@ public:
 	void setStartTime(long start_Time)
 	{
 		startTime = start_Time;
+	};
+	void setFutureStartTime(long future_Start_Time)
+	{
+		futureStartTime = future_Start_Time;
 	}
 	void setCurrentHighlightedPacingPanel (int current_Highlighted_Pacing_Panel)
 	{
@@ -186,6 +205,10 @@ public:
 	{
 		isBackwards = is_Backwards;
 	};
+	void setIsGoingToChangeSpeed(boolean is_Going_To_Change_Speed)
+	{
+		isGoingToChangeSpeed = is_Going_To_Change_Speed;
+	};
 	void setNumberPacers(int number_Pacers)
 	{
 		numberPacers = number_Pacers;
@@ -193,6 +216,10 @@ public:
 	void setSecondsPerLap(double seconds_Per_Lap)
 	{
 		secondsPerLap = seconds_Per_Lap;
+	};
+	void setFutureSecondsPerLap(double future_Seconds_Per_Lap)
+	{
+		futureSecondsPerLap = future_Seconds_Per_Lap;
 	};
 	void setInitialDelay(int initDelay)
 	{
@@ -218,21 +245,25 @@ int dataPin = 2;
 int clockPin = 3;
 int numLEDS = 20;
 
-Pacer pacer[10] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
+const int PACER_ARRAY_SIZE = 10;
+Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
 	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
 	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS) };
 double secondsPerLapHolder;
-//int inputPacer = 0;				//This allows the user to control this number's pacer's secondsPerLap through the serial connection
-//int highestPacer = 0;
+
 String serialStringInput;			// Holds the raw, unformatted serial input from user
 String mode = "track";				// This mode String has two possible values: "track" and "party". Each value will result in different function calls
 int partyInt = 10;					// This integer controls what party functions will be run; 0 indicates all will be run
 
 double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
-const int TRACK_FLAG_SIZE = 8, PARTY_FLAG_SIZE = 11;
-const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
+const int TRACK_FLAG_SIZE = 9, PARTY_FLAG_SIZE = 11;
+const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
 const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
-long resetDelayDefaultDelayTimeMillis = 10000;
+long resetDelayDefaultDelayTimeMillis = 10000;		// the default delay time when resetting pacers on a delay
+long tempMillis;		// holds the milliseconds time that a pacer's speed will change
+double newSecondsPerLap; // holds the double (floating point) time that will become the pacer's secondsPerLap
+String stringSepFlag = ",";	// holds the string that separates the values in the speed change function
+bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need to figure out which pacer is going to change its speed
 
 // Set the first variable to the NUMBER of pixels. 32 = 32 pixels in a row
 Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
@@ -265,6 +296,11 @@ void loop()
 	{
 		setPixelColorBasedOnTime();
 
+		if (isChangePacerSpeedNeeded == true)
+		{
+			setChangingPacerSpeed();
+		}
+
 		getSerialFeedback();
 	}
 	else if (mode == "party")
@@ -274,23 +310,43 @@ void loop()
 	}
 }
 
-// changed the Velocity of the Pacer To (command "vpt")
-void changePacerPace(int index, double new_SecondsPerLap)
+void setChangingPacerSpeed()
 {
-	long tempMillis, startTime = pacer[index].getStartTime(), new_startTime;
+	for (int i=0; i < PACER_ARRAY_SIZE; i++)
+	{
+		if (pacer[i].getIsGoingToChangeSpeed())
+		{
+			if (millis() > tempMillis)
+			{
+				isChangePacerSpeedNeeded = false;
+				pacer[i].setSecondsPerLap(pacer[i].getFutureSecondsPerLap());
+				pacer[i].setIsGoingToChangeSpeed(false);
+				pacer[i].setFutureSecondsPerLap(0);
+				break;
+			}
+		}
+	}
+}
+
+// returns the new start time for a pacer intersecting the given pacer 2 lights ahead given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
+long getChangedPacerNewStartTime(int index, double new_SecondsPerLap)
+{
+	long temp_Millis, startTime = pacer[index].getStartTime(), new_startTime;
 	int getTotalPacingPanels = pacer[index].getTotalPacingPanels(), initialHighlightedPanel = pacer[index].getInitialHighlightedPanel();
 	double getSecondsPerLap = pacer[index].getSecondsPerLap();
-	int secondFromNowHighlightedPacingPanel = (pacer[index].getCurrentHighlightedPacingPanel+2)%pacer[index].getTotalPacingPanels();
+	int secondFromNowHighlightedPacingPanel = (pacer[index].getCurrentHighlightedPacingPanel()+2)%pacer[index].getTotalPacingPanels();
 
 	// use currentHighlightedPacingPanel + 2 and solve for getRunningTime (what millis() will be when it hits that panel)
-	tempMillis = ((((secondFromNowHighlightedPacingPanel + getTotalPacingPanels) - initialHighlightedPanel)*(getSecondsPerLap / getTotalPacingPanels * 1000))+(getSecondsPerLap*1000)) + startTime;
-	// tempMillis probably needs to be verified bigger than millis()
+	temp_Millis = (long)(((((secondFromNowHighlightedPacingPanel + getTotalPacingPanels) - initialHighlightedPanel)*(getSecondsPerLap / getTotalPacingPanels * 1000))+(getSecondsPerLap*1000)) + startTime);
+	// temp_Millis probably needs to be verified bigger than millis()
+
+	tempMillis = temp_Millis;
 
 	// then use the new getRunningTime (actually tempMillis and the new_SecondsPerLap to solve for startTime
-	new_startTime = -(((((secondFromNowHighlightedPacingPanel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - tempMillis);
+	new_startTime = -(long)(((((secondFromNowHighlightedPacingPanel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - temp_Millis);
 
 	// we need to return the new_startTime to change the pacer's start time, but we need to do this after millis() > tempMillis;
-	return;
+	return new_startTime;
 }
 
 // send input from user via the Serial Monitor Tool to send to the Arduino device
@@ -478,6 +534,7 @@ void checkAllUserInput()
 	String parsedLetterString;	// a temporary string for holding the user's non-digit string input
 	String parsedNumericString;	// a temporary string for holding the user's digit string input
 	int serialInputInt = -1;	// Holds the integer on the end of the string that the user input, such as "c1", "r2", "r", "rd", or "c"; It is equal to negative one because the user will never enter that value and can be used to determine bad input
+	double serialInputDouble = -1;	// Holds lap time in the case of "spt1,75" for set pacer 1 to 75 second lap
 	long tempMillisTime;
 
 	// Check if the user sent a lap time
@@ -494,39 +551,53 @@ void checkAllUserInput()
 		secondsPerLapHolder = 0;
 	}
 
-	// Parse the string that the user sent into characters and numbers (optional)
-	for (int i = 0; i < serialStringInput.length(); i++)	// Bug: I might need to reconsider the starting point because of the space that the user will usually enter
+	if (serialStringInput.lastIndexOf(stringSepFlag) > -1)
 	{
-		inChar = serialStringInput.charAt(i);
-		// if it's a letter
-		if (isAlpha(inChar))
+		if (serialStringInput.substring(0,3).equals(trackFlags[8]))
 		{
-			// if it's the last character of the string
-			if (i == serialStringInput.length()-1)
-			{
-				parsedLetterString = serialStringInput.substring(0);		// take the whole string
-				break;														// break out of the loop
-			}
-			continue;
+			parsedLetterString = trackFlags[8];
+
+			serialInputInt = serialStringInput.substring(3,serialStringInput.indexOf(stringSepFlag)).toInt();
+
+			serialInputDouble = atof(serialStringInput.substring(serialStringInput.indexOf(stringSepFlag)+1).c_str());
 		}
-		// if it's anything besides a letter
-		else
+	}
+	else
+	{
+		// Parse the string that the user sent into characters and numbers (optional)
+		for (int i = 0; i < serialStringInput.length(); i++)	// Bug: I might need to reconsider the starting point because of the space that the user will usually enter
 		{
-			// if it's the last character of the string
-			if (i == serialStringInput.length()-1)
+			inChar = serialStringInput.charAt(i);
+			// if it's a letter
+			if (isAlpha(inChar))
 			{
-				parsedLetterString = serialStringInput.substring(0,i);		// Bug: there might need to just be one parameter - 0
-				serialInputInt = serialStringInput.substring(i).toInt();	// Make a string out of everything past the nth character (string starts at 0th) onward, then Convert that string to an integer
+				// if it's the last character of the string
+				if (i == serialStringInput.length()-1)
+				{
+					parsedLetterString = serialStringInput.substring(0);		// take the whole string
+					break;														// break out of the loop
+				}
+				continue;
+			}
+			// if it's anything besides a letter
+			else
+			{
+				// if it's the last character of the string
+				if (i == serialStringInput.length()-1)
+				{
+					parsedLetterString = serialStringInput.substring(0,i);		// Bug: there might need to just be one parameter - 0
+					serialInputInt = serialStringInput.substring(i).toInt();	// Make a string out of everything past the nth character (string starts at 0th) onward, then Convert that string to an integer
+					break;
+				}
+				parsedLetterString = serialStringInput.substring(0,i);	// Bug: if "i+1" is greater than the string length, I suspect that this could cause problems, but I don't know
+
+				// not totally sure that this if statement is necessary
+				if (isDigit(serialStringInput.charAt(i)))
+				{
+					serialInputInt = serialStringInput.substring(i).toInt();	// Make a string out of everything past the nth character (string starts at 0th) onward, then Convert that string to an integer
+				}
 				break;
 			}
-			parsedLetterString = serialStringInput.substring(0,i);	// Bug: if "i+1" is greater than the string length, I suspect that this could cause problems, but I don't know
-
-			// not totally sure that this if statement is necessary
-			if (isDigit(serialStringInput.charAt(i)))
-			{
-				serialInputInt = serialStringInput.substring(i).toInt();	// Make a string out of everything past the nth character (string starts at 0th) onward, then Convert that string to an integer
-			}
-			break;
 		}
 	}
 
@@ -660,6 +731,12 @@ void checkAllUserInput()
 			break; 
 		case 7: // "track"
 			mode = "track";
+			break;
+		case 8: // "spt"
+			pacer[serialInputInt].setFutureStartTime(getChangedPacerNewStartTime(serialInputInt, serialInputDouble));
+			pacer[serialInputInt].setIsGoingToChangeSpeed(true);
+			pacer[serialInputInt].setFutureSecondsPerLap(serialInputDouble);
+			isChangePacerSpeedNeeded = true;
 			break;
 		default:
 			break;

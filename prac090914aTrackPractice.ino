@@ -296,10 +296,10 @@ void loop()
 	{
 		setPixelColorBasedOnTime();
 
-		if (isChangePacerSpeedNeeded == true)
+		/*if (isChangePacerSpeedNeeded == true)
 		{
 			setChangingPacerSpeed();
-		}
+		}*/
 
 		getSerialFeedback();
 	}
@@ -331,19 +331,33 @@ void setChangingPacerSpeed()
 // returns the new start time for a pacer intersecting the given pacer 2 lights ahead given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
 long getChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 {
-	long temp_Millis, startTime = pacer[index].getStartTime(), new_startTime;
+	long temp_Millis, startTime = pacer[index].getStartTime(), new_startTime, currentTime = millis(), divisionResult;
 	int getTotalPacingPanels = pacer[index].getTotalPacingPanels(), initialHighlightedPanel = pacer[index].getInitialHighlightedPanel();
 	double getSecondsPerLap = pacer[index].getSecondsPerLap();
-	int secondFromNowHighlightedPacingPanel = (pacer[index].getCurrentHighlightedPacingPanel()+2)%pacer[index].getTotalPacingPanels();
+	int current_Highlighted_Pacing_Panel = pacer[index].getCurrentHighlightedPacingPanel();
 
-	// use currentHighlightedPacingPanel + 2 and solve for getRunningTime (what millis() will be when it hits that panel)
-	temp_Millis = (long)(((((secondFromNowHighlightedPacingPanel + getTotalPacingPanels) - initialHighlightedPanel)*(getSecondsPerLap / getTotalPacingPanels * 1000))+(getSecondsPerLap*1000)) + startTime);
+	// use currentHighlightedPacingPanel and solve for getRunningTime (what millis() will be when it hit that panel that you're on)
+	new_startTime = (long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel)*(getSecondsPerLap / getTotalPacingPanels * 1000))+(getSecondsPerLap*1000)) + startTime);
 	// temp_Millis probably needs to be verified bigger than millis()
 
-	tempMillis = temp_Millis;
+	divisionResult = currentTime / (getSecondsPerLap*1000);
+
+	new_startTime = new_startTime + (divisionResult*(getSecondsPerLap*1000)) + (getSecondsPerLap*1000);
+	
+	while (currentTime < new_startTime)
+	{
+		new_startTime -= (getSecondsPerLap*1000);
+	}
+
+	// new_startTime -= (getSecondsPerLap*1000);
+
+	pacer[index].setStartTime(new_startTime);
+	pacer[index].setSecondsPerLap(new_SecondsPerLap);
+	pacer[index].setInitialHighlightedPanel(current_Highlighted_Pacing_Panel);
+	// tempMillis = temp_Millis;
 
 	// then use the new getRunningTime (actually tempMillis and the new_SecondsPerLap to solve for startTime
-	new_startTime = -(long)(((((secondFromNowHighlightedPacingPanel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - temp_Millis);
+	// new_startTime = -(long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - temp_Millis);
 
 	// we need to return the new_startTime to change the pacer's start time, but we need to do this after millis() > tempMillis;
 	return new_startTime;
@@ -733,10 +747,7 @@ void checkAllUserInput()
 			mode = "track";
 			break;
 		case 8: // "spt"
-			pacer[serialInputInt].setFutureStartTime(getChangedPacerNewStartTime(serialInputInt, serialInputDouble));
-			pacer[serialInputInt].setIsGoingToChangeSpeed(true);
-			pacer[serialInputInt].setFutureSecondsPerLap(serialInputDouble);
-			isChangePacerSpeedNeeded = true;
+			tempMillisTime = getChangedPacerNewStartTime(serialInputInt, serialInputDouble);
 			break;
 		default:
 			break;

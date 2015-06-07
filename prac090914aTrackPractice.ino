@@ -8,11 +8,10 @@
 
 */
 
-#include <SoftwareSerial.h>
 #include <Adafruit_WS2801.h>
 #include <Time.h>
-#include "LPD8806.h"
-#include "SPI.h"
+//#include "LPD8806.h"
+#include <SPI.h>
 
 /**
 *	Pacer Class - public in java program
@@ -126,7 +125,14 @@ public:
 	};
 	int getInitialHighlightedPanel()
 	{
-		return initialHighlightedPanel;
+		if (isBackwards)
+		{
+			return getTotalPacingPanels()-initialHighlightedPanel;
+		}
+		else
+		{
+			return initialHighlightedPanel;
+		}
 	};
 	int getNumMeters()
 	{
@@ -140,12 +146,12 @@ public:
 	{
 		if (!isBackwards)	// if isBackwards is not true
 		{
-			currentHighlightedPacingPanel = (int)(((getRunningTime()%(long)((int)getSecondsPerLap()*(double)1000))/getNextLightDelay())+initialHighlightedPanel)%getTotalPacingPanels();
+			currentHighlightedPacingPanel = (int)(((getRunningTime()%(long)((int)getSecondsPerLap()*(double)1000))/getNextLightDelay())+getInitialHighlightedPanel())%getTotalPacingPanels();
 			return currentHighlightedPacingPanel;
 		}
 		else
 		{
-			currentHighlightedPacingPanel = (getTotalPacingPanels()-1) - (int)(((getRunningTime()%(long)((int)getSecondsPerLap()*(double)1000))/getNextLightDelay())+initialHighlightedPanel)%getTotalPacingPanels();
+			currentHighlightedPacingPanel = (getTotalPacingPanels()-1) - (int)(((getRunningTime()%(long)((int)getSecondsPerLap()*(double)1000))/getNextLightDelay())+getInitialHighlightedPanel())%getTotalPacingPanels();
 			return currentHighlightedPacingPanel;
 		}
 	};
@@ -243,7 +249,7 @@ int Pacer::numberPacers = 0;
 
 int dataPin = 2;
 int clockPin = 3;
-int numLEDS = 20;
+int numLEDS = 45;
 
 const int PACER_ARRAY_SIZE = 10;
 Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
@@ -268,7 +274,6 @@ bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need t
 // Set the first variable to the NUMBER of pixels. 32 = 32 pixels in a row
 Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
 
-SoftwareSerial swerial(8,9);	// RX, TX
 int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0;
 int serialCountTo = 2000, trafficLightCountTo = 100, partySerialCountTo = 5;
 int tempLowestDelayedPacerIndex = -1;
@@ -614,6 +619,7 @@ void checkAllUserInput()
 					if (serialInputInt <= getHighestActivePacerIndex())	// Are we sure that we've cleared a pacer that is smaller than the inputPacer?
 					{
 						pacer[serialInputInt].setSecondsPerLap(0);		// If the user sends the clear pacer i text string, clear pacer i and reset it to 0
+						pacer[serialInputInt].setInitialHighlightedPanel(0);
 					}
 				}
 				else // If the user sends the clear all text string (just "c")
@@ -622,6 +628,7 @@ void checkAllUserInput()
 					for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 					{
 						pacer[i].setSecondsPerLap(0);
+						pacer[i].setInitialHighlightedPanel(0);
 					}
 				}
 			}
@@ -728,7 +735,6 @@ void checkAllUserInput()
 			break;
 		default:
 			break;
-
 	}
 }
 
@@ -802,12 +808,13 @@ void delayedPacerTrafficLightCountdown()
 	}
 	else if (tempLowestDelayedPacerIndex > -1)
 	{
-		forwardBackwardsPacerCountdown();
+		pacerCountdown();
 	}
 }
 
-void forwardBackwardsPacerCountdown()
+void pacerCountdown()
 {
+	// if it's backwards (end to beginning)
 	if (pacer[tempLowestDelayedPacerIndex].getIsBackwards())
 	{
 		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds))
@@ -818,7 +825,7 @@ void forwardBackwardsPacerCountdown()
 				{
 					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed())
 					{
-						strip.setPixelColor(pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()-1, Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+						strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()-1)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
 						return;
 					}
 					else
@@ -828,13 +835,14 @@ void forwardBackwardsPacerCountdown()
 						return;
 					}
 				}
-				strip.setPixelColor(pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()-2, Color(255,255,0)); // yellow
+				strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()-2)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(255,255,0)); // yellow
 				return;
 			}
-			strip.setPixelColor(pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()-3, Color(255,0,0));	// red
+			strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()-3)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(255,0,0));	// red
 			return;
 		}
 	}
+	// If it's frontwards (beginning to end)
 	else
 	{
 		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds))
@@ -845,7 +853,7 @@ void forwardBackwardsPacerCountdown()
 				{
 					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed())
 					{
-						strip.setPixelColor(0, Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+						strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel())%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
 						return;
 					}
 					else
@@ -855,10 +863,10 @@ void forwardBackwardsPacerCountdown()
 						return;
 					}
 				}
-				strip.setPixelColor(1, Color(255,255,0)); // yellow
+				strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()+1)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(255,255,0)); // yellow
 				return;
 			}
-			strip.setPixelColor(2, Color(255,0,0));	// red
+			strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()+2)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(255,0,0));	// red
 			return;
 		}
 	}

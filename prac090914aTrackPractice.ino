@@ -296,35 +296,12 @@ void loop()
 	{
 		setPixelColorBasedOnTime();
 
-		/*if (isChangePacerSpeedNeeded == true)
-		{
-			setChangingPacerSpeed();
-		}*/
-
 		getSerialFeedback();
 	}
 	else if (mode == "party")
 	{
 		partyFunctions();
 		getPartySerialFeedback();
-	}
-}
-
-void setChangingPacerSpeed()
-{
-	for (int i=0; i < PACER_ARRAY_SIZE; i++)
-	{
-		if (pacer[i].getIsGoingToChangeSpeed())
-		{
-			if (millis() > tempMillis)
-			{
-				isChangePacerSpeedNeeded = false;
-				pacer[i].setSecondsPerLap(pacer[i].getFutureSecondsPerLap());
-				pacer[i].setIsGoingToChangeSpeed(false);
-				pacer[i].setFutureSecondsPerLap(0);
-				break;
-			}
-		}
 	}
 }
 

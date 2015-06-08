@@ -549,13 +549,16 @@ void checkAllUserInput()
 
 	if (serialStringInput.lastIndexOf(stringSepFlag) > -1)
 	{
-		if (serialStringInput.substring(0,3).equals(trackFlags[8]))
+		for (int i=0; i < TRACK_FLAG_SIZE; i++)
 		{
-			parsedLetterString = trackFlags[8];
+			if (serialStringInput.substring(0,3).equals(trackFlags[i]))
+			{
+				parsedLetterString = trackFlags[i];
 
-			serialInputInt = serialStringInput.substring(3,serialStringInput.indexOf(stringSepFlag)).toInt();
+				serialInputInt = serialStringInput.substring(3,serialStringInput.indexOf(stringSepFlag)).toInt();
 
-			serialInputDouble = atof(serialStringInput.substring(serialStringInput.indexOf(stringSepFlag)+1).c_str());
+				serialInputDouble = atof(serialStringInput.substring(serialStringInput.indexOf(stringSepFlag)+1).c_str());
+			}
 		}
 	}
 	else

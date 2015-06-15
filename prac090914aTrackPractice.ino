@@ -1,6 +1,6 @@
-/*	**TrackPracticeWS2801**
+/*	**TrackPractice for WS2801 or WS2811/WS2812**
 
-	This version of the TrackPractice Arduino program is designed to work with a strip of WS2801 lights.
+	This version of the TrackPractice Arduino program is designed to work with a strip of WS2801 lights or WS2811/WS2812. You can just uncomment and comment the corresponding "strip" declaration lines.
 	I orginally ordered a 50-light strip of these lights off amazon for $31 (http://www.amazon.com/gp/product/B00LYRI1KY/).
 	A similar 25-light strip is also sold by Adafruit for $40 (https://www.adafruit.com/product/738).
 
@@ -8,9 +8,10 @@
 
 */
 
+#include <Adafruit_NeoPixel.h>
 #include <Adafruit_WS2801.h>
 #include <Time.h>
-//#include "LPD8806.h"
+#include "LPD8806.h"
 #include <SPI.h>
 
 /**
@@ -40,7 +41,7 @@ public:
 	// classes
 	Pacer(double lapSecs, double initDelay, int firstHighlightedPanel, int meters, int light_Train_Length, int total_Pacing_Panels) // Constructor
 	{
-		Adafruit_WS2801 strip1 = Adafruit_WS2801();
+		//Adafruit_WS2801 strip1 = Adafruit_WS2801();
 
 		uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)}; 
 		// white, red, yellow, green, cyan, blue, magenta
@@ -249,7 +250,7 @@ int Pacer::numberPacers = 0;
 
 int dataPin = 2;
 int clockPin = 3;
-int numLEDS = 45;
+int numLEDS = 30;
 
 const int PACER_ARRAY_SIZE = 10;
 Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
@@ -262,8 +263,8 @@ String mode = "track";				// This mode String has two possible values: "track" a
 int partyInt = 10;					// This integer controls what party functions will be run; 0 indicates all will be run
 
 double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
-const int TRACK_FLAG_SIZE = 9, PARTY_FLAG_SIZE = 11;
-const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
+const int TRACK_FLAG_SIZE = 10, PARTY_FLAG_SIZE = 11;
+const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
 const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
 long resetDelayDefaultDelayTimeMillis = 10000;		// the default delay time when resetting pacers on a delay
 long tempMillis;		// holds the milliseconds time that a pacer's speed will change
@@ -272,7 +273,16 @@ String stringSepFlag = ",";	// holds the string that separates the values in the
 bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need to figure out which pacer is going to change its speed
 
 // Set the first variable to the NUMBER of pixels. 32 = 32 pixels in a row
-Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
+// Parameter 1 = number of pixels in strip
+// Parameter 2 = Arduino pin number (most are valid)
+// Parameter 3 = pixel type flags, add together as needed:
+//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
+//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_GRB + NEO_KHZ800);
+//Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
+int stripNum = 0;	// Indicates the chip used in the strip - "0" indicates the WS2811/WS2812, "1" indicates the WS2801
 
 int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0;
 int serialCountTo = 2000, trafficLightCountTo = 100, partySerialCountTo = 5;
@@ -352,6 +362,7 @@ void setSerialInput()
 
 	while (Serial1.available() || Serial.available())
 	{
+		tempMillis = millis();
 		if (Serial1.available())
 		{
 			serialStringInput = Serial1.readStringUntil(' ');	// Serial1 processes serial input data from a mobile bluetooth connection
@@ -381,6 +392,7 @@ void setSerialInput()
 	}
 }
 
+// Checks for "track" as input sent from the user to change the mode from something else (like "party" mode)
 void checkTrackModeFlags()
 {
 	if (serialStringInput == "track")
@@ -456,8 +468,6 @@ void getSerialFeedback()
 				Serial.print(i);
 				Serial.print("] = ");
 				Serial.print(pacer[i].getSecondsPerLap());
-				Serial.print(" c = ");
-				Serial.print(pacer[i].getShade());
 			}
 		}
 		Serial.print(" LEDs ");
@@ -484,7 +494,7 @@ void getSerialFeedback()
 				Serial1.print(pacer[i].getSecondsPerLap());
 			}
 		}
-		Serial1.print(" LEDs ");
+		Serial1.print("\n LEDs ");
 		Serial1.print(pacer[0].getTotalPacingPanels());
 
 		serial1FeedbackIterator = 0;
@@ -537,7 +547,7 @@ void checkAllUserInput()
 	secondsPerLapHolder = atof(serialStringInput.c_str());		// change: try using String.toFloat() here
 	if (secondsPerLapHolder > 0)
 	{
-		pacer[getLowestUnusedPacerIndex()].setStartTimeToNow();
+		pacer[getLowestUnusedPacerIndex()].setStartTime(tempMillis);
 		pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (secondsPerLapHolder);
 		secondsPerLapHolder = 0;
 		return;												// This allows me to skip the checks for all the other flags if the user sent this input
@@ -736,6 +746,20 @@ void checkAllUserInput()
 		case 8: // "spt"
 			tempMillisTime = getChangedPacerNewStartTime(serialInputInt, serialInputDouble);
 			break;
+		case 9: // "strip"
+			/*if (stripNum == 0)
+			{
+				Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
+				stripNum = 1;
+				break;
+			}
+			if (stripNum == 1)
+			{
+				Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_GRB + NEO_KHZ800);
+				stripNum = 0;
+				break;
+			}*/
+			break;
 		default:
 			break;
 	}
@@ -815,6 +839,7 @@ void delayedPacerTrafficLightCountdown()
 	}
 }
 
+// Gives delayed pacers a countdown similar to a traffic light at wherever they are starting in whatever direction they are running
 void pacerCountdown()
 {
 	// if it's backwards (end to beginning)
@@ -879,6 +904,7 @@ void pacerCountdown()
 //****Party Functions
 //***************************
 
+// Switch statement that controls which "party" function will run
 void partyFunctions()
 {
 	// switch statement with party int as the value for choosing cases that calls different party functions based on its value

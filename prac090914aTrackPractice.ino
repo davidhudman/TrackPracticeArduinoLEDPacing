@@ -250,7 +250,7 @@ int Pacer::numberPacers = 0;
 
 int dataPin = 2;
 int clockPin = 3;
-int numLEDS = 30;
+int numLEDS = 100;
 
 const int PACER_ARRAY_SIZE = 10;
 Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
@@ -259,6 +259,7 @@ Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLE
 double secondsPerLapHolder;
 
 String serialStringInput;			// Holds the raw, unformatted serial input from user
+// String serialStringOutput;			// Used for sending a long string of data back to the user
 String mode = "track";				// This mode String has two possible values: "track" and "party". Each value will result in different function calls
 int partyInt = 10;					// This integer controls what party functions will be run; 0 indicates all will be run
 
@@ -320,7 +321,7 @@ void loop()
 	}
 }
 
-// returns the new start time for a pacer intersecting the given pacer 2 lights ahead given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
+// returns the new start time for a pacer intersecting the given pacer at the current light its on given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
 long getChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 {
 	long temp_Millis, startTime = pacer[index].getStartTime(), new_startTime, currentTime = millis(), divisionResult;
@@ -341,11 +342,11 @@ long getChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 		new_startTime -= (getSecondsPerLap*1000);
 	}
 
-	// new_startTime -= (getSecondsPerLap*1000);
+	// new_startTime -= (current_Highlighted_Pacing_Panel - initialHighlightedPanel) * ((new_SecondsPerLap*1000) / getTotalPacingPanels)	// when this line is added, also make the change below from setting the pacer's initialHighlightedPanel with currentHighlightedPanel to initialHighlightedPanel
 
 	pacer[index].setStartTime(new_startTime);
 	pacer[index].setSecondsPerLap(new_SecondsPerLap);
-	pacer[index].setInitialHighlightedPanel(current_Highlighted_Pacing_Panel);
+	pacer[index].setInitialHighlightedPanel(current_Highlighted_Pacing_Panel);		// change to initialHighlightedPanel eventually
 	// tempMillis = temp_Millis;
 
 	// then use the new getRunningTime (actually tempMillis and the new_SecondsPerLap to solve for startTime
@@ -410,14 +411,11 @@ void getPartySerialFeedback()
 		{
 			if (i == partyInt)
 			{
-				Serial.print("x");						// "x" marks the party function that is currently running
-				Serial.print(i);
-				Serial.print(": "+ partyFlags[i]);
+				Serial.print("x" + i + (String)": "+ partyFlags[i]);						// "x" marks the party function that is currently running
 			}
 			else
 			{
-				Serial.print(i);
-				Serial.print(": "+ partyFlags[i]);
+				Serial.print(i + ": "+ partyFlags[i]);
 			}
 		}
 		
@@ -434,14 +432,11 @@ void getPartySerialFeedback()
 		{
 			if (i == partyInt)
 			{
-				Serial1.print("x");						// "x" marks the party function that is currently running
-				Serial1.print(i);
-				Serial1.print(": "+ partyFlags[i]);
+				Serial1.print("x" + i + (String)": " + partyFlags[i]);						// "x" marks the party function that is currently running
 			}
 			else
 			{
-				Serial1.print(i);
-				Serial1.print(": "+ partyFlags[i]);
+				Serial1.print(i + ": "+ partyFlags[i]);
 			}
 		}
 
@@ -458,20 +453,15 @@ void getSerialFeedback()
 {
 	if (serialFeedbackIterator >= serialCountTo)				// desktop direct wired connection feedback
 	{
-		Serial.print("\ninputPacer = ");
-		Serial.print(getLowestUnusedPacerIndex());
+		Serial.print("\ninputPacer = " + getLowestUnusedPacerIndex());
 		for (int i=0; i < (getHighestActivePacerIndex()+1); i++)
 		{
 			if (pacer[i].getSecondsPerLap() > 0)
 			{
-				Serial.print(" Lap[");
-				Serial.print(i);
-				Serial.print("] = ");
-				Serial.print(pacer[i].getSecondsPerLap());
+				Serial.print(" Lap[" + i + (String)"] = "); Serial.print(pacer[i].getSecondsPerLap());
 			}
 		}
-		Serial.print(" LEDs ");
-		Serial.print(pacer[0].getTotalPacingPanels());
+		Serial.print(" LEDs " + pacer[0].getTotalPacingPanels());
 		
 		serialFeedbackIterator = 0;
 	}
@@ -482,20 +472,15 @@ void getSerialFeedback()
 
 	if (serial1FeedbackIterator >= serialCountTo)				// bluetooth mobile feedback
 	{
-		Serial1.print("\ninputPacer = ");
-		Serial1.print(getLowestUnusedPacerIndex());
+		Serial1.print("\ninputPacer = " + getLowestUnusedPacerIndex());
 		for (int i=0; i < (getHighestActivePacerIndex()+1); i++)
 		{
 			if (pacer[i].getSecondsPerLap() > 0)
 			{
-				Serial1.print(" Lap[");
-				Serial1.print(i);
-				Serial1.print("] = ");
-				Serial1.print(pacer[i].getSecondsPerLap());
+				Serial1.print(" Lap[" + i + (String)"] = "); Serial1.print(pacer[i].getSecondsPerLap());
 			}
 		}
-		Serial1.print("\n LEDs ");
-		Serial1.print(pacer[0].getTotalPacingPanels());
+		Serial1.print(" LEDs " + pacer[0].getTotalPacingPanels());
 
 		serial1FeedbackIterator = 0;
 	}
@@ -610,10 +595,10 @@ void checkAllUserInput()
 		}
 	}
 
-	Serial.println("serialInputInt: " + serialInputInt);
+	/*Serial.println("serialInputInt: " + serialInputInt);
 	Serial1.println("serialInputInt: " + serialInputInt);
 	Serial.println("LetterString: " + parsedLetterString);
-	Serial1.println("LetterString: " + parsedLetterString);
+	Serial1.println("LetterString: " + parsedLetterString);*/
 
 	// See if the parsedLetterString flag the user sent matches any of the flags above. If it does, do the tasks associated with that flag: flags[8] = {"c", "r", "l", "b", "rd", "rdp", "party", "track"};
 	switch(getDesiredFlagIndex(parsedLetterString))

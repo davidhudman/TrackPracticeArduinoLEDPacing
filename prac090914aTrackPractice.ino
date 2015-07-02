@@ -342,11 +342,11 @@ long getChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 		new_startTime -= (getSecondsPerLap*1000);
 	}
 
-	// new_startTime -= (current_Highlighted_Pacing_Panel - initialHighlightedPanel) * ((new_SecondsPerLap*1000) / getTotalPacingPanels)	// when this line is added, also make the change below from setting the pacer's initialHighlightedPanel with currentHighlightedPanel to initialHighlightedPanel
+	new_startTime -= (current_Highlighted_Pacing_Panel - initialHighlightedPanel) * ((new_SecondsPerLap*1000) / getTotalPacingPanels);	// when this line is added, also make the change below from setting the pacer's initialHighlightedPanel with currentHighlightedPanel to initialHighlightedPanel
 
 	pacer[index].setStartTime(new_startTime);
 	pacer[index].setSecondsPerLap(new_SecondsPerLap);
-	pacer[index].setInitialHighlightedPanel(current_Highlighted_Pacing_Panel);		// change to initialHighlightedPanel eventually
+	pacer[index].setInitialHighlightedPanel(initialHighlightedPanel);		// change to initialHighlightedPanel eventually
 	// tempMillis = temp_Millis;
 
 	// then use the new getRunningTime (actually tempMillis and the new_SecondsPerLap to solve for startTime
@@ -411,11 +411,16 @@ void getPartySerialFeedback()
 		{
 			if (i == partyInt)
 			{
-				Serial.print("x" + i + (String)": "+ partyFlags[i]);						// "x" marks the party function that is currently running
+				Serial.print("x");						// "x" marks the party function that is currently running
+				Serial.print(i);
+				Serial.print(": ");
+				Serial.print(partyFlags[i]);
 			}
 			else
 			{
-				Serial.print(i + ": "+ partyFlags[i]);
+				Serial.print(i);
+				Serial.print(": ");
+				Serial.print(partyFlags[i]);
 			}
 		}
 		
@@ -432,11 +437,16 @@ void getPartySerialFeedback()
 		{
 			if (i == partyInt)
 			{
-				Serial1.print("x" + i + (String)": " + partyFlags[i]);						// "x" marks the party function that is currently running
+				Serial1.print("x");						// "x" marks the party function that is currently running
+				Serial1.print(i);
+				Serial1.print(": ");
+				Serial1.print(partyFlags[i]);
 			}
 			else
 			{
-				Serial1.print(i + ": "+ partyFlags[i]);
+				Serial1.print(i);
+				Serial1.print(": ");
+				Serial1.print(partyFlags[i]);
 			}
 		}
 
@@ -453,15 +463,20 @@ void getSerialFeedback()
 {
 	if (serialFeedbackIterator >= serialCountTo)				// desktop direct wired connection feedback
 	{
-		Serial.print("\ninputPacer = " + getLowestUnusedPacerIndex());
+		Serial.print("\ninputPacer = ");
+		Serial.print(getLowestUnusedPacerIndex());
 		for (int i=0; i < (getHighestActivePacerIndex()+1); i++)
 		{
 			if (pacer[i].getSecondsPerLap() > 0)
 			{
-				Serial.print(" Lap[" + i + (String)"] = "); Serial.print(pacer[i].getSecondsPerLap());
+				Serial.print(" Lap[");
+				Serial.print(i);
+				Serial.print("] = ");
+				Serial.print(pacer[i].getSecondsPerLap());
 			}
 		}
-		Serial.print(" LEDs " + pacer[0].getTotalPacingPanels());
+		Serial.print(" LEDs ");
+		Serial.print(pacer[0].getTotalPacingPanels());
 		
 		serialFeedbackIterator = 0;
 	}
@@ -472,15 +487,20 @@ void getSerialFeedback()
 
 	if (serial1FeedbackIterator >= serialCountTo)				// bluetooth mobile feedback
 	{
-		Serial1.print("\ninputPacer = " + getLowestUnusedPacerIndex());
+		Serial1.print("\ninputPacer = ");
+		Serial1.print(getLowestUnusedPacerIndex());
 		for (int i=0; i < (getHighestActivePacerIndex()+1); i++)
 		{
 			if (pacer[i].getSecondsPerLap() > 0)
 			{
-				Serial1.print(" Lap[" + i + (String)"] = "); Serial1.print(pacer[i].getSecondsPerLap());
+				Serial1.print(" Lap[");
+				Serial1.print(i);
+				Serial1.print("] = ");
+				Serial1.print(pacer[i].getSecondsPerLap());
 			}
 		}
-		Serial1.print(" LEDs " + pacer[0].getTotalPacingPanels());
+		Serial1.print("\n LEDs ");
+		Serial1.print(pacer[0].getTotalPacingPanels());
 
 		serial1FeedbackIterator = 0;
 	}

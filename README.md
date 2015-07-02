@@ -22,6 +22,20 @@ This setup requires the following items:
 
 Commands:
 
+| Command       | Desc       | Example |
+| ------------- |:-------------| -----:|
+| "c"           | **C**lear all pacers that are currently running |  |
+| "r"           | **R**eset all pacers that are currently running and start them immediately      |  |
+| "rd"          | (**R**eset **D**elay) reset all pacers that are currently running but wait a predetermined amount of time before starting them     |  |
+| "b"           | (**B**ackwards) set all pacers to run the opposite direction that the first pacer is currently running (including the first pacer)     |  |
+| "(any floating point or whole number)"          | sets a new pacer to run at x seconds per lap, which in this case is 75 seconds |    75 or 68.72 |
+| "c(any whole number)"          | **C**lears a currently running pacer at a certain index off the track; this certain index is 2, so it clears pacer 2; |    "c2" |
+| "r(any whole number)"          | **R**esets the pacer at a certain index to run immediately; this certain index is 1, so it resets pacer 1 |   "r1" |
+| "rd(any whole number)"          | **R**esets all pacers to run following the **D**elay defined by the number on the end of the text; In this case, the number on the end of the text is 10, so all currently running pacers will be immediately removed from the track and will start following a 10 second delay |  "rd10" |
+| "rdp(any whole number)"          | **R**esets following a predetermined **D**elay a **P**acer at a certain index to run; In this case, the index is 4, so pacer 4 will be immediately removed from the track and will start following a predetermined delay |    "rdp4" |
+| "b(any whole number)"          | set a pacer at a specific index to run the opposite direction (**B**ackwards) that the it is currently running; this certain index is 3, so it will make pacer 3 run in the opposite direction | "b3" |
+| "l(any whole number)"          | set the number of **L**ights that are on the track based on the whole number on the end of the text; In this case, the number of lights will be set to 45 | "l45" |
+
 * "c" - **C**lear all pacers that are currently running
 
 * "r" - **R**eset all pacers that are currently running and start them immediately

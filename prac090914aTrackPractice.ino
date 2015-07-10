@@ -8,6 +8,8 @@
 
 */
 
+// #include <Adafruit_NeoPixel.h>
+
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_WS2801.h>
 #include <Time.h>
@@ -250,12 +252,12 @@ int Pacer::numberPacers = 0;
 
 int dataPin = 2;
 int clockPin = 3;
-int numLEDS = 100;
+int numLEDS = 1000;
 
 const int PACER_ARRAY_SIZE = 10;
-Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
-	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
-	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS) };
+Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), 
+	Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), 
+	Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100) };
 double secondsPerLapHolder;
 
 String serialStringInput;			// Holds the raw, unformatted serial input from user
@@ -281,7 +283,7 @@ bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need t
 //   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_RGB + NEO_KHZ800); // NEO_RGB + 
 //Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
 int stripNum = 0;	// Indicates the chip used in the strip - "0" indicates the WS2811/WS2812, "1" indicates the WS2801
 
@@ -465,6 +467,8 @@ void getSerialFeedback()
 	{
 		Serial.print("\ninputPacer = ");
 		Serial.print(getLowestUnusedPacerIndex());
+		Serial.print(" ");
+		Serial.print(millis());
 		for (int i=0; i < (getHighestActivePacerIndex()+1); i++)
 		{
 			if (pacer[i].getSecondsPerLap() > 0)

@@ -252,12 +252,12 @@ int Pacer::numberPacers = 0;
 
 int dataPin = 2;
 int clockPin = 3;
-int numLEDS = 1000;
+int numLEDS = 100;
 
 const int PACER_ARRAY_SIZE = 10;
-Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), 
-	Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100), 
-	Pacer(0,0,0,0,1,100), Pacer(0,0,0,0,1,100) };
+Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
+	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
+	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS) };
 double secondsPerLapHolder;
 
 String serialStringInput;			// Holds the raw, unformatted serial input from user
@@ -283,9 +283,9 @@ bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need t
 //   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_RGB + NEO_KHZ800); // NEO_RGB + 
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_RGB + NEO_KHZ800); // Initialization of the Adafruit NeoPixel strip
+double clockAdjustmentFactor = .5;		// Use with caution. Different numLEDs require different adjustments. Since the Adafruit_NeoPixel library creates timing problems for Arduino, this factor will be used to adjust all user input and output, so the user can continue to use numbers they would want. This is a temporary workaround until the timing issues created by the library are resolved.
 //Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
-int stripNum = 0;	// Indicates the chip used in the strip - "0" indicates the WS2811/WS2812, "1" indicates the WS2801
 
 int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0;
 int serialCountTo = 2000, trafficLightCountTo = 100, partySerialCountTo = 5;
@@ -476,7 +476,7 @@ void getSerialFeedback()
 				Serial.print(" Lap[");
 				Serial.print(i);
 				Serial.print("] = ");
-				Serial.print(pacer[i].getSecondsPerLap());
+				Serial.print(pacer[i].getSecondsPerLap()/clockAdjustmentFactor);
 			}
 		}
 		Serial.print(" LEDs ");
@@ -500,7 +500,7 @@ void getSerialFeedback()
 				Serial1.print(" Lap[");
 				Serial1.print(i);
 				Serial1.print("] = ");
-				Serial1.print(pacer[i].getSecondsPerLap());
+				Serial1.print(pacer[i].getSecondsPerLap()/clockAdjustmentFactor);
 			}
 		}
 		Serial1.print("\n LEDs ");
@@ -557,7 +557,7 @@ void checkAllUserInput()
 	if (secondsPerLapHolder > 0)
 	{
 		pacer[getLowestUnusedPacerIndex()].setStartTime(tempMillis);
-		pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (secondsPerLapHolder);
+		pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (secondsPerLapHolder*clockAdjustmentFactor);
 		secondsPerLapHolder = 0;
 		return;												// This allows me to skip the checks for all the other flags if the user sent this input
 	}
@@ -725,7 +725,7 @@ void checkAllUserInput()
 				// call all pacers' setStartTime() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillisTime + serialInputInt*1000);	// sets each pacers' milliseconds startTime to the current time + (the number of seconds the user sent * 1000 milliseconds)
+					pacer[i].setStartTime(tempMillisTime + ((serialInputInt*1000)*clockAdjustmentFactor));	// sets each pacers' milliseconds startTime to the current time + (the number of seconds the user sent * 1000 milliseconds)
 				}
 			}
 			// If the user just sends "rd" to reset all pacers on a delay
@@ -735,7 +735,7 @@ void checkAllUserInput()
 				// call all pacers' setStartTimeToNowPlusDelay() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillisTime + resetDelayDefaultDelayTimeMillis);
+					pacer[i].setStartTime(tempMillisTime + resetDelayDefaultDelayTimeMillis*clockAdjustmentFactor);
 				}
 			}
 			break; 
@@ -743,7 +743,7 @@ void checkAllUserInput()
 			if (serialInputInt >= 0 && serialInputInt < pacer[0].getNumberPacers())
 			{
 				// call this pacer's setStartTimeToNowPlusDelay() function
-				pacer[serialInputInt].setStartTimeToNowPlusDelay(resetDelayDefaultDelayTimeMillis);
+				pacer[serialInputInt].setStartTimeToNowPlusDelay(resetDelayDefaultDelayTimeMillis*clockAdjustmentFactor);
 			}
 			break; 
 		case 6: // "party"
@@ -753,7 +753,7 @@ void checkAllUserInput()
 			mode = "track";
 			break;
 		case 8: // "spt"
-			tempMillisTime = getChangedPacerNewStartTime(serialInputInt, serialInputDouble);
+			tempMillisTime = getChangedPacerNewStartTime(serialInputInt, serialInputDouble*clockAdjustmentFactor);
 			break;
 		case 9: // "strip"
 			/*if (stripNum == 0)

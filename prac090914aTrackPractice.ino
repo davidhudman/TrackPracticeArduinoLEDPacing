@@ -324,7 +324,7 @@ void loop()
 }
 
 // returns the new start time for a pacer intersecting the given pacer at the current light its on given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
-long getChangedPacerNewStartTime(int index, double new_SecondsPerLap)
+void setChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 {
 	long temp_Millis, startTime = pacer[index].getStartTime(), new_startTime, currentTime = millis(), divisionResult;
 	int getTotalPacingPanels = pacer[index].getTotalPacingPanels(), initialHighlightedPanel = pacer[index].getInitialHighlightedPanel();
@@ -355,7 +355,7 @@ long getChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 	// new_startTime = -(long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - temp_Millis);
 
 	// we need to return the new_startTime to change the pacer's start time, but we need to do this after millis() > tempMillis;
-	return new_startTime;
+	// return new_startTime;
 }
 
 // send input from user via the Serial Monitor Tool to send to the Arduino device
@@ -550,7 +550,6 @@ void checkAllUserInput()
 	String parsedNumericString;	// a temporary string for holding the user's digit string input
 	int serialInputInt = -1;	// Holds the integer on the end of the string that the user input, such as "c1", "r2", "r", "rd", or "c"; It is equal to negative one because the user will never enter that value and can be used to determine bad input
 	double serialInputDouble = -1;	// Holds lap time in the case of "spt1,75" for set pacer 1 to 75 second lap
-	long tempMillisTime;
 
 	// Check if the user sent a lap time
 	secondsPerLapHolder = atof(serialStringInput.c_str());		// change: try using String.toFloat() here
@@ -664,11 +663,10 @@ void checkAllUserInput()
 			// user sent just "r" to immediately reset all pacers
 			else
 			{
-				tempMillisTime = millis();								// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
-				// call all pacers' setStartTimeToNow() function
+				// call all pacers' setStartTime() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillisTime);
+					pacer[i].setStartTime(tempMillis);		// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				}
 			}
 			break; 
@@ -721,21 +719,19 @@ void checkAllUserInput()
 			// If the user sends "rd" with a digit on the end to set the delay to a specific number of characters
 			if (serialStringInput.length() > 2)
 			{
-				tempMillisTime = millis();											// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				// call all pacers' setStartTime() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillisTime + ((serialInputInt*1000)*clockAdjustmentFactor));	// sets each pacers' milliseconds startTime to the current time + (the number of seconds the user sent * 1000 milliseconds)
+					pacer[i].setStartTime(tempMillis + ((serialInputInt*1000)*clockAdjustmentFactor));	// sets each pacers' milliseconds startTime to the current time + (the number of seconds the user sent * 1000 milliseconds * the clockAdjustmentFactor); tempMillis makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				}
 			}
 			// If the user just sends "rd" to reset all pacers on a delay
 			else
 			{
-				tempMillisTime = millis();											// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				// call all pacers' setStartTimeToNowPlusDelay() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillisTime + resetDelayDefaultDelayTimeMillis*clockAdjustmentFactor);
+					pacer[i].setStartTime(tempMillis + resetDelayDefaultDelayTimeMillis*clockAdjustmentFactor);		// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				}
 			}
 			break; 
@@ -753,7 +749,7 @@ void checkAllUserInput()
 			mode = "track";
 			break;
 		case 8: // "spt"
-			tempMillisTime = getChangedPacerNewStartTime(serialInputInt, serialInputDouble*clockAdjustmentFactor);
+			setChangedPacerNewStartTime(serialInputInt, serialInputDouble*clockAdjustmentFactor);
 			break;
 		case 9: // "strip"
 			/*if (stripNum == 0)

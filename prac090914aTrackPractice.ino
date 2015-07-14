@@ -266,8 +266,8 @@ String mode = "track";				// This mode String has two possible values: "track" a
 int partyInt = 10;					// This integer controls what party functions will be run; 0 indicates all will be run
 
 double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
-const int TRACK_FLAG_SIZE = 10, PARTY_FLAG_SIZE = 11;
-const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
+const int TRACK_FLAG_SIZE = 11, PARTY_FLAG_SIZE = 11;
+const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip", "a"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
 const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
 long resetDelayDefaultDelayTimeMillis = 10000;		// the default delay time when resetting pacers on a delay
 long tempMillis;		// holds the milliseconds time that a pacer's speed will change
@@ -284,7 +284,7 @@ bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need t
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_RGB + NEO_KHZ800); // Initialization of the Adafruit NeoPixel strip
-double clockAdjustmentFactor = .5;		// Use with caution. Different numLEDs require different adjustments. Since the Adafruit_NeoPixel library creates timing problems for Arduino, this factor will be used to adjust all user input and output, so the user can continue to use numbers they would want. This is a temporary workaround until the timing issues created by the library are resolved.
+double clockAdjustmentFactor = 1;		// (originally set at .5) Use with caution. Different numLEDs require different adjustments. Since the Adafruit_NeoPixel library creates timing problems for Arduino, this factor will be used to adjust all user input and output, so the user can continue to use numbers they would want. This is a temporary workaround until the timing issues created by the library are resolved.
 //Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
 
 int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0;
@@ -565,6 +565,7 @@ void checkAllUserInput()
 		secondsPerLapHolder = 0;
 	}
 
+	// specifically made to deal with spt#,#.##
 	if (serialStringInput.lastIndexOf(stringSepFlag) > -1)
 	{
 		for (int i=0; i < TRACK_FLAG_SIZE; i++)
@@ -764,6 +765,10 @@ void checkAllUserInput()
 				stripNum = 0;
 				break;
 			}*/
+			break;
+		case 10: // "a" clockAdjustmentFactor - this is weird because it expects "a5" to set clockAdjustmentFactor to .5 and "a10" to set clockAdjustmentFactor to 1.0
+			serialInputDouble = (double) serialInputInt / 10;
+			clockAdjustmentFactor = serialInputDouble;
 			break;
 		default:
 			break;

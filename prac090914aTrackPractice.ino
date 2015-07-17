@@ -60,7 +60,7 @@ public:
 		isGoingToChangeSpeed = false;
 		totalPacingPanels = total_Pacing_Panels;
 		numberPacers++;
-		startTime = millis() + (long)initialDelay;
+		startTime = myMillis() + (long)initialDelay;
 	};
 	int getNumberPacers()
 	{
@@ -76,7 +76,7 @@ public:
 	};
 	bool isCurrentlyDelayed()
 	{
-		if ((startTime - millis()) > 0)
+		if ((startTime - myMillis()) > 0)
 		{
 			return true;
 		}
@@ -84,7 +84,7 @@ public:
 	};
 	bool isStartTimeWithinXSecondsAndGreaterThanZero(int seconds)
 	{
-		if (((startTime - millis()) > 0) && ((startTime - millis()) < (seconds*1000)))
+		if (((startTime - myMillis()) > 0) && ((startTime - myMillis()) < (seconds*1000)))
 		{
 			return true;
 		}
@@ -92,7 +92,7 @@ public:
 	};
 	bool isStartTimeWithinXSecondsOnly(int seconds)
 	{
-		if ((startTime - millis()) < (seconds*1000))
+		if ((startTime - myMillis()) < (seconds*1000))
 		{
 			return true;
 		}
@@ -104,7 +104,7 @@ public:
 	};
 	long getDelayRemaining()
 	{
-		return startTime - millis();
+		return startTime - myMillis();
 	}
 	double getSecondsPerLap()
 	{
@@ -169,8 +169,8 @@ public:
 	long getRunningTime()
 	{
 		// This if statement is meant to solve the problem of pacing panels running before their delay
-		if (millis() > getStartTime())
-		return millis() - getStartTime();		// if the fix doesn't work, just leave this line
+		if (myMillis() > getStartTime())
+		return myMillis() - getStartTime();		// if the fix doesn't work, just leave this line
 		else
 		return 0;
 	};
@@ -188,11 +188,11 @@ public:
 	};
 	void setStartTimeToNow()
 	{
-		startTime = millis();
+		startTime = myMillis();
 	};
 	void setStartTimeToNowPlusDelay(long delayMillis)
 	{
-		startTime = millis() + delayMillis;
+		startTime = myMillis() + delayMillis;
 	};
 	void setStartTime(long start_Time)
 	{
@@ -285,6 +285,8 @@ bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need t
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_RGB + NEO_KHZ800); // Initialization of the Adafruit NeoPixel strip
 double clockAdjustmentFactor = 1;		// (originally set at .5) Use with caution. Different numLEDs require different adjustments. Since the Adafruit_NeoPixel library creates timing problems for Arduino, this factor will be used to adjust all user input and output, so the user can continue to use numbers they would want. This is a temporary workaround until the timing issues created by the library are resolved.
+long milliSecondAddon = 0;
+double microSecondAddon = 0;
 //Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
 
 int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0;
@@ -299,6 +301,7 @@ void setup()
 	strip.begin();				// Start up the LED strip
 
 	strip.show();				// Update the strip, to start they are all 'off'
+	microMilliSecondAddon();
 
 	Serial.flush();
 	Serial1.flush();
@@ -326,14 +329,14 @@ void loop()
 // returns the new start time for a pacer intersecting the given pacer at the current light its on given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
 void setChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 {
-	long temp_Millis, startTime = pacer[index].getStartTime(), new_startTime, currentTime = millis(), divisionResult;
+	long temp_Millis, startTime = pacer[index].getStartTime(), new_startTime, currentTime = myMillis(), divisionResult;
 	int getTotalPacingPanels = pacer[index].getTotalPacingPanels(), initialHighlightedPanel = pacer[index].getInitialHighlightedPanel();
 	double getSecondsPerLap = pacer[index].getSecondsPerLap();
 	int current_Highlighted_Pacing_Panel = pacer[index].getCurrentHighlightedPacingPanel();
 
-	// use currentHighlightedPacingPanel and solve for getRunningTime (what millis() will be when it hit that panel that you're on)
+	// use currentHighlightedPacingPanel and solve for getRunningTime (what myMillis() will be when it hit that panel that you're on)
 	new_startTime = (long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel)*(getSecondsPerLap / getTotalPacingPanels * 1000))+(getSecondsPerLap*1000)) + startTime);
-	// temp_Millis probably needs to be verified bigger than millis()
+	// temp_Millis probably needs to be verified bigger than myMillis()
 
 	divisionResult = currentTime / (getSecondsPerLap*1000);
 
@@ -354,7 +357,7 @@ void setChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 	// then use the new getRunningTime (actually tempMillis and the new_SecondsPerLap to solve for startTime
 	// new_startTime = -(long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - temp_Millis);
 
-	// we need to return the new_startTime to change the pacer's start time, but we need to do this after millis() > tempMillis;
+	// we need to return the new_startTime to change the pacer's start time, but we need to do this after myMillis() > tempMillis;
 	// return new_startTime;
 }
 
@@ -365,7 +368,7 @@ void setSerialInput()
 
 	while (Serial1.available() || Serial.available())
 	{
-		tempMillis = millis();
+		tempMillis = myMillis();
 		if (Serial1.available())
 		{
 			serialStringInput = Serial1.readStringUntil(' ');	// Serial1 processes serial input data from a mobile bluetooth connection
@@ -468,7 +471,7 @@ void getSerialFeedback()
 		Serial.print("\ninputPacer = ");
 		Serial.print(getLowestUnusedPacerIndex());
 		Serial.print(" ");
-		Serial.print(millis());
+		Serial.print(myMillis());
 		for (int i=0; i < (getHighestActivePacerIndex()+1); i++)
 		{
 			if (pacer[i].getSecondsPerLap() > 0)
@@ -538,7 +541,23 @@ void setPixelColorBasedOnTime()
 	delayedPacerTrafficLightCountdown();
 
 	strip.show();              // refresh strip display
+	microMilliSecondAddon();
 
+}
+
+void microMilliSecondAddon()
+{
+	microSecondAddon += strip.numPixels() * 20.12;		// 20 was too slow, 20.25 too fast; 20.12 might be a hair to fast (<1 sec per 20min) increasing the variable will make Arduino perceive time faster than it is actually happening (lights go faster)
+	while (microSecondAddon >= 1000)
+	{
+		 milliSecondAddon++;
+		 microSecondAddon -= 1000;
+	}
+}
+
+long myMillis()
+{
+	return millis() + milliSecondAddon;
 }
 
 // checks for all flags in the user's input with a switch statement
@@ -667,7 +686,7 @@ void checkAllUserInput()
 				// call all pacers' setStartTime() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillis);		// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
+					pacer[i].setStartTime(tempMillis);		// This makes sure that all pacers have the exact same start time. Using a call to myMillis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				}
 			}
 			break; 
@@ -723,7 +742,7 @@ void checkAllUserInput()
 				// call all pacers' setStartTime() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillis + ((serialInputInt*1000)*clockAdjustmentFactor));	// sets each pacers' milliseconds startTime to the current time + (the number of seconds the user sent * 1000 milliseconds * the clockAdjustmentFactor); tempMillis makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
+					pacer[i].setStartTime(tempMillis + ((serialInputInt*1000)*clockAdjustmentFactor));	// sets each pacers' milliseconds startTime to the current time + (the number of seconds the user sent * 1000 milliseconds * the clockAdjustmentFactor); tempMillis makes sure that all pacers have the exact same start time. Using a call to myMillis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				}
 			}
 			// If the user just sends "rd" to reset all pacers on a delay
@@ -732,7 +751,7 @@ void checkAllUserInput()
 				// call all pacers' setStartTimeToNowPlusDelay() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillis + resetDelayDefaultDelayTimeMillis*clockAdjustmentFactor);		// This makes sure that all pacers have the exact same start time. Using a call to millis() to calculate the pacer start time would result in slightly different start times for each pacer called
+					pacer[i].setStartTime(tempMillis + resetDelayDefaultDelayTimeMillis*clockAdjustmentFactor);		// This makes sure that all pacers have the exact same start time. Using a call to myMillis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				}
 			}
 			break; 
@@ -1011,10 +1030,12 @@ void colorChase(uint32_t c, uint8_t wait)
 	{
 		strip.setPixelColor(i, c); // set one pixel
 		strip.show();              // refresh strip display
+		microMilliSecondAddon();
 		delay(wait);               // hold image for a moment
 		strip.setPixelColor(i, 0); // erase pixel (but don't refresh yet)
 	}
 	strip.show(); // for last erased pixel
+	microMilliSecondAddon();
 }
 
 // An "ordered dither" fills every pixel in a sequence that looks
@@ -1041,6 +1062,7 @@ void dither(uint32_t c, uint8_t wait)
 		}
 		strip.setPixelColor(reverse, c);
 		strip.show();
+		microMilliSecondAddon();
 		delay(wait);
 	}
 	delay(250); // Hold image for 1/4 sec
@@ -1067,6 +1089,7 @@ void scanner(uint8_t r, uint8_t g, uint8_t b, uint8_t wait)
 		strip.setPixelColor(pos + 2, Color(r/4, g/4, b/4));
 
 		strip.show();
+		microMilliSecondAddon();
 		delay(wait);
 		// If we wanted to be sneaky we could erase just the tail end
 		// pixel, but it's much easier just to erase the whole thing
@@ -1100,6 +1123,7 @@ void rainbow(uint8_t wait)
 			strip.setPixelColor(i, Wheel( (i + j) % 255));
 		}  
 		strip.show();   // write all the pixels out
+		microMilliSecondAddon();
 		delay(wait);
 	}
 }
@@ -1121,6 +1145,7 @@ void rainbowCycle(uint8_t wait)
 			strip.setPixelColor(i, Wheel( ((i * 256 / strip.numPixels()) + j) % 256) );
 		}  
 		strip.show();   // write all the pixels out
+		microMilliSecondAddon();
 		delay(wait);
 	}
 }
@@ -1135,6 +1160,7 @@ void colorWipe(uint32_t c, uint8_t wait)
 	{
 		strip.setPixelColor(i, c);
 		strip.show();
+		microMilliSecondAddon();
 		delay(wait);
 	}
 	setSerialInput();

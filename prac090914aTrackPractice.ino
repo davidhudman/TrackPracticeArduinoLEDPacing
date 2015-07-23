@@ -354,7 +354,7 @@ void loop()
 
 void callback()
 {
-	interruptMillis+=interruptFreqMicro;
+	interruptMillis+=(interruptFreqMicro/1000);
 }
 
 void microMilliSecondAddon()

@@ -276,18 +276,8 @@ double newSecondsPerLap; // holds the double (floating point) time that will bec
 String stringSepFlag = ",";	// holds the string that separates the values in the speed change function
 bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need to figure out which pacer is going to change its speed
 
-// Set the first variable to the NUMBER of pixels. 32 = 32 pixels in a row
-// Parameter 1 = number of pixels in strip
-// Parameter 2 = Arduino pin number (most are valid)
-// Parameter 3 = pixel type flags, add together as needed:
-//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
-//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
-//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
-//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_RGB + NEO_KHZ800); // Initialization of the Adafruit NeoPixel strip
 double clockAdjustmentFactor = 1;		// (originally set at .5) Use with caution. Different numLEDs require different adjustments. Since the Adafruit_NeoPixel library creates timing problems for Arduino, this factor will be used to adjust all user input and output, so the user can continue to use numbers they would want. This is a temporary workaround until the timing issues created by the library are resolved.
-long milliSecondAddon = 0;
-double microSecondAddon = 0;
 long interruptMillis = 0;
 long interruptFreqMicro = 10000;		// The number of microseconds that will pass before the interrupt fires (example: 10,000 microseconds = .01 seconds)
 //Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
@@ -304,37 +294,15 @@ void setup()
 	strip.begin();				// Start up the LED strip
 
 	strip.show();				// Update the strip, to start they are all 'off'
-	microMilliSecondAddon();
 
 	Serial.flush();
 	Serial1.flush();
 
 	Timer1.initialize(10000);         // initialize timer1, and set a .01 second (10,000 micro second) period
 	Timer1.attachInterrupt(callback);  // attaches callback() as a timer overflow interrupt
-
-	//#if F_CPU == 16000000L
-	//	#define clock_prescale_set(clock_div_1);
-	//	#define TCCR1  = _BV(PWM1A) | _BV(CS13) | _BV(CS11) | _BV(CS10); // 1:1024 prescale
-	//	#define OCR1C  = F_CPU / 1024 / 100 - 1;
-	//#else
-	//	#define TCCR1  = _BV(PWM1A) | _BV(CS13) | _BV(CS11); // 1:512 prescale
-	//	#define OCR1C  = F_CPU / 512 / 100 - 1;
-	//#endif
-	//	#define GTCCR  = 0;          // No PWM out
-	//	#define TIMSK |= _BV(TOIE1); // Enable overflow interrupt
 }
 
-//#define ISR(TIMER1_OVF_vect) {
-//	uint8_t  w, i, n, s, v, r, g, b;
-//	uint16_t v1, s1;
-//	
-//	if (true){
-//	Serial.print("Hello");
-//	}
-//}
-
 // If necessary, function declarations should be here - Declaring functions whose functions will be defined later
-
 void loop()
 {
 	setSerialInput();
@@ -357,19 +325,8 @@ void callback()
 	interruptMillis+=(interruptFreqMicro/1000);
 }
 
-void microMilliSecondAddon()
-{
-	//microSecondAddon += strip.numPixels() * 20.09;		// 20.06 was too slow, 20.25 too fast; 20.12 might be a hair to fast (<1 sec per 20min) increasing the variable will make Arduino perceive time faster than it is actually happening (lights go faster)
-	//while (microSecondAddon >= 1000)
-	//{
-	//	 milliSecondAddon++;
-	//	 microSecondAddon -= 1000;
-	//}
-}
-
 long myMillis()
 {
-	// return millis() + milliSecondAddon;
 	return interruptMillis;
 }
 
@@ -588,7 +545,6 @@ void setPixelColorBasedOnTime()
 	delayedPacerTrafficLightCountdown();
 
 	strip.show();              // refresh strip display
-	microMilliSecondAddon();
 
 }
 
@@ -1062,12 +1018,10 @@ void colorChase(uint32_t c, uint8_t wait)
 	{
 		strip.setPixelColor(i, c); // set one pixel
 		strip.show();              // refresh strip display
-		microMilliSecondAddon();
 		delay(wait);               // hold image for a moment
 		strip.setPixelColor(i, 0); // erase pixel (but don't refresh yet)
 	}
 	strip.show(); // for last erased pixel
-	microMilliSecondAddon();
 }
 
 // An "ordered dither" fills every pixel in a sequence that looks
@@ -1094,7 +1048,7 @@ void dither(uint32_t c, uint8_t wait)
 		}
 		strip.setPixelColor(reverse, c);
 		strip.show();
-		microMilliSecondAddon();
+		
 		delay(wait);
 	}
 	delay(250); // Hold image for 1/4 sec
@@ -1121,7 +1075,7 @@ void scanner(uint8_t r, uint8_t g, uint8_t b, uint8_t wait)
 		strip.setPixelColor(pos + 2, Color(r/4, g/4, b/4));
 
 		strip.show();
-		microMilliSecondAddon();
+		
 		delay(wait);
 		// If we wanted to be sneaky we could erase just the tail end
 		// pixel, but it's much easier just to erase the whole thing
@@ -1155,7 +1109,7 @@ void rainbow(uint8_t wait)
 			strip.setPixelColor(i, Wheel( (i + j) % 255));
 		}  
 		strip.show();   // write all the pixels out
-		microMilliSecondAddon();
+		
 		delay(wait);
 	}
 }
@@ -1177,7 +1131,7 @@ void rainbowCycle(uint8_t wait)
 			strip.setPixelColor(i, Wheel( ((i * 256 / strip.numPixels()) + j) % 256) );
 		}  
 		strip.show();   // write all the pixels out
-		microMilliSecondAddon();
+		
 		delay(wait);
 	}
 }
@@ -1192,7 +1146,7 @@ void colorWipe(uint32_t c, uint8_t wait)
 	{
 		strip.setPixelColor(i, c);
 		strip.show();
-		microMilliSecondAddon();
+		
 		delay(wait);
 	}
 	setSerialInput();

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+var text;
+
+text = createDiv("Sensor reading:");
+text.position(10,10);
+
+
+$(document).ready(function(){
+    $("button").click(function(){
+        $(this).hide();
+		alert("Handler for .click() called.");
+		//var mySensorReading = loadStrings("/input");
+    });
+});
+
+/*function showData(result) {
+	// when the server returns, show the result in the div:
+	// text.html("Sensor reading:" + result);
+	if (result < 400)
+	{
+		text.html("Sick:" + result);
+		document.body.style.backgroundColor = "green";
+	}
+	else if (result > 800)
+	{
+		text.html("Healthy:" + result);
+		document.body.style.backgroundColor = "red";
+	}
+	else
+	{
+		text.html("OK:" + result);
+		document.body.style.backgroundColor = "white";
+	}
+	text.position(result, 10);
+	// make another HTTP call:
+	var sensorReading = loadStrings("/data", showData);
+}*/
+
+</script>
+</head>
+<body>
+
+<button>If you click on me, I will disappear (or trigger that alert).</button>
+<button>Click me away!</button>
+<button>Click me too!</button>
+
+</body>
+</html>

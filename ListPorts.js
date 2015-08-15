@@ -7,7 +7,7 @@ var app = new servi(false); // servi instance
 app.port(8080);             // port number to run the server on
  
 // configure the server's behavior:
-app.serveFiles("public");     // serve static HTML from public folder..
+app.serveFiles("public");     // serve static HTML from public folder...
 app.route('/data', sendData); // route requests for /data to sendData()
 app.route('/input', sendSerialInput); // route requests for /input to sendSerialInput()
 // now that everything is configured, start the server:

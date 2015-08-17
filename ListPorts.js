@@ -34,8 +34,10 @@ myPort.on('input', sendSerialInput);
    // myPort.write("5 l30 ");			// Then use userInput down here to write it to the port to send it to Arduino
 }
  
-function sendSerialInput() {
-	myPort.write("1 l30 ");
+function sendSerialInput(request) {
+	myPort.write(request.params.comment);
+	console.log("I am the best looking.");
+	console.log(request.params.comment);
 }
 
 function saveLatestData(data) {

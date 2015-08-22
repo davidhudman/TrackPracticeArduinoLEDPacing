@@ -7,7 +7,7 @@
 <script>
 /*var text;
 
-text = createDiv("Sensor reading:");
+text = createDiv("Sensor reading:"); 
 text.position(10,10);*/
 
 $(document).ready(function(){
@@ -41,22 +41,7 @@ document.getElementById('textboxid').style.fontSize="40pt";
 
 /*function showData(result) {
 	// when the server returns, show the result in the div:
-	// text.html("Sensor reading:" + result);
-	if (result < 400)
-	{
-		text.html("Sick:" + result);
-		document.body.style.backgroundColor = "green";
-	}
-	else if (result > 800)
-	{
-		text.html("Healthy:" + result);
-		document.body.style.backgroundColor = "red";
-	}
-	else
-	{
-		text.html("OK:" + result);
-		document.body.style.backgroundColor = "white";
-	}
+	text.html("Sensor reading:" + result);
 	text.position(result, 10);
 	// make another HTTP call:
 	var sensorReading = loadStrings("/data", showData);

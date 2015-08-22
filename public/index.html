@@ -36,8 +36,18 @@ $(document).ready(function(){
     });
 });
 
-document.getElementById('textboxid').style.height="200px";
-document.getElementById('textboxid').style.fontSize="40pt";
+$(document).ready(function(){
+    $("#textboxid").click(function(){
+        $(this).val("");
+		$("p").text("textbox was clicked");
+    });
+});
+
+$(document).ready(function(){
+	document.getElementById('textboxid').style.height="60px";
+	document.getElementById('textboxid').style.width="150px";
+	document.getElementById('textboxid').style.fontSize="40pt";
+});
 
 /*function showData(result) {
 	// when the server returns, show the result in the div:
@@ -50,15 +60,44 @@ document.getElementById('textboxid').style.fontSize="40pt";
 </head>
 <body>
 
-<div>Name: <input type="text" name="user"></div>
-<h3 class="test">If you click on me, I will disappear.</h3>
-<button>Click me away!</button>
 <form method="GET" action="/input">
 	<!--<input type="text" name="name" value="Your Name">-->
-	<input id="textboxid" type="text" name="comment" value="Comments">
+	<input id="textboxid" type="text" name="comment" value="Your Input">
 	<input type="submit" name="submit" value="Submit">
 </form>
 <p>Click me too!</p>
+<div>
+<ul>
+<li>"c" - <b>C</b>lear all pacers that are currently running</li>
+
+<li>"r" - <b>R</b>eset all pacers that are currently running and start them immediately</li>
+
+<li>"rd" - (<b>R</b>eset <b>D</b>elay) reset all pacers that are currently running but wait a predetermined amount of time before starting them</li>
+
+<li>"b" - (<b>B</b>ackwards) set all pacers to run the opposite direction that the first pacer is currently running (including the first pacer)</li>
+
+<li>"(any floating point or whole number)"; Example: "75"; sets a new pacer to run at x seconds per lap, which in this case is 75 seconds</li>
+
+<li>"c(any whole number)": Example: "c2"; <b>C</b>lears a currently running pacer at a certain index off the track; this certain index is 2, so it clears pacer 2;*</li>
+
+<li>"r(any whole number)": Example: "r1"; <b>R</b>esets the pacer at a certain index to run immediately; this certain index is 1, so it resets pacer 1*</li>
+
+<li>"rd(any whole number)": Example: "rd10"; <b>R</b>esets all pacers to run following the <b>D</b>elay defined by the number on the end of the text; In this case, the number on the end of the text is 10, so all currently running pacers will be immediately removed from the track and will start following a 10 second delay</li>
+
+<li>"rdp(any whole number)": Example: "rdp4"; <b>R</b>esets following a predetermined <b>D</b>elay a <b>P</b>acer at a certain index to run; In this case, the index is 4, so pacer 4 will be immediately removed from the track and will start following a predetermined delay*</li>
+
+<li>"b(any whole number)": Example: "b3"; set a pacer at a specific index to run the opposite direction (<b>B</b>ackwards) that the it is currently running; this certain index is 3, so it will make pacer 3 run in the opposite direction*;</li>
+
+<li>"l(any whole number)": Example: "l45"; set the number of <b>L</b>ights that are on the track based on the whole number on the end of the text; In this case, the number of lights will be set to 45</li>
+
+<li>*(keep in mind that the index of the first pacer is 0)</li>
+</ul>
+</div>
+
+<div><br /><br /><br /><h2>Stuff for testing:</h2></div>
+<div>Name: <input type="text" name="user"></div>
+<h3 class="test">If you click on me, I will disappear.</h3>
+<button>Click me away!</button>
 
 </body>
 </html>

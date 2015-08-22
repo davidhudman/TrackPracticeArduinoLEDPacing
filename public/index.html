@@ -36,6 +36,9 @@ $(document).ready(function(){
     });
 });
 
+document.getElementById('textboxid').style.height="200px";
+document.getElementById('textboxid').style.fontSize="40pt";
+
 /*function showData(result) {
 	// when the server returns, show the result in the div:
 	// text.html("Sensor reading:" + result);
@@ -67,7 +70,7 @@ $(document).ready(function(){
 <button>Click me away!</button>
 <form method="GET" action="/input">
 	<!--<input type="text" name="name" value="Your Name">-->
-	<input type="text" name="comment" value="Comments">
+	<input id="textboxid" type="text" name="comment" value="Comments">
 	<input type="submit" name="submit" value="Submit">
 </form>
 <p>Click me too!</p>

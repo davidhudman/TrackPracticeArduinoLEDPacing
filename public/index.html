@@ -46,7 +46,7 @@ $(document).ready(function(){
 // Listens for button click to toggle the command section
 $(document).ready(function(){
     $("#commandToggle").click(function(){
-        $("#commandTable").toggle()
+        $("#commandTable").slideToggle("fast");
 		$("p").text("commandToggle was clicked");
     });
 });
@@ -54,7 +54,7 @@ $(document).ready(function(){
 // Listens for button click to toggle the extras section
 $(document).ready(function(){
     $("#extrasToggle").click(function(){
-        $("#extrasDiv").toggle()
+        $("#extrasDiv").slideToggle("fast");
 		$("p").text("extrasToggle was clicked");
     });
 });
@@ -81,9 +81,9 @@ $(document).ready(function(){
 	document.getElementById('textboxid').style.width="250px";
 	document.getElementById('textboxid').style.fontSize="40pt";
 	$('table').attr('border', '4');
-	$('#commandTable').hide();
-	$('#extrasDiv').hide();
-	$('#partytextboxid').hide();
+	$('#commandTable').hide().css("background-color", "#FFB8B8");
+	$('#extrasDiv').hide().css("background-color", "#FFB8B8");
+	$("body").css("background-color", "#4D4D4D");
 });
 
 /*var text;
@@ -102,15 +102,48 @@ text.position(10,10);*/
 </head>
 <body>
 
-<form method="GET" action="/input">
-	<!--<input type="text" name="name" value="Your Name">-->
-	<input id="partytextboxid" type="text" name="comment" value="track">
-	<br /><br />
-	<input id="partysubmit" type="submit" name="submit" value="Start Party Mode">
-</form>
+<table>
+<tr>
+	<td>
+		<form method="GET" action="/input">
+			<input id="resetDelayTextboxID" style="display:none" type="text" name="comment" value="rd">
+			<input id="resetDelaySubmit" type="submit" name="submit" value="Reset Delay">
+		</form>
+	</td>
+
+	<td>
+		<form method="GET" action="/input">
+			<input id="resetTextboxID" style="display:none" type="text" name="comment" value="r ">
+			<input id="resetSubmit" type="submit" name="submit" value="Reset">
+		</form>
+	</td>
+
+	<td>
+		<form method="GET" action="/input">
+			<input id="backwardsTextboxID" style="display:none" type="text" name="comment" value="b">
+			<input id="backwardsSubmit" type="submit" name="submit" value="Backwards">
+		</form>
+	</td>
+
+	<td>
+		<form method="GET" action="/input">
+			<input id="clearTextboxID" style="display:none" type="text" name="comment" value="c">
+			<input id="clearSubmit" type="submit" name="submit" value="Clear Pacers">
+		</form>
+	</td>
+
+	<td>
+		<form method="GET" action="/input">
+			<input id="partytextboxid" style="display:none" type="text" name="comment" value="track">
+			<input id="partysubmit" type="submit" name="submit" value="Start Party Mode">
+		</form>
+	</td>
+</tr>
+</table>
+
+<br /><br />
 
 <form method="GET" action="/input">
-	<!--<input type="text" name="name" value="Your Name">-->
 	<input id="textboxid" type="text" name="comment" value="Your Input">
 	<br /><br />
 	<input type="submit" name="submit" value="Submit">

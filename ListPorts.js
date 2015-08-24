@@ -10,6 +10,7 @@ app.port(8080);             // port number to run the server on;
 app.serveFiles("public");     // serve static HTML from public folder
 app.route('/data', sendData); // route requests for /data to sendData()
 app.route('/input', sendSerialInput); // route requests for /input to sendSerialInput()
+// app.route('/party', sendSerialInput); // route requests for /party to sendSerialInput_Party()
 // now that everything is configured, start the server:
 app.start();
 
@@ -27,7 +28,7 @@ myPort.on('open', showPortOpen);
 myPort.on('data', saveLatestData);
 myPort.on('close', showPortClose);
 myPort.on('error', showError);
-myPort.on('input', sendSerialInput);
+// myPort.on('input', sendSerialInput);
  
  function showPortOpen() {			// maybe add a parameter like userInput
    console.log('port open. Data rate: ' + myPort.options.baudRate);

@@ -83,12 +83,15 @@ $(document).ready(function(){
 	$('table').attr('border', '4');
 	$('#commandTable').hide().css("background-color", "#00FF00");
 	$('#extrasDiv').hide().css("background-color", "#FFFF33");
-	$("body").css("background-color", "#666666");
+	$("body").css("background-color", "#F2F2F2");
 	$("button").css("display", "inline-block");
-	$(".submitButton, #TextboxSubmit").css("min-width", "120px");
-	$(".submitButton, #TextboxSubmit").css("height", "50px");
+	$(".submitButton, #TextboxSubmit, #commandToggle").css("min-width", "120px");
+	$(".submitButton, #TextboxSubmit, #commandToggle").css("height", "50px");
 	$(".submitButton").css("background-color", "#FF1919");
 	$(".submitButton, #TextboxSubmit").css("font-weight", "bold");
+	$("#TextboxSubmit").css("background-color", "#4286F5");
+	$("#extrasToggle").css("background-color", "#FFFF33");
+	$("#commandToggle").css("background-color", "#00FF00");
 });
 
 /*var text;
@@ -155,7 +158,7 @@ text.position(10,10);*/
 <br /><br />
 
 <form method="GET" action="/input">
-	<input id="textboxid" type="text" name="comment" value="Your Input">
+	<input id="textboxid" autocomplete="off" type="text" name="comment" value="Your Input">
 	<br /><br />
 	<input id="TextboxSubmit" type="submit" name="submit" value="Submit">
 </form>
@@ -195,7 +198,6 @@ text.position(10,10);*/
 <br /><br /><br />
 
 <button id="extrasToggle">Show/hide Extras</button>
-
 <div id="extrasDiv">
 	<h2>Stuff for testing:</h2>
 	Name: <input type="text" name="user">

@@ -36,8 +36,8 @@ myPort.on('input', sendSerialInput);
  
 function sendSerialInput(request) {
 	myPort.write(request.params.comment);
-	console.log("I am the best looking.");
-	console.log(request.params.comment);
+	// console.log("I am the best looking.");
+	console.log("Input: "+request.params.comment);
 }
 
 function saveLatestData(data) {

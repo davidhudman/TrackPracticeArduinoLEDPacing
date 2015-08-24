@@ -81,9 +81,14 @@ $(document).ready(function(){
 	document.getElementById('textboxid').style.width="250px";
 	document.getElementById('textboxid').style.fontSize="40pt";
 	$('table').attr('border', '4');
-	$('#commandTable').hide().css("background-color", "#FFB8B8");
-	$('#extrasDiv').hide().css("background-color", "#FFB8B8");
-	$("body").css("background-color", "#4D4D4D");
+	$('#commandTable').hide().css("background-color", "#00FF00");
+	$('#extrasDiv').hide().css("background-color", "#FFFF33");
+	$("body").css("background-color", "#666666");
+	$("button").css("display", "inline-block");
+	$(".submitButton, #TextboxSubmit").css("min-width", "120px");
+	$(".submitButton, #TextboxSubmit").css("height", "50px");
+	$(".submitButton").css("background-color", "#FF1919");
+	$(".submitButton, #TextboxSubmit").css("font-weight", "bold");
 });
 
 /*var text;
@@ -107,35 +112,41 @@ text.position(10,10);*/
 	<td>
 		<form method="GET" action="/input">
 			<input id="resetDelayTextboxID" style="display:none" type="text" name="comment" value="rd">
-			<input id="resetDelaySubmit" type="submit" name="submit" value="Reset Delay">
+			<input id="resetDelaySubmit" class="submitButton" type="submit" name="submit" value="Reset Delay">
 		</form>
 	</td>
+	<!--<td>
+		<form action="/input" method="get">
+			<input type="submit" value="rd" 
+		name="Reset Delay" id="resetDelaySubmit" />
+		</form>
+	</td>-->
 
 	<td>
 		<form method="GET" action="/input">
 			<input id="resetTextboxID" style="display:none" type="text" name="comment" value="r ">
-			<input id="resetSubmit" type="submit" name="submit" value="Reset">
+			<input id="resetSubmit" class="submitButton" type="submit" name="submit" value="Reset">
 		</form>
 	</td>
 
 	<td>
 		<form method="GET" action="/input">
 			<input id="backwardsTextboxID" style="display:none" type="text" name="comment" value="b">
-			<input id="backwardsSubmit" type="submit" name="submit" value="Backwards">
+			<input id="backwardsSubmit" class="submitButton" type="submit" name="submit" value="Backwards">
 		</form>
 	</td>
 
 	<td>
 		<form method="GET" action="/input">
 			<input id="clearTextboxID" style="display:none" type="text" name="comment" value="c">
-			<input id="clearSubmit" type="submit" name="submit" value="Clear Pacers">
+			<input id="clearSubmit" class="submitButton" type="submit" name="submit" value="Clear Pacers">
 		</form>
 	</td>
 
 	<td>
 		<form method="GET" action="/input">
 			<input id="partytextboxid" style="display:none" type="text" name="comment" value="track">
-			<input id="partysubmit" type="submit" name="submit" value="Start Party Mode">
+			<input id="partysubmit" class="submitButton" type="submit" name="submit" value="Start Party Mode">
 		</form>
 	</td>
 </tr>
@@ -146,7 +157,7 @@ text.position(10,10);*/
 <form method="GET" action="/input">
 	<input id="textboxid" type="text" name="comment" value="Your Input">
 	<br /><br />
-	<input type="submit" name="submit" value="Submit">
+	<input id="TextboxSubmit" type="submit" name="submit" value="Submit">
 </form>
 
 <p>Click me too!</p>

@@ -4,7 +4,7 @@ var serialport = require('serialport');// include the library
 var servi = require('servi');
 
 var app = new servi(false); // servi instance
-app.port(8080);             // port number to run the server on
+app.port(8080);             // port number to run the server on;
  
 // configure the server's behavior:
 app.serveFiles("public");     // serve static HTML from public folder

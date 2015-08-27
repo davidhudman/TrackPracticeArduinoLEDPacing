@@ -1,4 +1,4 @@
-var latestData = 0;
+var latestData = "...";
 
 var serialport = require('serialport');// include the library
 var servi = require('servi');

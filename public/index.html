@@ -7,6 +7,9 @@
 <script>
 
 // for testing purposes: hides the h4 element when the testButton is clicked
+
+var counter = 0; 
+
 $(document).ready(function(){
     $("#testButton").click(function(){
         $("h4").toggle();
@@ -75,6 +78,15 @@ $(document).ready(function(){
     });
 });
 
+function getLatestData() {
+	$.get("/data", function(data){
+		$("p").text(data);
+	});
+	// $("p").text(counter++);
+}
+
+
+
 // Everything done when the page initially loads
 $(document).ready(function(){
 	document.getElementById('textboxid').style.height="60px";
@@ -92,6 +104,8 @@ $(document).ready(function(){
 	$("#TextboxSubmit").css("background-color", "#4286F5");
 	$("#extrasToggle").css("background-color", "#FFFF33");
 	$("#commandToggle").css("background-color", "#00FF00");
+	
+	var myVar=setInterval(function(){getLatestData()},1000);
 });
 
 /*var text;
@@ -101,8 +115,8 @@ text.position(10,10);*/
 
 /*function showData(result) {
 	// when the server returns, show the result in the div:
-	text.html("Sensor reading:" + result);
-	text.position(result, 10);
+	$("p").text("Sensor reading:" + result);
+	// $("p").position(result, 10);
 	// make another HTTP call:
 	var sensorReading = loadStrings("/data", showData);
 }*/

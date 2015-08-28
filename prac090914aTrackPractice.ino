@@ -456,7 +456,7 @@ void getPartySerialFeedback()
 		serialFeedbackIterator++;
 	}
 
-	if (serial1FeedbackIterator >= partySerialCountTo)				// bluetooth mobile feedback
+	if (serial1FeedbackIterator >= partySerialCountTo)				// bluetooth mobile feedback.
 	{
 		for (int i=0; i < PARTY_FLAG_SIZE; i++)			// Bug: potential bug because this .length may just return the length of the string, not the array; If it does, you can use something like sizeOf(partyFlags) / sizeOf(partyFlags[0]
 		{

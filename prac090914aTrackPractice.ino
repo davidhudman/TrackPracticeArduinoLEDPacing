@@ -271,6 +271,8 @@ const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "pa
 const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
 String stringSepFlag = ",";	// holds the string that separates the values in the speed change function
 String serialStringInput;			// Holds the raw, unformatted serial input from user
+String printThis = " ";
+String stringHolder = " ";
 
 //***********************************************
 // Declarations: All variables predefined
@@ -436,16 +438,22 @@ void getPartySerialFeedback()
 		{
 			if (i == partyInt)
 			{
-				Serial.print("x");						// "x" marks the party function that is currently running
-				Serial.print(i);
-				Serial.print(": ");
-				Serial.print(partyFlags[i]);
+				printThis = " ";
+				printThis.concat("x");				// "x" marks the party function that is currently running
+				printThis.concat(i);
+				printThis.concat(": ");
+				printThis.concat(partyFlags[i]);
+
+				Serial.println(printThis);
 			}
 			else
 			{
-				Serial.print(i);
-				Serial.print(": ");
-				Serial.print(partyFlags[i]);
+				printThis = " ";
+				printThis.concat(i);
+				printThis.concat(": ");
+				printThis.concat(partyFlags[i]);
+
+				Serial.println(printThis);
 			}
 		}
 		
@@ -462,16 +470,22 @@ void getPartySerialFeedback()
 		{
 			if (i == partyInt)
 			{
-				Serial1.print("x");						// "x" marks the party function that is currently running
-				Serial1.print(i);
-				Serial1.print(": ");
-				Serial1.print(partyFlags[i]);
+				printThis = " ";
+				printThis.concat("x");				// "x" marks the party function that is currently running
+				printThis.concat(i);
+				printThis.concat(": ");
+				printThis.concat(partyFlags[i]);
+
+				Serial1.println(printThis);
 			}
 			else
 			{
-				Serial1.print(i);
-				Serial1.print(": ");
-				Serial1.print(partyFlags[i]);
+				printThis = " ";
+				printThis.concat(i);
+				printThis.concat(": ");
+				printThis.concat(partyFlags[i]);
+
+				Serial1.println(printThis);
 			}
 		}
 
@@ -488,22 +502,30 @@ void getSerialFeedback()
 {
 	if (serialFeedbackIterator >= serialCountTo)				// desktop direct wired connection feedback
 	{
-		Serial.print("\ninputPacer = ");
-		Serial.print(getLowestUnusedPacerIndex());
-		Serial.print(" ");
-		Serial.print(myMillis());
+		printThis = " ";
+		printThis.concat("\ninputPacer = ");
+		printThis.concat(getLowestUnusedPacerIndex());
+		printThis.concat(" ");
+		printThis.concat((myMillis()/60000)%(60));
+		printThis.concat(":");
+		printThis.concat((myMillis()/1000)%(60));
+		printThis.concat(".");
+		printThis.concat(myMillis()%1000);
+
 		for (int i=0; i < (getHighestActivePacerIndex()+1); i++)
 		{
 			if (pacer[i].getSecondsPerLap() > 0)
 			{
-				Serial.print(" Lap[");
-				Serial.print(i);
-				Serial.print("] = ");
-				Serial.print(pacer[i].getSecondsPerLap()/clockAdjustmentFactor);
+				printThis.concat(" Lap[");
+				printThis.concat(i);
+				printThis.concat("] = ");
+				printThis.concat((int)(pacer[i].getSecondsPerLap()/clockAdjustmentFactor));
 			}
 		}
-		Serial.print(" LEDs ");
-		Serial.print(pacer[0].getTotalPacingPanels());
+		printThis.concat(" LEDs ");
+		printThis.concat(pacer[0].getTotalPacingPanels());
+
+		Serial.println(printThis);
 		
 		serialFeedbackIterator = 0;
 	}
@@ -514,20 +536,23 @@ void getSerialFeedback()
 
 	if (serial1FeedbackIterator >= serialCountTo)				// bluetooth mobile feedback
 	{
-		Serial1.print("\ninputPacer = ");
-		Serial1.print(getLowestUnusedPacerIndex());
+		printThis = " ";
+		printThis.concat("\ninputPacer = ");
+		printThis.concat(getLowestUnusedPacerIndex());
 		for (int i=0; i < (getHighestActivePacerIndex()+1); i++)
 		{
 			if (pacer[i].getSecondsPerLap() > 0)
 			{
-				Serial1.print(" Lap[");
-				Serial1.print(i);
-				Serial1.print("] = ");
-				Serial1.print(pacer[i].getSecondsPerLap()/clockAdjustmentFactor);
+				printThis.concat(" Lap[");
+				printThis.concat(i);
+				printThis.concat("] = ");
+				printThis.concat((int)(pacer[i].getSecondsPerLap()/clockAdjustmentFactor));
 			}
 		}
-		Serial1.print("\n LEDs ");
-		Serial1.print(pacer[0].getTotalPacingPanels());
+		printThis.concat(" LEDs ");
+		printThis.concat(pacer[0].getTotalPacingPanels());
+
+		Serial1.println(printThis);
 
 		serial1FeedbackIterator = 0;
 	}

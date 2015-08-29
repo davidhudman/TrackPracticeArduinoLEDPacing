@@ -179,6 +179,62 @@ public:
 	{
 		return shade;
 	};
+	//uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)}; 
+	// white, red, yellow, green, cyan, blue, magenta
+	int getColorInt()
+	{
+		uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)}; 
+		// white, red, yellow, green, cyan, blue, magenta
+		int i=0;
+		while (shade != color[i])
+		{
+			i++;
+		}
+		return i;
+	}
+	String getColorWord()
+	{
+
+		switch (getColorInt())
+		{
+		case 0:
+			return "white";
+			break;
+		case 1:
+			return "green";		// actually red on better strip
+			break;
+		case 2:
+			return "yellow";
+			break;
+		case 3:
+			return "red";		// actually green on better strip
+			break;
+		case 4:
+			return "magenta";		// actually cyan on better strip
+			break;
+		case 5:
+			return "blue";
+			break;
+		case 6:
+			return "cyan";	// actually magenta on better strip
+			break;
+		default:
+			return "?";
+			break;
+		}
+	}
+	void setColorInt(int i)
+	{
+		if (i>=0 && i<7)
+		{
+			uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)}; 
+			// white, red, yellow, green, cyan, blue, magenta
+
+			shade = color[i];
+		}
+
+
+	}
 	void setShade(uint32_t new_Shade)
 	{
 		shade = new_Shade;
@@ -266,8 +322,8 @@ Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLE
 //***********************************************
 // Declarations: Related to strings
 //***********************************************
-const int TRACK_FLAG_SIZE = 11, PARTY_FLAG_SIZE = 11;
-const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip", "a"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
+const int TRACK_FLAG_SIZE = 12, PARTY_FLAG_SIZE = 11;
+const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip", "a", "pct"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
 const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
 String stringSepFlag = ",";	// holds the string that separates the values in the speed change function
 String serialStringInput;			// Holds the raw, unformatted serial input from user
@@ -280,7 +336,7 @@ String stringHolder = " ";
 double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
 long resetDelayDefaultDelayTimeMillis = 10000;		// the default delay time when resetting pacers on a delay
 int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0;
-int serialCountTo = 2000, trafficLightCountTo = 100, partySerialCountTo = 5;
+int serialCountTo = 50, trafficLightCountTo = 100, partySerialCountTo = 5;
 int tempLowestDelayedPacerIndex = -1;
 
 bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need to figure out which pacer is going to change its speed
@@ -502,28 +558,42 @@ void getSerialFeedback()
 {
 	if (serialFeedbackIterator >= serialCountTo)				// desktop direct wired connection feedback
 	{
+		// This is going to need to be JSON output like "glossary": { "title": "example glossary", "GlossDiv": {
 		printThis = " ";
-		printThis.concat("\ninputPacer = ");
+		printThis.concat("{ ");
+		printThis.concat("\"inputPcr\": \"");
 		printThis.concat(getLowestUnusedPacerIndex());
-		printThis.concat(" ");
+		printThis.concat("\", ");
+		printThis.concat("\"Time\": {\"totalMillis\": ");
+		printThis.concat(myMillis());
+		printThis.concat("\", \"hr\": \"");
+		printThis.concat((myMillis()/3600000));
+		printThis.concat("\", \"min\": \"");
 		printThis.concat((myMillis()/60000)%(60));
-		printThis.concat(":");
+		printThis.concat("\", \"sec\": \"");
 		printThis.concat((myMillis()/1000)%(60));
-		printThis.concat(".");
+		printThis.concat("\", \"millis\": \"");
 		printThis.concat(myMillis()%1000);
+		printThis.concat("\"}, ");
+		printThis.concat("\"LEDs\": \"");
+		printThis.concat(pacer[0].getTotalPacingPanels());
+		printThis.concat("\", ");
 
 		for (int i=0; i < (getHighestActivePacerIndex()+1); i++)
 		{
 			if (pacer[i].getSecondsPerLap() > 0)
 			{
-				printThis.concat(" Lap[");
+				printThis.concat("\"Pcr\": {\"i\": \"");
 				printThis.concat(i);
-				printThis.concat("] = ");
+				printThis.concat("\", \"LapSecs\": \"");
 				printThis.concat((int)(pacer[i].getSecondsPerLap()/clockAdjustmentFactor));
+				printThis.concat("\", \"color\": \"");
+				printThis.concat(pacer[i].getColorWord());
+				printThis.concat("\"}, ");
 			}
 		}
-		printThis.concat(" LEDs ");
-		printThis.concat(pacer[0].getTotalPacingPanels());
+
+		printThis.concat("}");
 
 		Serial.println(printThis);
 		
@@ -626,6 +696,7 @@ void checkAllUserInput()
 
 				serialInputDouble = atof(serialStringInput.substring(serialStringInput.indexOf(stringSepFlag)+1).c_str());
 			}
+
 		}
 	}
 	else
@@ -817,6 +888,13 @@ void checkAllUserInput()
 		case 10: // "a" clockAdjustmentFactor - this is weird because it expects "a5" to set clockAdjustmentFactor to .5 and "a10" to set clockAdjustmentFactor to 1.0
 			serialInputDouble = (double) serialInputInt / 10;
 			clockAdjustmentFactor = serialInputDouble;
+			break;
+		case 11: // "pct" pacerColorTo - example "pct2,0" changes pacer with index 2 to the color index 0 which is white
+			if (serialStringInput.length() > 1 && serialInputInt > -1 && serialInputInt < 7)
+			{
+				int intHolder = (int) serialInputDouble;
+				pacer[serialInputInt].setColorInt(intHolder);
+			}
 			break;
 		default:
 			break;

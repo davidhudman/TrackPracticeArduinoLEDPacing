@@ -586,7 +586,17 @@ void getSerialFeedback()
 				printThis.concat("\"Pcr\": {\"i\": \"");
 				printThis.concat(i);
 				printThis.concat("\", \"LapSecs\": \"");
+
+				// round the float
+				float b = (pacer[i].getSecondsPerLap()/clockAdjustmentFactor) * 100;
+				while (b >= 100)
+				{
+					b -= 100;
+				}
 				printThis.concat((int)(pacer[i].getSecondsPerLap()/clockAdjustmentFactor));
+				printThis.concat(".");
+				printThis.concat((int)(b));
+
 				printThis.concat("\", \"color\": \"");
 				printThis.concat(pacer[i].getColorWord());
 				printThis.concat("\"}, ");

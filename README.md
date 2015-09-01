@@ -46,7 +46,7 @@ Commands:
 | "rdp(any whole number)"          | **R**esets following a predetermined **D**elay a **P**acer at a certain index to run; In this case, the index is 4, so pacer 4 will be immediately removed from the track and will start following a predetermined delay |    "rdp4" |
 | "b(any whole number)"          | set a pacer at a specific index to run the opposite direction (**B**ackwards) that the it is currently running; this certain index is 3, so it will make pacer 3 run in the opposite direction | "b3" |
 | "l(any whole number)"          | set the number of **L**ights that are on the track based on the whole number on the end of the text; In this case, the number of lights will be set to 45 | "l45" |
-| "spt(any whole number)"         | Set the **S**peed of the **P**acer **T**o whatever speed that you tell it to; so the example would set the pacer at index 1 to 60.5 seconds per lap, whether it was currently running or not. If it was currently running, it would be as if it just sped up or slowed down to the new pace | "spt1,60.5" |
+| "spt(any floating point number)"         | Set the **S**peed of the **P**acer **T**o whatever speed that you tell it to; so the example would set the pacer at index 1 to 60.5 seconds per lap, whether it was currently running or not. If it was currently running, it would be as if it just sped up or slowed down to the new pace | "spt1,60.5" |
 | "a(any whole number)"          | set clockAdjustmentFactor to the number of deci-seconds that you give it (so 10 in the example will be setting it to 1.0). This is basically not used anymore and is only necessary if you have timing issues. | "a10" |
 | "pct(any whole number)"         | Set the index of your **P**acer **C**olor **T**o whatever color corresponds to the integer that was sent on the end. In the example, the pacer index is 2 and the color integer is 0 which corresponds to the color "white" | "pct2,0" |
 
@@ -73,7 +73,7 @@ Commands:
 
 * "l(any whole number)": Example: "l45"; set the number of **L**ights that are on the track based on the whole number on the end of the text; In this case, the number of lights will be set to 45
 
-* "spt(any whole number)": Example: "spt1,60"; Set the **S**peed of the **P**acer **T**o whatever speed that you tell it to; so the example would set the pacer at index 1 to 60 seconds per lap, whether it was currently running or not. If it was currently running, it would be as if it just sped up or slowed down to the new pace
+* "spt(any floating point number)": Example: "spt1,60"; Set the **S**peed of the **P**acer **T**o whatever speed that you tell it to; so the example would set the pacer at index 1 to 60 seconds per lap, whether it was currently running or not. If it was currently running, it would be as if it just sped up or slowed down to the new pace
 
 * "a(any whole number)": Example: "a10"; set clock**A**djustmentFactor to the number of deci-seconds that you give it (so 10 in the example will be setting it to 1.0). This is basically not used anymore and is only necessary if you have timing issues.
 

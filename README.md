@@ -16,7 +16,7 @@ This setup requires the following items:
 
 * Arduino Micro
 * HC-05 Bluetooth Module - [Setup Explained](http://www.instructables.com/id/Arduino-AND-Bluetooth-HC-05-Connecting-easily/)
-* WS2801 Addressable RGB LEDs
+* WS2801 Addressable RGB LEDs (or WS2812 or WS2811, it's possible that more will work too)
 
 ### End User Instructions ###
 

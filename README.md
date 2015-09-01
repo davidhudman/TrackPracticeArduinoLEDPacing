@@ -8,7 +8,10 @@
 * Version
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
-This allows for lights to pace runners as they go around a running track. It allows for users to send inputs (paces - like 70 seconds per lap) to the lights through their smartphones. These are Microsoft Visual Studio project files, but the main one is the .ino file. This .ino file is uploaded via your USB port to the Arduino Micro. 
+This allows for lights to pace runners as they go around a running track. It allows for users to send inputs (paces - like 70 seconds per lap) to the lights through their smartphones. These are Microsoft Visual Studio project files, but the main one is the .ino file. This .ino file is uploaded via your USB port to the Arduino Micro.
+
+I am currently building a web interface with [this repository](https://bitbucket.org/davidhudman/nodetrackpractice/overview). It uses nodeJS to talk over the serial ports (USB) and a wired connection to the Arduino.
+
 
 Version: 1.0
 

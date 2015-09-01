@@ -29,6 +29,8 @@ This setup requires the following items:
 * HC-05 Bluetooth Module - [Setup Explained](http://www.instructables.com/id/Arduino-AND-Bluetooth-HC-05-Connecting-easily/)
 * WS2801 Addressable RGB LEDs (or WS2812 or WS2811, it's possible that more will work too)
 
+---------
+
 ### End User Instructions ###
 
 Commands:
@@ -81,6 +83,7 @@ Commands:
 
 *(keep in mind that the index of the first pacer is 0)
 
+-------------
 
 ### How do I get set up? ###
 
@@ -90,6 +93,8 @@ Commands:
 * Database configuration
 * How to run tests
 * Deployment instructions
+
+------------
 
 ### Contribution guidelines ###
 

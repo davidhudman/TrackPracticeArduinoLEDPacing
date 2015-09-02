@@ -505,28 +505,22 @@ void getPartySerialFeedback()
 {
 	if (serialFeedbackIterator >= partySerialCountTo)				// desktop direct wired connection feedback
 	{
+		printThis = " ";
+
 		for (int i=0; i < PARTY_FLAG_SIZE; i++)			// Bug: potential bug because this .length may just return the length of the string, not the array; If it does, you can use something like sizeOf(partyFlags) / sizeOf(partyFlags[0]
 		{
 			if (i == partyInt)
 			{
-				printThis = " ";
 				printThis.concat("x");				// "x" marks the party function that is currently running
-				printThis.concat(i);
-				printThis.concat(": ");
-				printThis.concat(partyFlags[i]);
-
-				Serial.println(printThis);
 			}
-			else
-			{
-				printThis = " ";
-				printThis.concat(i);
-				printThis.concat(": ");
-				printThis.concat(partyFlags[i]);
 
-				Serial.println(printThis);
-			}
+			printThis.concat(i);
+			printThis.concat(": ");
+			printThis.concat(partyFlags[i]);
+			printThis.concat("... ");
 		}
+
+		Serial.println(printThis);
 		
 		serialFeedbackIterator = 0;
 	}
@@ -537,28 +531,22 @@ void getPartySerialFeedback()
 
 	if (serial1FeedbackIterator >= partySerialCountTo)				// bluetooth mobile feedback.
 	{
+		printThis = " ";
+
 		for (int i=0; i < PARTY_FLAG_SIZE; i++)			// Bug: potential bug because this .length may just return the length of the string, not the array; If it does, you can use something like sizeOf(partyFlags) / sizeOf(partyFlags[0]
-		{
+		{	
 			if (i == partyInt)
 			{
-				printThis = " ";
 				printThis.concat("x");				// "x" marks the party function that is currently running
-				printThis.concat(i);
-				printThis.concat(": ");
-				printThis.concat(partyFlags[i]);
-
-				Serial1.println(printThis);
 			}
-			else
-			{
-				printThis = " ";
-				printThis.concat(i);
-				printThis.concat(": ");
-				printThis.concat(partyFlags[i]);
 
-				Serial1.println(printThis);
-			}
+			printThis.concat(i);
+			printThis.concat(": ");
+			printThis.concat(partyFlags[i]);
+			printThis.concat("... ");
 		}
+
+		Serial.println(printThis);
 
 		serial1FeedbackIterator = 0;
 	}

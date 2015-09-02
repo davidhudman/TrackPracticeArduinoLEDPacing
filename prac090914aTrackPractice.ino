@@ -152,12 +152,12 @@ public:
 	{
 		if (!isBackwards)	// if isBackwards is not true
 		{
-			currentHighlightedPacingPanel = (int)(((getRunningTime()%(long)((int)getSecondsPerLap()*(double)1000))/getNextLightDelay())+getInitialHighlightedPanel())%getTotalPacingPanels();
+			currentHighlightedPacingPanel = (int)(((getRunningTime()%(long)(getSecondsPerLap()*(double)1000))/getNextLightDelay())+getInitialHighlightedPanel())%getTotalPacingPanels();
 			return currentHighlightedPacingPanel;
 		}
 		else
 		{
-			currentHighlightedPacingPanel = (getTotalPacingPanels()-1) - (int)(((getRunningTime()%(long)((int)getSecondsPerLap()*(double)1000))/getNextLightDelay())+getInitialHighlightedPanel())%getTotalPacingPanels();
+			currentHighlightedPacingPanel = (getTotalPacingPanels()-1) - (int)(((getRunningTime()%(long)(getSecondsPerLap()*(double)1000))/getNextLightDelay())+getInitialHighlightedPanel())%getTotalPacingPanels();
 			return currentHighlightedPacingPanel;
 		}
 	};
@@ -603,12 +603,12 @@ void getSerialFeedback()
 				printThis.concat("\", \"LapSecs\": \"");
 
 				// round the float
-				float b = (pacer[i].getSecondsPerLap()/clockAdjustmentFactor) * 100;
+				float b = (pacer[i].getSecondsPerLap()) * 100;
 				while (b >= 100)
 				{
 					b -= 100;
 				}
-				printThis.concat((int)(pacer[i].getSecondsPerLap()/clockAdjustmentFactor));
+				printThis.concat((int)(pacer[i].getSecondsPerLap()));
 				printThis.concat(".");
 				printThis.concat((int)(b));
 
@@ -641,7 +641,7 @@ void getSerialFeedback()
 				printThis.concat(" Lap[");
 				printThis.concat(i);
 				printThis.concat("] = ");
-				printThis.concat((int)(pacer[i].getSecondsPerLap()/clockAdjustmentFactor));
+				printThis.concat((int)(pacer[i].getSecondsPerLap()));
 			}
 		}
 		printThis.concat(" LEDs ");
@@ -699,7 +699,7 @@ void checkAllUserInput()
 	if (secondsPerLapHolder > 0)
 	{
 		pacer[getLowestUnusedPacerIndex()].setStartTime(tempMillis);
-		pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (secondsPerLapHolder*clockAdjustmentFactor);
+		pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (secondsPerLapHolder);
 		secondsPerLapHolder = 0;
 		return;												// This allows me to skip the checks for all the other flags if the user sent this input
 	}
@@ -831,32 +831,15 @@ void checkAllUserInput()
 			// If the user sends an int that is in the range of the indexes for the pacer array
 			if (serialInputInt >= 0 && serialInputInt < pacer[0].getNumberPacers())
 			{
-				if (!pacer[serialInputInt].getIsBackwards())		// If the user sends the backwards flag for pacer i text string and it ISN'T currently backwards
-				{
-					pacer[serialInputInt].setIsBackwards(true);		// Make pacer i backwards
-				}
-				else												// If the user sends the backwards flag for pacer i text string and it IS currently backwards
-				{
-					pacer[serialInputInt].setIsBackwards(false);	// Make pacer i forwards
-				}
+				pacer[serialInputInt].setIsBackwards(!pacer[serialInputInt].getIsBackwards());		// Make pacer i the opposite of its current backwards-ness
 			}
 			else // If the user sends the set all backwards text string. When switching the backwards-ness of all pacers, this function looks at the first pacer and flips it and then flips all the others the same way.
 			{
-				if (!pacer[0].getIsBackwards())
+				bool tempIsBackwards = pacer[0].getIsBackwards();
+				// set all pacers is backwards to the opposite of whatever pacer at index 0 currently is
+				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					// set all pacers is backwards to false
-					for (int i = 0; i < pacer[0].getNumberPacers(); i++)
-					{
-						pacer[i].setIsBackwards(true);
-					}
-				}
-				else
-				{
-					// set all pacers is backwards to true
-					for (int i = 0; i < pacer[0].getNumberPacers(); i++)
-					{
-						pacer[i].setIsBackwards(false);
-					}
+					pacer[i].setIsBackwards(!tempIsBackwards);
 				}
 			}
 			break; 
@@ -867,7 +850,7 @@ void checkAllUserInput()
 				// call all pacers' setStartTime() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillis + ((serialInputInt*1000)*clockAdjustmentFactor));	// sets each pacers' milliseconds startTime to the current time + (the number of seconds the user sent * 1000 milliseconds * the clockAdjustmentFactor); tempMillis makes sure that all pacers have the exact same start time. Using a call to myMillis() to calculate the pacer start time would result in slightly different start times for each pacer called
+					pacer[i].setStartTime(tempMillis + ((serialInputInt*1000)));	// sets each pacers' milliseconds startTime to the current time + (the number of seconds the user sent * 1000 milliseconds * the clockAdjustmentFactor); tempMillis makes sure that all pacers have the exact same start time. Using a call to myMillis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				}
 			}
 			// If the user just sends "rd" to reset all pacers on a delay
@@ -876,7 +859,7 @@ void checkAllUserInput()
 				// call all pacers' setStartTimeToNowPlusDelay() function
 				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 				{
-					pacer[i].setStartTime(tempMillis + resetDelayDefaultDelayTimeMillis*clockAdjustmentFactor);		// This makes sure that all pacers have the exact same start time. Using a call to myMillis() to calculate the pacer start time would result in slightly different start times for each pacer called
+					pacer[i].setStartTime(tempMillis + resetDelayDefaultDelayTimeMillis);		// This makes sure that all pacers have the exact same start time. Using a call to myMillis() to calculate the pacer start time would result in slightly different start times for each pacer called
 				}
 			}
 			break; 
@@ -884,7 +867,7 @@ void checkAllUserInput()
 			if (serialInputInt >= 0 && serialInputInt < pacer[0].getNumberPacers())
 			{
 				// call this pacer's setStartTimeToNowPlusDelay() function
-				pacer[serialInputInt].setStartTimeToNowPlusDelay(resetDelayDefaultDelayTimeMillis*clockAdjustmentFactor);
+				pacer[serialInputInt].setStartTimeToNowPlusDelay(resetDelayDefaultDelayTimeMillis);
 			}
 			break; 
 		case 6: // "party"
@@ -894,7 +877,7 @@ void checkAllUserInput()
 			mode = "track";
 			break;
 		case 8: // "spt"
-			setChangedPacerNewStartTime(serialInputInt, serialInputDouble*clockAdjustmentFactor);
+			setChangedPacerNewStartTime(serialInputInt, serialInputDouble);
 			break;
 		case 9: // "strip"
 			/*if (stripNum == 0)

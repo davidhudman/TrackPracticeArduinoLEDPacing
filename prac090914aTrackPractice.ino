@@ -34,6 +34,7 @@ private:
 	bool isStopwatchStarted;
 	bool isBackwards;
 	bool isGoingToChangeSpeed;				// indicates whether the pacer is about to change its speed
+	bool isVisible;							// indicates whether the pacer should be visible or not (the color black / it logically keeps running)
 	long startTime, futureStartTime;
 	static int numberPacers; // static
 	int currentHighlightedPacingPanel;	// This determines which pacing panel is currently lit up
@@ -59,6 +60,7 @@ public:
 		isStopwatchStarted = false;
 		isBackwards = false;
 		isGoingToChangeSpeed = false;
+		isVisible = true;
 		totalPacingPanels = total_Pacing_Panels;
 		numberPacers++;
 		startTime = myMillis() + (long)initialDelay;
@@ -177,14 +179,19 @@ public:
 	};
 	uint32_t getShade()
 	{
-		return shade;
+		if (getIsVisible() == true)
+		{
+			return shade;
+		}
+		else
+		{
+			return Color(0,0,0);
+		}
 	};
-	//uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)}; 
-	// white, red, yellow, green, cyan, blue, magenta
 	int getColorInt()
 	{
-		uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)}; 
-		// white, red, yellow, green, cyan, blue, magenta
+		uint32_t color[8] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127), Color(0,0,0)}; 
+		// white, red, yellow, green, cyan, blue, magenta, black
 		int i=0;
 		while (shade != color[i])
 		{
@@ -194,7 +201,6 @@ public:
 	}
 	String getColorWord()
 	{
-
 		switch (getColorInt())
 		{
 		case 0:
@@ -218,22 +224,31 @@ public:
 		case 6:
 			return "cyan";	// actually magenta on better strip
 			break;
+		case 7:
+			return "black";
+			break;
 		default:
 			return "?";
 			break;
 		}
 	}
+	bool getIsVisible()
+	{
+		return isVisible;
+	}
+	void setIsVisible(bool is_Visible)
+	{
+		isVisible = is_Visible;
+	}
 	void setColorInt(int i)
 	{
-		if (i>=0 && i<7)
+		if (i>=0 && i<8)
 		{
-			uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)}; 
-			// white, red, yellow, green, cyan, blue, magenta
+			uint32_t color[8] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127), Color(0,0,0)}; 
+		// white, red, yellow, green, cyan, blue, magenta, black
 
 			shade = color[i];
 		}
-
-
 	}
 	void setShade(uint32_t new_Shade)
 	{
@@ -322,8 +337,8 @@ Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLE
 //***********************************************
 // Declarations: Related to strings
 //***********************************************
-const int TRACK_FLAG_SIZE = 12, PARTY_FLAG_SIZE = 11;
-const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip", "a", "pct"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
+const int TRACK_FLAG_SIZE = 13, PARTY_FLAG_SIZE = 11;
+const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip", "a", "pct", "v"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
 const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
 String stringSepFlag = ",";	// holds the string that separates the values in the speed change function
 String serialStringInput;			// Holds the raw, unformatted serial input from user
@@ -355,7 +370,7 @@ double newSecondsPerLap; // holds the double (floating point) time that will bec
 // Declarations: Everything related to the strip and its timing
 //***********************************************
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_RGB + NEO_KHZ800); // Initialization of the Adafruit NeoPixel strip
-double clockAdjustmentFactor = 1;		// (originally set at .5) Use with caution. Different numLEDs require different adjustments. Since the Adafruit_NeoPixel library creates timing problems for Arduino, this factor will be used to adjust all user input and output, so the user can continue to use numbers they would want. This is a temporary workaround until the timing issues created by the library are resolved.
+double clockAdjustmentFactor = 1.0;		// (originally set at .5) Use with caution. Different numLEDs require different adjustments. Since the Adafruit_NeoPixel library creates timing problems for Arduino, this factor will be used to adjust all user input and output, so the user can continue to use numbers they would want. This is a temporary workaround until the timing issues created by the library are resolved.
 long interruptMillis = 0;
 long interruptFreqMicro = 10000;		// The number of microseconds that will pass before the interrupt fires (example: 10,000 microseconds = .01 seconds)
 //Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
@@ -904,6 +919,22 @@ void checkAllUserInput()
 			{
 				int intHolder = (int) serialInputDouble;
 				pacer[serialInputInt].setColorInt(intHolder);
+			}
+			break;
+		case 12: // "v" hidden - example "v2" changes pacer with index 2 to visible so that it is still logically running while not visible to the athlete
+			// If the user sends an int that is in the range of the indexes for the pacer array
+			if (serialInputInt >= 0 && serialInputInt < pacer[0].getNumberPacers())
+			{
+				pacer[serialInputInt].setIsVisible(!pacer[serialInputInt].getIsVisible());
+			}
+			else if (serialInputInt == -1)
+			{
+				bool tempVisible = pacer[0].getIsVisible();
+				// call all pacers' setIsVisible() function
+				for (int i = 0; i < pacer[0].getNumberPacers(); i++)
+				{
+					pacer[i].setIsVisible(!tempVisible);
+				}
 			}
 			break;
 		default:

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<!--<script src="jquery1113.js"></script>-->
+<script type="text/javascript" src="//cdn.jsdelivr.net/p5.js/0.3.8/addons/p5.dom.js"></script>
+<script>
+
+// for testing purposes: hides the h4 element when the testButton is clicked
+
+var counter = 0; 
+
+$(document).ready(function(){
+    $("#testButton").click(function(){
+        $("h4").toggle();
+    });
+});
+
+// for testing purposes: hides the paragraph when it is clicked
+$(document).ready(function(){
+    $("p").click(function(){
+        $(this).hide();
+    });
+});
+
+// for testing purposes: when the .test element is clicked, an action is taken
+$(document).ready(function(){
+    $(".test").click(function(){
+        $(this).hide();
+    });
+});
+
+// for testing purposes: changes value of paragraph when the testButton is clicked
+$(document).ready(function(){
+    $("#testButton").click(function(){
+        newText = $("input:text").val();
+		$("p").text(newText);
+    });
+});
+
+//  for testing purposes: Changes paragraph whenever the textbox clicked
+$(document).ready(function(){
+    $("#textboxid").click(function(){
+        $(this).val("");
+		$("p").text("textbox was clicked").show();
+    });
+});
+
+// Listens for button click to toggle the command section
+$(document).ready(function(){
+    $("#commandToggle").click(function(){
+        $("#commandTable").slideToggle("fast");
+		$("p").text("commandToggle was clicked");
+    });
+});
+
+// Listens for button click to toggle the extras section
+$(document).ready(function(){
+    $("#extrasToggle").click(function(){
+        $("#extrasDiv").slideToggle("fast");
+		$("p").text("extrasToggle was clicked");
+    });
+});
+
+$(document).ready(function(){
+    $("#partysubmit").click(function(){
+		if ($('#partytextboxid').val() == "party")
+		{
+			$('#partytextboxid').val("track");
+			$('#partysubmit').val("Start Party Mode");
+		}
+		else
+		{
+			$('#partytextboxid').val("party");
+			$('#partysubmit').val("Start Track Mode");
+		}
+		$("p").text("partySubmit button was clicked");
+    });
+});
+
+function getLatestData() {
+	$.get("/data", function(data){
+		$("p").text(data);
+	});
+	// $("p").text(counter++);
+}
+
+
+
+// Everything done when the page initially loads
+$(document).ready(function(){
+	document.getElementById('textboxid').style.height="60px";
+	document.getElementById('textboxid').style.width="250px";
+	document.getElementById('textboxid').style.fontSize="40pt";
+	$('table').attr('border', '4');
+	$('#commandTable').hide().css("background-color", "#00FF00");
+	$('#extrasDiv').hide().css("background-color", "#FFFF33");
+	$("body").css("background-color", "#F2F2F2");
+	$("button").css("display", "inline-block");
+	$(".submitButton, #TextboxSubmit, #commandToggle").css("min-width", "120px");
+	$(".submitButton, #TextboxSubmit, #commandToggle").css("height", "50px");
+	$(".submitButton").css("background-color", "#FF1919");
+	$(".submitButton, #TextboxSubmit").css("font-weight", "bold");
+	$("#TextboxSubmit").css("background-color", "#4286F5");
+	$("#extrasToggle").css("background-color", "#FFFF33");
+	$("#commandToggle").css("background-color", "#00FF00");
+	
+	var myVar=setInterval(function(){getLatestData()},1000);
+});
+
+/*var text;
+
+text = createDiv("Sensor reading:"); 
+text.position(10,10);*/
+
+/*function showData(result) {
+	// when the server returns, show the result in the div:
+	$("p").text("Sensor reading:" + result);
+	// $("p").position(result, 10);
+	// make another HTTP call:
+	var sensorReading = loadStrings("/data", showData);
+}*/
+</script>
+</head>
+<body>
+
+<table>
+<tr>
+	<td>
+		<form method="GET" action="/input">
+			<input id="resetDelayTextboxID" style="display:none" type="text" name="comment" value="rd">
+			<input id="resetDelaySubmit" class="submitButton" type="submit" name="submit" value="Reset Delay">
+		</form>
+	</td>
+	<!--<td>
+		<form action="/input" method="get">
+			<input type="submit" value="rd" 
+		name="Reset Delay" id="resetDelaySubmit" />
+		</form>
+	</td>-->
+
+	<td>
+		<form method="GET" action="/input">
+			<input id="resetTextboxID" style="display:none" type="text" name="comment" value="r ">
+			<input id="resetSubmit" class="submitButton" type="submit" name="submit" value="Reset">
+		</form>
+	</td>
+
+	<td>
+		<form method="GET" action="/input">
+			<input id="backwardsTextboxID" style="display:none" type="text" name="comment" value="b">
+			<input id="backwardsSubmit" class="submitButton" type="submit" name="submit" value="Backwards">
+		</form>
+	</td>
+
+	<td>
+		<form method="GET" action="/input">
+			<input id="clearTextboxID" style="display:none" type="text" name="comment" value="c">
+			<input id="clearSubmit" class="submitButton" type="submit" name="submit" value="Clear Pacers">
+		</form>
+	</td>
+
+	<td>
+		<form method="GET" action="/input">
+			<input id="partytextboxid" style="display:none" type="text" name="comment" value="track">
+			<input id="partysubmit" class="submitButton" type="submit" name="submit" value="Start Party Mode">
+		</form>
+	</td>
+</tr>
+</table>
+
+<br /><br />
+
+<form method="GET" action="/input">
+	<input id="textboxid" autocomplete="off" type="text" name="comment" value="Your Input :)">
+	<br /><br />
+	<input id="TextboxSubmit" type="submit" name="submit" value="Submit">
+</form>
+
+<p>Click me too!</p>
+
+<button id="commandToggle">Show/hide Commands</button>
+<div id="commandTable">
+	<table>
+		<tr><td>"c" </td><td> <b>C</b>lear all pacers that are currently running</td></tr>
+
+		<tr><td>"r" </td><td> <b>R</b>eset all pacers that are currently running and start them immediately</td></tr>
+
+		<tr><td>"rd" </td><td> (<b>R</b>eset <b>D</b>elay) reset all pacers that are currently running but wait a predetermined amount of time before starting them</td></tr>
+
+		<tr><td>"b" </td><td> (<b>B</b>ackwards) set all pacers to run the opposite direction that the first pacer is currently running (including the first pacer)</td></tr>
+
+		<tr><td>"(any floating point or whole number)" </td><td> Example: "75"; sets a new pacer to run at x seconds per lap, which in this case is 75 seconds</td></tr>
+
+		<tr><td>"c(any whole number)" </td><td> Example: "c2"; <b>C</b>lears a currently running pacer at a certain index off the track; this certain index is 2, so it clears pacer 2;*</td></tr>
+
+		<tr><td>"r(any whole number)" </td><td> Example: "r1"; <b>R</b>esets the pacer at a certain index to run immediately; this certain index is 1, so it resets pacer 1*</td></tr>
+
+		<tr><td>"rd(any whole number)" </td><td> Example: "rd10"; <b>R</b>esets all pacers to run following the <b>D</b>elay defined by the number on the end of the text; In this case, the number on the end of the text is 10, so all currently running pacers will be immediately removed from the track and will start following a 10 second delay</td></tr>
+
+		<tr><td>"rdp(any whole number)" </td><td> Example: "rdp4"; <b>R</b>esets following a predetermined <b>D</b>elay a <b>P</b>acer at a certain index to run; In this case, the index is 4, so pacer 4 will be immediately removed from the track and will start following a predetermined delay*</td></tr>
+
+		<tr><td>"b(any whole number)" </td><td> Example: "b3"; set a pacer at a specific index to run the opposite direction (<b>B</b>ackwards) that the it is currently running; this certain index is 3, so it will make pacer 3 run in the opposite direction*;</td></tr>
+
+		<tr><td>"l(any whole number)" </td><td> Example: "l45"; set the number of <b>L</b>ights that are on the track based on the whole number on the end of the text; In this case, the number of lights will be set to 45</td></tr>
+
+		<br />
+		*(keep in mind that the index of the first pacer is 0)
+	</table>
+</div>
+
+<br /><br /><br />
+
+<button id="extrasToggle">Show/hide Extras</button>
+<div id="extrasDiv">
+	<h2>Stuff for testing:</h2>
+	Name: <input type="text" name="user">
+	<h3 class="test">If you click on me, I will disappear.</h3>
+	<button id="testButton">Click me away!</button>
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

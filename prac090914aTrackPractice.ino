@@ -341,7 +341,7 @@ const int TRACK_FLAG_SIZE = 15, PARTY_FLAG_SIZE = 11;
 const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip", "a", "pct", "v", "apb", "spb"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
 const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
 String stringSepFlag = ",";	// holds the string that separates the values in the speed change function
-String serialStringInput;			// Holds the raw, unformatted serial input from user
+String serialStringInput;			// Holds the raw, unformatted serial input from user.
 String printThis = " ";
 String stringHolder = " ";
 
@@ -355,8 +355,7 @@ int serialCountTo = 50, trafficLightCountTo = 100, partySerialCountTo = 5;
 int tempLowestDelayedPacerIndex = -1;
 
 bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need to figure out which pacer is going to change its speed
-String mode = trackFlags[7];				// This mode String has two possible values: "track" and "party". Each value will result in different function calls
-//String mode = "track";
+bool partyMode = false;				// This mode (now partyMode) String (now bool) has two possible values: "track" and "party" (now true and false). Each value will result in different function calls
 int partyInt = 10;					// This integer controls what party functions will be run; 0 indicates all will be run
 
 //***********************************************
@@ -396,13 +395,13 @@ void loop()
 {
 	setSerialInput();
 
-	if (mode == "track")
+	if (partyMode == false)
 	{
 		setPixelColorBasedOnTime();
 
 		getSerialFeedback();
 	}
-	else if (mode == "party")
+	else
 	{
 		partyFunctions();
 		getPartySerialFeedback();
@@ -473,7 +472,7 @@ void setSerialInput()
 			//serialStringInput.trim();
 		}
 
-		if (mode == "track")
+		if (partyMode == false)
 		{
 			checkAllUserInput();
 
@@ -482,7 +481,7 @@ void setSerialInput()
 			getSerialFeedback();
 
 		}
-		else // if (mode == "party")
+		else // if (partyMode == true)
 		{
 			checkTrackModeFlags();
 			partyInt = serialStringInput.toInt();
@@ -494,9 +493,9 @@ void setSerialInput()
 // Checks for "track" as input sent from the user to change the mode from something else (like "party" mode)
 void checkTrackModeFlags()
 {
-	if (serialStringInput == "track")
+	if (serialStringInput == trackFlags[7])
 	{
-		mode = "track";
+		partyMode = false;
 	}
 }
 
@@ -859,10 +858,10 @@ void checkAllUserInput()
 			}
 			break; 
 		case 6: // "party"
-			mode = "party";
+			partyMode = true;
 			break; 
 		case 7: // "track"
-			mode = "track";
+			partyMode = false;
 			break;
 		case 8: // "spt"
 			setChangedPacerNewStartTime(serialInputInt, serialInputDouble);

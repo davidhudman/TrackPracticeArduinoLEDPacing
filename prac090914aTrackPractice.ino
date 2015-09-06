@@ -341,7 +341,7 @@ const int TRACK_FLAG_SIZE = 15, PARTY_FLAG_SIZE = 11;
 const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip", "a", "pct", "v", "apb", "spb"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
 const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
 String stringSepFlag = ",";	// holds the string that separates the values in the speed change function
-String serialStringInput;			// Holds the raw, unformatted serial input from user.
+String serialStringInput;			// Holds the raw, unformatted serial input from user
 String printThis = " ";
 String stringHolder = " ";
 

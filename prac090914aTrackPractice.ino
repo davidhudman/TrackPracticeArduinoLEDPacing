@@ -37,7 +37,8 @@ private:
 	bool isVisible;							// indicates whether the pacer should be visible or not (the color black / it logically keeps running)
 	long startTime, futureStartTime;
 	static int numberPacers; // static
-	int currentHighlightedPacingPanel;	// This determines which pacing panel is currently lit up
+	int currentHighlightedPacingPanel;		// This determines which pacing panel is currently lit up
+	int colorInt;							// Determines which color index in the color array that the pacer should be
 
 public:
 	// variables
@@ -47,15 +48,12 @@ public:
 	{
 		//Adafruit_WS2801 strip1 = Adafruit_WS2801();
 
-		uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)}; 
-		// white, red, yellow, green, cyan, blue, magenta
-
 		secondsPerLap = lapSecs;
 		initialDelay = initDelay;
 		currentHighlightedPacingPanel = firstHighlightedPanel;
 		initialHighlightedPanel = firstHighlightedPanel;
 		numMeters = meters;
-		shade = color[numberPacers%7];
+		colorInt = numberPacers%7;
 		lightTrainLength = light_Train_Length;
 		isStopwatchStarted = false;
 		isBackwards = false;
@@ -177,60 +175,9 @@ public:
 		else
 		return 0;
 	};
-	uint32_t getShade()
-	{
-		if (getIsVisible() == true)
-		{
-			return shade;
-		}
-		else
-		{
-			return Color(0,0,0);
-		}
-	};
 	int getColorInt()
 	{
-		uint32_t color[8] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127), Color(0,0,0)}; 
-		// white, red, yellow, green, cyan, blue, magenta, black
-		int i=0;
-		while (shade != color[i])
-		{
-			i++;
-		}
-		return i;
-	}
-	String getColorWord()
-	{
-		switch (getColorInt())
-		{
-		case 0:
-			return "white";
-			break;
-		case 1:
-			return "green";		// actually red on better strip
-			break;
-		case 2:
-			return "yellow";
-			break;
-		case 3:
-			return "red";		// actually green on better strip
-			break;
-		case 4:
-			return "magenta";		// actually cyan on better strip
-			break;
-		case 5:
-			return "blue";
-			break;
-		case 6:
-			return "cyan";	// actually magenta on better strip
-			break;
-		case 7:
-			return "black";
-			break;
-		default:
-			return "?";
-			break;
-		}
+		return colorInt;
 	}
 	bool getIsVisible()
 	{
@@ -244,16 +191,9 @@ public:
 	{
 		if (i>=0 && i<8)
 		{
-			uint32_t color[8] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127), Color(0,0,0)}; 
-		// white, red, yellow, green, cyan, blue, magenta, black
-
-			shade = color[i];
+			colorInt = i;
 		}
 	}
-	void setShade(uint32_t new_Shade)
-	{
-		shade = new_Shade;
-	};
 	void setTotalPacingPanels(int total_Pacing_Panels_)
 	{
 		totalPacingPanels = total_Pacing_Panels_;
@@ -314,10 +254,6 @@ public:
 	{
 		numMeters = meters;
 	};
-	void setC(uint32_t c)
-	{
-		shade = c;
-	};
 };
 
 int Pacer::numberPacers = 0;
@@ -333,6 +269,8 @@ const int PACER_ARRAY_SIZE = 10;
 Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
 	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
 	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS) };
+uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)};
+		// white, red, yellow, green, cyan, blue, magenta
 
 //***********************************************
 // Declarations: Related to strings
@@ -416,6 +354,47 @@ void callback()
 long myMillis()
 {
 	return interruptMillis;
+}
+
+// Use an integer parameter to determine what RGB color value it is associated with
+uint32_t getColorFromInt(int i)
+{
+	return color[i];
+}
+
+// Use an integer parameter to determine what color word it is associated with
+String getColorWord(int color_Int)
+{
+	switch (color_Int)
+	{
+	case 0:
+		return "white";
+		break;
+	case 1:
+		return "green";		// actually red on better strip
+		break;
+	case 2:
+		return "yellow";
+		break;
+	case 3:
+		return "red";		// actually green on better strip
+		break;
+	case 4:
+		return "magenta";		// actually cyan on better strip
+		break;
+	case 5:
+		return "blue";
+		break;
+	case 6:
+		return "cyan";	// actually magenta on better strip
+		break;
+	case 7:
+		return "black";
+		break;
+	default:
+		return "?";
+		break;
+	}
 }
 
 // returns the new start time for a pacer intersecting the given pacer at the current light its on given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
@@ -599,8 +578,10 @@ void getSerialFeedback()
 				printThis.concat(".");
 				printThis.concat((int)(b));
 
+				printThis.concat("\", \"colorInt\": \"");
+				printThis.concat(pacer[i].getColorInt());
 				printThis.concat("\", \"color\": \"");
-				printThis.concat(pacer[i].getColorWord());
+				printThis.concat(getColorWord(pacer[i].getColorInt()));
 				printThis.concat("\"}, ");
 			}
 		}
@@ -660,7 +641,7 @@ void setPixelColorBasedOnTime()
 	{
 		if (pacer[j].getSecondsPerLap() > 0)
 		{
-			strip.setPixelColor(pacer[j].getCurrentHighlightedPacingPanel(), pacer[j].getShade()); // set one pixel
+			strip.setPixelColor(pacer[j].getCurrentHighlightedPacingPanel(), getColorFromInt(pacer[j].getColorInt())); // set one pixel
 		}
 	}
 

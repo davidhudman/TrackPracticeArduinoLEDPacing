@@ -371,7 +371,7 @@ double newSecondsPerLap; // holds the double (floating point) time that will bec
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_RGB + NEO_KHZ800); // Initialization of the Adafruit NeoPixel strip
 double clockAdjustmentFactor = 1.0;		// (originally set at .5) Use with caution. Different numLEDs require different adjustments. Since the Adafruit_NeoPixel library creates timing problems for Arduino, this factor will be used to adjust all user input and output, so the user can continue to use numbers they would want. This is a temporary workaround until the timing issues created by the library are resolved.
 long interruptMillis = 0;
-long interruptFreqMicro = 10000;		// The number of microseconds that will pass before the interrupt fires (example: 10,000 microseconds = .01 seconds)
+long interruptFreqMicro = 10000;		// The number of microseconds that will pass before the interrupt fires (example: 10,000 microseconds = .01 seconds).
 //Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
 
 void setup()

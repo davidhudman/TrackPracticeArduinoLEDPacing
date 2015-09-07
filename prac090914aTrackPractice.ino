@@ -270,7 +270,8 @@ Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLE
 	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
 	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS) };
 uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)};
-		// white, red, yellow, green, cyan, blue, magenta
+const String colorName[7] = {"white", "green", "yellow", "red", "magenta", "blue", "cyan"};
+		// should be on a decent strip: white, red, yellow, green, cyan, blue, magenta
 
 //***********************************************
 // Declarations: Related to strings
@@ -354,47 +355,6 @@ void callback()
 long myMillis()
 {
 	return interruptMillis;
-}
-
-// Use an integer parameter to determine what RGB color value it is associated with
-uint32_t getColorFromInt(int i)
-{
-	return color[i];
-}
-
-// Use an integer parameter to determine what color word it is associated with
-String getColorWord(int color_Int)
-{
-	switch (color_Int)
-	{
-	case 0:
-		return "white";
-		break;
-	case 1:
-		return "green";		// actually red on better strip
-		break;
-	case 2:
-		return "yellow";
-		break;
-	case 3:
-		return "red";		// actually green on better strip
-		break;
-	case 4:
-		return "magenta";		// actually cyan on better strip
-		break;
-	case 5:
-		return "blue";
-		break;
-	case 6:
-		return "cyan";	// actually magenta on better strip
-		break;
-	case 7:
-		return "black";
-		break;
-	default:
-		return "?";
-		break;
-	}
 }
 
 // returns the new start time for a pacer intersecting the given pacer at the current light its on given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
@@ -581,7 +541,7 @@ void getSerialFeedback()
 				printThis.concat("\", \"colorInt\": \"");
 				printThis.concat(pacer[i].getColorInt());
 				printThis.concat("\", \"color\": \"");
-				printThis.concat(getColorWord(pacer[i].getColorInt()));
+				printThis.concat(colorName[pacer[i].getColorInt()]);
 				printThis.concat("\"}, ");
 			}
 		}
@@ -641,7 +601,7 @@ void setPixelColorBasedOnTime()
 	{
 		if (pacer[j].getSecondsPerLap() > 0)
 		{
-			strip.setPixelColor(pacer[j].getCurrentHighlightedPacingPanel(), getColorFromInt(pacer[j].getColorInt())); // set one pixel
+			strip.setPixelColor(pacer[j].getCurrentHighlightedPacingPanel(), color[pacer[j].getColorInt()]); // set one pixel
 		}
 	}
 

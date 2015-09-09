@@ -42,7 +42,7 @@ private:
 
 public:
 	// variables
-	
+
 	// classes
 	Pacer(double lapSecs, double initDelay, int firstHighlightedPanel, int meters, int light_Train_Length, int total_Pacing_Panels) // Constructor
 	{
@@ -62,6 +62,7 @@ public:
 		totalPacingPanels = total_Pacing_Panels;
 		numberPacers++;
 		startTime = myMillis() + (long)initialDelay;
+		double lapTimesArray[20] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 	};
 	int getNumberPacers()
 	{

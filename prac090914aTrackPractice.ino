@@ -10,10 +10,18 @@
 
 // #include <Adafruit_NeoPixel.h>
 
-#include <TimerOne.h>
+// #include <TimerOne.h>
+#include <YunServer.h>
+#include <YunClient.h>
+#include <Process.h>
+#include <Mailbox.h>
+#include <HttpClient.h>
+#include <FileIO.h>
+#include <Console.h>
+#include <Bridge.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_WS2801.h>
-#include <Time.h>
+// #include <Time.h>
 #include "LPD8806.h"
 #include <SPI.h>
 
@@ -314,6 +322,8 @@ double clockAdjustmentFactor = 1.0;		// (originally set at .5) Use with caution.
 long interruptMillis = 0;
 long interruptFreqMicro = 10000;		// The number of microseconds that will pass before the interrupt fires (example: 10,000 microseconds = .01 seconds).
 //Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
+YunServer server;
+YunClient client;
 
 void setup()
 {
@@ -321,19 +331,23 @@ void setup()
 	Serial1.begin(9600);		// Allows Arduino to communicate with mobile devices through bluetooth connection
 
 	strip.begin();				// Start up the LED strip
-
 	strip.show();				// Update the strip, to start they are all 'off'
+	
+	Bridge.begin();
+	server.listenOnLocalhost();
+	server.begin();
 
 	Serial.flush();
 	Serial1.flush();
 
-	Timer1.initialize(10000);         // initialize timer1, and set a .01 second (10,000 micro second) period
-	Timer1.attachInterrupt(callback);  // attaches callback() as a timer overflow interrupt
+	// Timer1.initialize(10000);         // initialize timer1, and set a .01 second (10,000 micro second) period
+	//Timer1.attachInterrupt(callback);  // attaches callback() as a timer overflow interrupt
 }
 
 // If necessary, function declarations should be here - Declaring functions whose functions will be defined later
 void loop()
 {
+	client = server.accept();
 	setSerialInput();
 
 	if (partyMode == false)
@@ -440,7 +454,7 @@ void setSerialInput()
 {
 	// This could be an if statement or a while statement; an if statement will run the main loop between each serial input, but a while loop will process all the serial input and then return to the main loop
 
-	while (Serial1.available() || Serial.available())
+	while (Serial1.available() || Serial.available() || client)
 	{
 		tempMillis = myMillis();
 		if (Serial1.available())
@@ -448,10 +462,14 @@ void setSerialInput()
 			serialStringInput = Serial1.readStringUntil(' ');	// Serial1 processes serial input data from a mobile bluetooth connection
 			//serialStringInput.trim();
 		}
-		else
+		else if (Serial.available())
 		{
 			serialStringInput = Serial.readStringUntil(' ');	// Serial processes serial data input from a USB connection
 			//serialStringInput.trim();
+		}
+		else if (client)
+		{
+			serialStringInput = client.readStringUntil('/');
 		}
 
 		if (partyMode == false)
@@ -468,8 +486,9 @@ void setSerialInput()
 			checkTrackModeFlags();
 			partyInt = serialStringInput.toInt();
 		}
-		serialStringInput = NULL;
+		serialStringInput = " ";
 	}
+	client.stop();
 }
 
 // Checks for "track" as input sent from the user to change the mode from something else (like "party" mode)

@@ -10,20 +10,14 @@
 
 // #include <Adafruit_NeoPixel.h>
 
+#include <FastLED.h>
+
 // #include <TimerOne.h>
-#include <YunServer.h>
-#include <YunClient.h>
-#include <Process.h>
-#include <Mailbox.h>
-#include <HttpClient.h>
-#include <FileIO.h>
-#include <Console.h>
-#include <Bridge.h>
-#include <Adafruit_NeoPixel.h>
-#include <Adafruit_WS2801.h>
+// #include <Adafruit_NeoPixel.h>
+//#include <Adafruit_WS2801.h>
 // #include <Time.h>
-#include "LPD8806.h"
-#include <SPI.h>
+//#include "LPD8806.h"
+// #include <SPI.h>
 
 /**
 *	Pacer Class - public in java program
@@ -267,17 +261,17 @@ public:
 
 int Pacer::numberPacers = 0;
 
-int dataPin = 2;
-int clockPin = 3;
-int numLEDS = 100;
+#define DATA_PIN 2
+#define CLOCK_PIN 3
+#define NUM_LEDS 30
 
 //***********************************************
 // Declarations: Related to the pacer objects
 //***********************************************
 const int PACER_ARRAY_SIZE = 10;
-Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
-	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS), 
-	Pacer(0,0,0,0,1,numLEDS), Pacer(0,0,0,0,1,numLEDS) };
+Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), 
+	Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), 
+	Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS) };
 uint32_t color[7] = {Color(127,127,127), Color(127,0,0), Color(127,127,0), Color(0,127,0), Color(0,127,127), Color(0,0,127), Color(127,0,127)};
 // const int COLOR_ARRAY_SIZE = 7;
 // const String colorName[COLOR_ARRAY_SIZE] = {"white", "green", "yellow", "red", "magenta", "blue", "cyan"};
@@ -317,37 +311,39 @@ double newSecondsPerLap; // holds the double (floating point) time that will bec
 //***********************************************
 // Declarations: Everything related to the strip and its timing
 //***********************************************
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_RGB + NEO_KHZ800); // Initialization of the Adafruit NeoPixel strip
+// Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDS, dataPin, NEO_RGB + NEO_KHZ800); // Initialization of the Adafruit NeoPixel strip
+CRGB leds[NUM_LEDS];
 double clockAdjustmentFactor = 1.0;		// (originally set at .5) Use with caution. Different numLEDs require different adjustments. Since the Adafruit_NeoPixel library creates timing problems for Arduino, this factor will be used to adjust all user input and output, so the user can continue to use numbers they would want. This is a temporary workaround until the timing issues created by the library are resolved.
 long interruptMillis = 0;
 long interruptFreqMicro = 10000;		// The number of microseconds that will pass before the interrupt fires (example: 10,000 microseconds = .01 seconds).
 //Adafruit_WS2801 strip = Adafruit_WS2801(numLEDS, dataPin, clockPin);
-YunServer server;
-YunClient client;
 
 void setup()
 {
+	// Uncomment/edit one of the following lines for your leds arrangement.
+	// FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
+	// FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
+	FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
+	// FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+	// FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+	// FastLED.addLeds<LPD8806, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+
 	Serial.begin(9600);			// Allows Arduino to communicate with computer through Serial monitor tool window
 	Serial1.begin(9600);		// Allows Arduino to communicate with mobile devices through bluetooth connection
 
-	strip.begin();				// Start up the LED strip
-	strip.show();				// Update the strip, to start they are all 'off'
-	
-	Bridge.begin();
-	server.listenOnLocalhost();
-	server.begin();
+	// strip.begin();				// Start up the LED strip
+	FastLED.show();				// Update the strip, to start they are all 'off'
 
 	Serial.flush();
 	Serial1.flush();
 
-	// Timer1.initialize(10000);         // initialize timer1, and set a .01 second (10,000 micro second) period
+	//Timer1.initialize(10000);         // initialize timer1, and set a .01 second (10,000 micro second) period
 	//Timer1.attachInterrupt(callback);  // attaches callback() as a timer overflow interrupt
 }
 
 // If necessary, function declarations should be here - Declaring functions whose functions will be defined later
 void loop()
 {
-	client = server.accept();
 	setSerialInput();
 
 	if (partyMode == false)
@@ -417,7 +413,7 @@ String getColorWord(int color_Int)
 // returns the new start time for a pacer intersecting the given pacer at the current light its on given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
 void setChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 {
-	long temp_Millis, startTime = pacer[index].getStartTime(), new_startTime, currentTime = myMillis(), divisionResult;
+	/*long temp_Millis, startTime = pacer[index].getStartTime(), new_startTime, currentTime = myMillis(), divisionResult;
 	int getTotalPacingPanels = pacer[index].getTotalPacingPanels(), initialHighlightedPanel = pacer[index].getInitialHighlightedPanel();
 	double getSecondsPerLap = pacer[index].getSecondsPerLap();
 	int current_Highlighted_Pacing_Panel = pacer[index].getCurrentHighlightedPacingPanel();
@@ -446,7 +442,7 @@ void setChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 	// new_startTime = -(long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - temp_Millis);
 
 	// we need to return the new_startTime to change the pacer's start time, but we need to do this after myMillis() > tempMillis;
-	// return new_startTime;
+	// return new_startTime;*/
 }
 
 // send input from user via the Serial Monitor Tool to send to the Arduino device
@@ -454,7 +450,7 @@ void setSerialInput()
 {
 	// This could be an if statement or a while statement; an if statement will run the main loop between each serial input, but a while loop will process all the serial input and then return to the main loop
 
-	while (Serial1.available() || Serial.available() || client)
+	while (Serial1.available() || Serial.available())
 	{
 		tempMillis = myMillis();
 		if (Serial1.available())
@@ -462,14 +458,10 @@ void setSerialInput()
 			serialStringInput = Serial1.readStringUntil(' ');	// Serial1 processes serial input data from a mobile bluetooth connection
 			//serialStringInput.trim();
 		}
-		else if (Serial.available())
+		else
 		{
 			serialStringInput = Serial.readStringUntil(' ');	// Serial processes serial data input from a USB connection
 			//serialStringInput.trim();
-		}
-		else if (client)
-		{
-			serialStringInput = client.readStringUntil('/');
 		}
 
 		if (partyMode == false)
@@ -488,7 +480,6 @@ void setSerialInput()
 		}
 		serialStringInput = " ";
 	}
-	client.stop();
 }
 
 // Checks for "track" as input sent from the user to change the mode from something else (like "party" mode)
@@ -653,9 +644,9 @@ void setPixelColorBasedOnTime()
 	// *** Need to change the count to variables in these for loops to variables so it's not calling that function on every loop
 
 	// Turn every light off
-	for (int i=0; i < strip.numPixels(); i++) 
+	for (int i=0; i < FastLED.size(); i++)
 	{
-		strip.setPixelColor(i, Color(0,0,0));
+		leds[i] = CHSV( 0, 0, 0);
 	}
 
 	// Place the pacers where they are supposed to be with the correct color
@@ -663,14 +654,16 @@ void setPixelColorBasedOnTime()
 	{
 		if (pacer[j].getSecondsPerLap() > 0)
 		{
-			strip.setPixelColor(pacer[j].getCurrentHighlightedPacingPanel(), getColorFromInt(pacer[j].getColorInt())); // set one pixel
+			leds[pacer[j].getCurrentHighlightedPacingPanel()] = CHSV( 255, 255, 255);
+
+			// strip.setPixelColor(pacer[j].getCurrentHighlightedPacingPanel(), getColorFromInt(pacer[j].getColorInt())); // set one pixel
 		}
 	}
 
 	// Traffic Light Countdown for delayed pacers
 	delayedPacerTrafficLightCountdown();
 
-	strip.show();              // refresh strip display
+	FastLED.show();              // refresh strip display
 
 }
 
@@ -814,7 +807,7 @@ void checkAllUserInput()
 				{
 					pacer[i].setTotalPacingPanels(serialInputInt);
 				}
-				strip.updateLength(serialInputInt);
+				// strip.updateLength(serialInputInt);
 			}
 			break; 
 		case 3: // "b"
@@ -924,19 +917,19 @@ void checkAllUserInput()
 // Returns an integer that represents the array index of a string so that it can be used in a switch statement
 int getDesiredFlagIndex(String s)
 {
-	for (int i=0; i < TRACK_FLAG_SIZE; i++)	// For each index of the flags array
+	/*for (int i=0; i < TRACK_FLAG_SIZE; i++)	// For each index of the flags array
 	{
 		if (s.equals(trackFlags[i]))					// If the string sent by the user equals a particular string in the array
 			return i;							// Return that string's index
 	}
 	return -1;									// If no index matches, return -1;
-
+	*/
 }
 
 // Returns the lowest available (empty) pacer or return the highest index; returns the index of the lowest pacer instance with getSecondsPerLap() == 0 unless all are greater than 0, in which case it will return the int associated with the instance of the highest pacer
 int getLowestUnusedPacerIndex()
 {
-	for (int i = 0; i < pacer[0].getNumberPacers(); i++)
+	/*for (int i = 0; i < pacer[0].getNumberPacers(); i++)
 	{
 		if (pacer[i].getSecondsPerLap() == 0)
 		{
@@ -945,26 +938,26 @@ int getLowestUnusedPacerIndex()
 	}
 
 	// Return the index of the highest pacer if a lower empty one was not found
-	return pacer[0].getNumberPacers()-1;
+	return pacer[0].getNumberPacers()-1;*/
 }
 
 // Returns the index of the highest pacer instance with getSecondsPerLap() > 0 or returns -1 if no pacers have getSecondsPerLap > 0
 int getHighestActivePacerIndex()
 {
-	for (int i = pacer[0].getNumberPacers()-1; i > -1; i--)
+	/*for (int i = pacer[0].getNumberPacers()-1; i > -1; i--)
 	{
 		if (pacer[i].getSecondsPerLap() > 0)
 		{
 			return i;
 		}
 	}
-	return -1;
+	return -1;*/
 }
 
 // Computes the Lowest Delayed Pacer only one time per trafficLightCountTo times that the main loop runs
 void computeLowestDelayedPacer()
 {
-	if (trafficLightIterator >= trafficLightCountTo)
+	/*if (trafficLightIterator >= trafficLightCountTo)
 	{
 		int highest_Active_Pacer = getHighestActivePacerIndex();
 		for (int i=0; i <= highest_Active_Pacer; i++)	// used with the if statement to get the lowest delayed pacer index
@@ -979,37 +972,37 @@ void computeLowestDelayedPacer()
 	else
 	{
 		trafficLightIterator++;
-	}
+	}*/
 }
 
 // Give delayed pacers a traffic light countdown
 void delayedPacerTrafficLightCountdown()
 {
-	if (tempLowestDelayedPacerIndex <= -1)
+	/*if (tempLowestDelayedPacerIndex <= -1)
 	{
 		computeLowestDelayedPacer();
 	}
 	else if (tempLowestDelayedPacerIndex > -1)
 	{
 		pacerCountdown();
-	}
+	}*/
 }
 
 // Gives delayed pacers a countdown similar to a traffic light at wherever they are starting in whatever direction they are running
 void pacerCountdown()
 {
 	// if it's backwards (end to beginning)
-	if (pacer[tempLowestDelayedPacerIndex].getIsBackwards())
+	/*if (pacer[tempLowestDelayedPacerIndex].getIsBackwards())
 	{
 		if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds))
 		{
 			if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds))
 			{
-				if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds))
+				if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(-1))
 				{
-					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed())
+					if (pacer[tempLowestDelayedPacerIndex].isStartTimeWithinXSecondsOnly(-4))
 					{
-						strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()-1)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+						leds[(pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()-1)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()] = CHSV (255,0,0);	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
 						return;
 					}
 					else
@@ -1019,10 +1012,10 @@ void pacerCountdown()
 						return;
 					}
 				}
-				strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()-2)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(255,255,0)); // yellow
+				leds[(pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()-2)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()] = CHSV (255,255,0); // yellow
 				return;
 			}
-			strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()-3)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(255,0,0));	// red
+			leds[(pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()-3)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()] = CHSV (255,0,0);	// red
 			return;
 		}
 	}
@@ -1037,7 +1030,7 @@ void pacerCountdown()
 				{
 					if (pacer[tempLowestDelayedPacerIndex].isCurrentlyDelayed())
 					{
-						strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel())%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(0,0,0));	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+						leds[(pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel())%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()] = CHSV (0,0,0);	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
 						return;
 					}
 					else
@@ -1047,13 +1040,13 @@ void pacerCountdown()
 						return;
 					}
 				}
-				strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()+1)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(255,255,0)); // yellow
+				leds[(pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()+1)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()] = CHSV (255,255,0); // yellow
 				return;
 			}
-			strip.setPixelColor((pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()+2)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels(), Color(255,0,0));	// red
+			leds[(pacer[tempLowestDelayedPacerIndex].getInitialHighlightedPanel()+2)%pacer[tempLowestDelayedPacerIndex].getTotalPacingPanels()] = CHSV (255,0,0);	// red
 			return;
 		}
-	}
+	}*/
 }
 
 //***************************
@@ -1064,7 +1057,7 @@ void pacerCountdown()
 void partyFunctions()
 {
 	// switch statement with party int as the value for choosing cases that calls different party functions based on its value
-	switch(partyInt)
+	/*switch(partyInt)
 	{
 		// {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"}
 		case 0:
@@ -1139,156 +1132,156 @@ void partyFunctions()
 			colorWipe(Color(0, 255, 255), 20);	// aqua
 			colorWipe(Color(0, 0, 0), 20);
 			break;
-	}
+	}*/
 }
 
 // Chase a dot down the strip
 // good for testing purposes
 void colorChase(uint32_t c, uint8_t wait) 
 {
-	int i;
+	//int i;
 
-	for (i=0; i < strip.numPixels(); i++) 
-	{
-		strip.setPixelColor(i, 0);  // turn all pixels off
-	}
+	//for (i=0; i < FastLED.size(); i++) //strip.numPixels();
+	//{
+	//	leds[i] = CHSV (0,0,0);  // turn all pixels off
+	//}
 
-	for (i=0; i < strip.numPixels(); i++) 
-	{
-		strip.setPixelColor(i, c); // set one pixel
-		strip.show();              // refresh strip display
-		delay(wait);               // hold image for a moment
-		strip.setPixelColor(i, 0); // erase pixel (but don't refresh yet)
-	}
-	strip.show(); // for last erased pixel
+	//for (i=0; i < FastLED.size(); i++) // strip.numPixels();
+	//{
+	//	strip.setPixelColor(i, c); // set one pixel
+	//	strip.show();              // refresh strip display
+	//	delay(wait);               // hold image for a moment
+	//	strip.setPixelColor(i, 0); // erase pixel (but don't refresh yet)
+	//}
+	//strip.show(); // for last erased pixel
 }
 
 // An "ordered dither" fills every pixel in a sequence that looks
 // sparkly and almost random, but actually follows a specific order.
 void dither(uint32_t c, uint8_t wait) 
 {
-	// Determine highest bit needed to represent pixel index
-	int hiBit = 0;
-	int n = strip.numPixels() - 1;
-	for(int bit=1; bit < 0x8000; bit <<= 1) 
-	{
-		if(n & bit) hiBit = bit;
-	}
+	//// Determine highest bit needed to represent pixel index
+	//int hiBit = 0;
+	//int n = FastLED.size() - 1; // strip.numPixels()
+	//for(int bit=1; bit < 0x8000; bit <<= 1) 
+	//{
+	//	if(n & bit) hiBit = bit;
+	//}
 
-	int bit, reverse;
-	for(int i=0; i<(hiBit << 1); i++) 
-	{
-		// Reverse the bits in i to create ordered dither:
-		reverse = 0;
-		for(bit=1; bit <= hiBit; bit <<= 1) 
-		{
-			reverse <<= 1;
-			if(i & bit) reverse |= 1;
-		}
-		strip.setPixelColor(reverse, c);
-		strip.show();
-		
-		delay(wait);
-	}
-	delay(250); // Hold image for 1/4 sec
+	//int bit, reverse;
+	//for(int i=0; i<(hiBit << 1); i++) 
+	//{
+	//	// Reverse the bits in i to create ordered dither:
+	//	reverse = 0;
+	//	for(bit=1; bit <= hiBit; bit <<= 1) 
+	//	{
+	//		reverse <<= 1;
+	//		if(i & bit) reverse |= 1;
+	//	}
+	//	strip.setPixelColor(reverse, c);
+	//	strip.show();
+	//	
+	//	delay(wait);
+	//}
+	//delay(250); // Hold image for 1/4 sec
 }
 
 // "Larson scanner" = Cylon/KITT bouncing light effect
 void scanner(uint8_t r, uint8_t g, uint8_t b, uint8_t wait) 
 {
-	int i, j, pos, dir;
+	//int i, j, pos, dir;
 
-	pos = 0;
-	dir = 1;
+	//pos = 0;
+	//dir = 1;
 
-	for(i=0; i<((strip.numPixels()-1) * 8); i++) 
-	{
-		// Draw 5 pixels centered on pos.  setPixelColor() will clip
-		// any pixels off the ends of the strip, no worries there.
-		// we'll make the colors dimmer at the edges for a nice pulse
-		// look
-		strip.setPixelColor(pos - 2, Color(r/4, g/4, b/4));
-		strip.setPixelColor(pos - 1, Color(r/2, g/2, b/2));
-		strip.setPixelColor(pos, Color(r, g, b));
-		strip.setPixelColor(pos + 1, Color(r/2, g/2, b/2));
-		strip.setPixelColor(pos + 2, Color(r/4, g/4, b/4));
+	//for(i=0; i<((FastLED.size()-1) * 8); i++) // strip.numPixels()
+	//{
+	//	// Draw 5 pixels centered on pos.  setPixelColor() will clip
+	//	// any pixels off the ends of the strip, no worries there.
+	//	// we'll make the colors dimmer at the edges for a nice pulse
+	//	// look
+	//	strip.setPixelColor(pos - 2, Color(r/4, g/4, b/4));
+	//	strip.setPixelColor(pos - 1, Color(r/2, g/2, b/2));
+	//	strip.setPixelColor(pos, Color(r, g, b));
+	//	strip.setPixelColor(pos + 1, Color(r/2, g/2, b/2));
+	//	strip.setPixelColor(pos + 2, Color(r/4, g/4, b/4));
 
-		strip.show();
-		
-		delay(wait);
-		// If we wanted to be sneaky we could erase just the tail end
-		// pixel, but it's much easier just to erase the whole thing
-		// and draw a new one next time.
-		for(j=-2; j<= 2; j++)
-		{
-			strip.setPixelColor(pos+j, Color(0,0,0));
-		}
-		// Bounce off ends of strip
-		pos += dir;
-		if(pos < 0) 
-		{
-			pos = 1;
-			dir = -dir;
-		} 
-		else if(pos >= strip.numPixels()) 
-		{
-			pos = strip.numPixels() - 2;
-			dir = -dir;
-		}
-	}
+	//	strip.show();
+	//	
+	//	delay(wait);
+	//	// If we wanted to be sneaky we could erase just the tail end
+	//	// pixel, but it's much easier just to erase the whole thing
+	//	// and draw a new one next time.
+	//	for(j=-2; j<= 2; j++)
+	//	{
+	//		strip.setPixelColor(pos+j, Color(0,0,0));
+	//	}
+	//	// Bounce off ends of strip
+	//	pos += dir;
+	//	if(pos < 0) 
+	//	{
+	//		pos = 1;
+	//		dir = -dir;
+	//	} 
+	//	else if(pos >= strip.numPixels()) 
+	//	{
+	//		pos = strip.numPixels() - 2;
+	//		dir = -dir;
+	//	}
+	//}
 }
 void rainbow(uint8_t wait) 
 {
-	int i, j;
-   
-	for (j=0; j < 256; j++)     // 3 cycles of all 256 colors in the wheel
-	{
-		for (i=0; i < strip.numPixels(); i++) 
-		{
-			strip.setPixelColor(i, Wheel( (i + j) % 255));
-		}  
-		strip.show();   // write all the pixels out
-		
-		delay(wait);
-	}
+	//int i, j;
+ //  
+	//for (j=0; j < 256; j++)     // 3 cycles of all 256 colors in the wheel
+	//{
+	//	for (i=0; i < strip.numPixels(); i++) 
+	//	{
+	//		strip.setPixelColor(i, Wheel( (i + j) % 255));
+	//	}  
+	//	strip.show();   // write all the pixels out
+	//	
+	//	delay(wait);
+	//}
 }
 
 // Slightly different, this one makes the rainbow wheel equally distributed 
 // along the chain
 void rainbowCycle(uint8_t wait)
 {
-	int i, j;
-  
-	for (j=0; j < 256 * 5; j++)     // 5 cycles of all 25 colors in the wheel
-	{
-		for (i=0; i < strip.numPixels(); i++) 
-		{
-			// tricky math! we use each pixel as a fraction of the full 96-color wheel
-			// (thats the i / strip.numPixels() part)
-			// Then add in j which makes the colors go around per pixel
-			// the % 96 is to make the wheel cycle around
-			strip.setPixelColor(i, Wheel( ((i * 256 / strip.numPixels()) + j) % 256) );
-		}  
-		strip.show();   // write all the pixels out
-		
-		delay(wait);
-	}
+	//int i, j;
+ // 
+	//for (j=0; j < 256 * 5; j++)     // 5 cycles of all 25 colors in the wheel
+	//{
+	//	for (i=0; i < FastLED.size(); i++) // strip.numPixels()
+	//	{
+	//		// tricky math! we use each pixel as a fraction of the full 96-color wheel
+	//		// (thats the i / strip.numPixels() part)
+	//		// Then add in j which makes the colors go around per pixel
+	//		// the % 96 is to make the wheel cycle around
+	//		strip.setPixelColor(i, Wheel( ((i * 256 / strip.numPixels()) + j) % 256) );
+	//	}  
+	//	strip.show();   // write all the pixels out
+	//	
+	//	delay(wait);
+	//}
 }
 
 // fill the dots one after the other with said color
 // good for testing purposes
 void colorWipe(uint32_t c, uint8_t wait) 
 {
-	int i;
-  
-	for (i=0; i < strip.numPixels(); i++) 
-	{
-		strip.setPixelColor(i, c);
-		strip.show();
-		
-		delay(wait);
-	}
-	setSerialInput();
+	//int i;
+ // 
+	//for (i=0; i < FastLED.size(); i++) // strip.numPixels()
+	//{
+	//	strip.setPixelColor(i, c);
+	//	strip.show();
+	//	
+	//	delay(wait);
+	//}
+	//setSerialInput();
 }
 
 /* Helper functions */

@@ -12,38 +12,79 @@
 #define _VSARDUINO_H_
 #define __AVR_ATmega32u4__
 #define __AVR_ATmega32U4__
+#define F_CPU 16000000L
+#define ARDUINO 165
+#define ARDUINO_AVR_YUN
+#define ARDUINO_ARCH_AVR
 #define USB_VID 0x2341
 #define USB_PID 0x8041
-#define USB_MANUFACTURER "\"Unknown\""
-#define USB_PRODUCT "\"Arduino Yun\""
-#define ARDUINO 165
-#define ARDUINO_MAIN
-#define __AVR__
-#define __avr__
-#define F_CPU 16000000L
 #define __cplusplus
 #define __inline__
 #define __asm__(x)
 #define __extension__
-#define __ATTR_PURE__
-#define __ATTR_CONST__
+//#define __ATTR_PURE__
+//#define __ATTR_CONST__
 #define __inline__
-#define __asm__ 
+//#define __asm__ 
 #define __volatile__
-
-#define __builtin_va_list
+#define GCC_VERSION 40801
+#define volatile(va_arg) 
+#define _CONST
+typedef void *__builtin_va_list;
 #define __builtin_va_start
 #define __builtin_va_end
-#define __DOXYGEN__
+//#define __DOXYGEN__
 #define __attribute__(x)
 #define NOINLINE __attribute__((noinline))
 #define prog_void
 #define PGM_VOID_P int
-            
+#ifndef __builtin_constant_p
+#define __builtin_constant_p __attribute__((__const__))
+#endif
+#ifndef __builtin_strlen
+#define __builtin_strlen  __attribute__((__const__))
+#endif
+#define NEW_H
+/*
+#ifndef __ATTR_CONST__
+#define __ATTR_CONST__ __attribute__((__const__))
+#endif
+
+#ifndef __ATTR_MALLOC__
+#define __ATTR_MALLOC__ __attribute__((__malloc__))
+#endif
+
+#ifndef __ATTR_NORETURN__
+#define __ATTR_NORETURN__ __attribute__((__noreturn__))
+#endif
+
+#ifndef __ATTR_PURE__
+#define __ATTR_PURE__ __attribute__((__pure__))
+#endif            
+*/
 typedef unsigned char byte;
 extern "C" void __cxa_pure_virtual() {;}
-#include "C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\arduino.h"
-#include "C:\Program Files (x86)\Arduino\hardware\arduino\avr\variants\yun\pins_arduino.h" 
-#include "C:\Users\david\Documents\Arduino\prac090914aTrackPractice\prac090914aTrackPractice.ino"
-#include "C:\Users\david\Documents\Arduino\prac090914aTrackPractice\resource.h"
+
+
+
+#include <arduino.h>
+#include <pins_arduino.h> 
+#undef F
+#define F(string_literal) ((const PROGMEM char *)(string_literal))
+#undef PSTR
+#define PSTR(string_literal) ((const PROGMEM char *)(string_literal))
+#undef cli
+#define cli()
+#define pgm_read_byte(address_short)
+#define pgm_read_word(address_short)
+#define pgm_read_word2(address_short)
+#define digitalPinToPort(P)
+#define digitalPinToBitMask(P) 
+#define digitalPinToTimer(P)
+#define analogInPinToBit(P)
+#define portOutputRegister(P)
+#define portInputRegister(P)
+#define portModeRegister(P)
+#include <prac090914aTrackPractice.ino>
+#include <resource.h>
 #endif

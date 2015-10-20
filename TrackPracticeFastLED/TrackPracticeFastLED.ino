@@ -31,10 +31,7 @@ public:
 	// variables
 
 	// classes
-	Pacer(double lapSecs, double initDelay, int firstHighlightedPanel, int meters, int light_Train_Length, int total_Pacing_Panels) // Constructor
-	{
-		//Adafruit_WS2801 strip1 = Adafruit_WS2801();
-
+	Pacer(double lapSecs, double initDelay, int firstHighlightedPanel, int meters, int light_Train_Length, int total_Pacing_Panels) { // Constructor
 		secondsPerLap = lapSecs;
 		initialDelay = initDelay;
 		currentHighlightedPacingPanel = firstHighlightedPanel;
@@ -52,107 +49,79 @@ public:
 		double lapTimesArray[20] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 		shade = CRGB::White;
 	};
-	int getNumberPacers()
-	{
+	int getNumberPacers() {
 		return numberPacers;
 	};
-	CRGB getShade()
-	{
+	CRGB getShade() {
 		return shade;
 	};
-	bool getIsStopwatchStarted()
-	{
+	bool getIsStopwatchStarted() {
 		return isStopwatchStarted;
 	};
-	bool getIsGoingToChangeSpeed()
-	{
+	bool getIsGoingToChangeSpeed() {
 		return isGoingToChangeSpeed;
 	};
-	bool isCurrentlyDelayed()
-	{
-		if ((startTime - millis()) > 0)
-		{
+	bool isCurrentlyDelayed() {
+		if ((startTime - millis()) > 0) {
 			return true;
 		}
 		else return false;
 	};
-	bool isStartTimeWithinXSecondsAndGreaterThanZero(int seconds)
-	{
-		if (((startTime - millis()) > 0) && ((startTime - millis()) < (seconds*1000)))
-		{
+	bool isStartTimeWithinXSecondsAndGreaterThanZero(int seconds) {
+		if (((startTime - millis()) > 0) && ((startTime - millis()) < (seconds*1000))) {
 			return true;
 		}
 		else return false;
 	};
-	bool isStartTimeWithinXSecondsOnly(int seconds)
-	{
-		if ((startTime - millis()) < (seconds*1000))
-		{
+	bool isStartTimeWithinXSecondsOnly(int seconds) {
+		if ((startTime - millis()) < (seconds*1000)) {
 			return true;
 		}
 		else return false;
 	};
-	bool getIsBackwards()
-	{
+	bool getIsBackwards() {
 		return isBackwards;
 	};
-	long getDelayRemaining()
-	{
+	long getDelayRemaining() {
 		return startTime - millis();
 	}
-	double getSecondsPerLap()
-	{
+	double getSecondsPerLap() {
 		return secondsPerLap;
 	};
-	double getFutureSecondsPerLap()
-	{
+	double getFutureSecondsPerLap() {
 		return futureSecondsPerLap;
 	};
-	int getTotalPacingPanels()
-	{
+	int getTotalPacingPanels() {
 		return totalPacingPanels;
 	};
-	int getLightTrainLength()
-	{
+	int getLightTrainLength() {
 		return lightTrainLength;
 	};
-	double getInitialDelay()
-	{
+	double getInitialDelay() {
 		return initialDelay;
 	};
-	int getInitialHighlightedPanel()
-	{
-		if (isBackwards)
-		{
+	int getInitialHighlightedPanel() {
+		if (isBackwards) {
 			return getTotalPacingPanels()-initialHighlightedPanel;
 		}
-		else
-		{
+		else {
 			return initialHighlightedPanel;
 		}
 	};
-	int getNumMeters()
-	{
+	int getNumMeters() {
 		return numMeters;
 	};
-	double getNextLightDelay()			// The delay between pacing panels lighting up. This is derived from the number of seconds that it takes for the pacing panels to complete a lap and the total number of pacing panels
-	{
+	double getNextLightDelay() {		// The delay between pacing panels lighting up. This is derived from the number of seconds that it takes for the pacing panels to complete a lap and the total number of pacing panels
 		return ((getSecondsPerLap() / (double)getTotalPacingPanels()*1000));
 	};
-	int getCurrentHighlightedPacingPanel()
-	{
+	int getCurrentHighlightedPacingPanel() {
 		long tempStartTime = getStartTime();
 		long temp_Millis = millis();
-		if (tempStartTime > (temp_Millis-0)) // make this temp_Millis - 1000 if you want to show green when it's go time
-		{
-			if (isBackwards)
-			{
-				if ((tempStartTime - temp_Millis) > (trafficLightCountDownDarkSeconds*1000))
-				{
-					if ((tempStartTime - temp_Millis) > (trafficLightCountDownYellowSeconds*1000))
-					{
-						if ((tempStartTime - temp_Millis) > (trafficLightCountDownRedSeconds*1000))
-						{
+		if (tempStartTime > (temp_Millis-0)) { // make this temp_Millis - 1000 if you want to show green when it's go time
+			if (isBackwards) {
+				if ((tempStartTime - temp_Millis) > (trafficLightCountDownDarkSeconds*1000)) {
+					if ((tempStartTime - temp_Millis) > (trafficLightCountDownYellowSeconds*1000)) {
+						if ((tempStartTime - temp_Millis) > (trafficLightCountDownRedSeconds*1000)) {
 							return (getInitialHighlightedPanel()-3)%getTotalPacingPanels();
 						}
 						return (getInitialHighlightedPanel()-2)%getTotalPacingPanels();
@@ -160,14 +129,10 @@ public:
 					return (getInitialHighlightedPanel()-1)%getTotalPacingPanels();
 				}
 			}
-			else // frontwards
-			{
-				if ((tempStartTime - temp_Millis) > (trafficLightCountDownDarkSeconds*1000))
-				{
-					if ((tempStartTime - temp_Millis) > (trafficLightCountDownYellowSeconds*1000))
-					{
-						if ((tempStartTime - temp_Millis) > (trafficLightCountDownRedSeconds*1000))
-						{
+			else { // frontwards
+				if ((tempStartTime - temp_Millis) > (trafficLightCountDownDarkSeconds*1000)) {
+					if ((tempStartTime - temp_Millis) > (trafficLightCountDownYellowSeconds*1000)) {
+						if ((tempStartTime - temp_Millis) > (trafficLightCountDownRedSeconds*1000)) {
 							return (getInitialHighlightedPanel()+2)%getTotalPacingPanels();
 						}
 						return (getInitialHighlightedPanel()+1)%getTotalPacingPanels();
@@ -176,117 +141,90 @@ public:
 				}
 			}
 		}
-		else
-		{
-			if (!isBackwards)	// if isBackwards is not true
-			{
+		else {
+			if (!isBackwards) {	// if isBackwards is not true
 				currentHighlightedPacingPanel = (int)(((getRunningTime()%(long)(getSecondsPerLap()*(double)1000))/getNextLightDelay())+getInitialHighlightedPanel())%getTotalPacingPanels();
 				return currentHighlightedPacingPanel;
 			}
-			else
-			{
+			else {
 				currentHighlightedPacingPanel = (getTotalPacingPanels()-1) - (int)(((getRunningTime()%(long)(getSecondsPerLap()*(double)1000))/getNextLightDelay())+getInitialHighlightedPanel())%getTotalPacingPanels();
 				return currentHighlightedPacingPanel;
 			}
 		}
 	};
-	long getStartTime()
-	{
+	long getStartTime() {
 		return startTime;
 	};
-	long getFutureStartTime()
-	{
+	long getFutureStartTime() {
 		return futureStartTime;
 	};
-	long getRunningTime()
-	{
+	long getRunningTime() {
 		// This if statement is meant to solve the problem of pacing panels running before their delay
 		if (millis() > getStartTime())
 		return millis() - getStartTime();		// if the fix doesn't work, just leave this line
 		else
 		return 0;
 	};
-	int getColorInt()
-	{
+	int getColorInt() {
 		return colorInt;
 	}
-	bool getIsVisible()
-	{
+	bool getIsVisible() {
 		return isVisible;
 	}
-	void setIsVisible(bool is_Visible)
-	{
+	void setIsVisible(bool is_Visible) {
 		isVisible = is_Visible;
 	}
-	void setShade(CRGB newShade)
-	{
+	void setShade(CRGB newShade) {
 		shade = newShade;
 	}
-	void setColorInt(int i)
-	{
-		if (i>=0 && i<8)
-		{
+	void setColorInt(int i) {
+		if (i>=0 && i<8) {
 			colorInt = i;
 		}
 	}
-	void setTotalPacingPanels(int total_Pacing_Panels_)
-	{
+	void setTotalPacingPanels(int total_Pacing_Panels_) {
 		totalPacingPanels = total_Pacing_Panels_;
 	};
-	void setStartTimeToNow()
-	{
+	void setStartTimeToNow() {
 		startTime = millis();
 	};
-	void setStartTimeToNowPlusDelay(long delayMillis)
-	{
+	void setStartTimeToNowPlusDelay(long delayMillis) {
 		startTime = millis() + delayMillis;
 	};
-	void setStartTime(long start_Time)
-	{
+	void setStartTime(long start_Time) {
 		startTime = start_Time;
 	};
-	void setFutureStartTime(long future_Start_Time)
-	{
+	void setFutureStartTime(long future_Start_Time) {
 		futureStartTime = future_Start_Time;
 	}
-	void setCurrentHighlightedPacingPanel (int current_Highlighted_Pacing_Panel)
-	{
+	void setCurrentHighlightedPacingPanel (int current_Highlighted_Pacing_Panel) {
 		currentHighlightedPacingPanel = current_Highlighted_Pacing_Panel;
 	};
-	void setIsStopwatchStarted(boolean is_Stopwatch_Started)
-	{
+	void setIsStopwatchStarted(boolean is_Stopwatch_Started) {
 		isStopwatchStarted = is_Stopwatch_Started;
 	};
-	void setIsBackwards(boolean is_Backwards)
-	{
+	void setIsBackwards(boolean is_Backwards) {
 		isBackwards = is_Backwards;
 	};
-	void setIsGoingToChangeSpeed(boolean is_Going_To_Change_Speed)
-	{
+	void setIsGoingToChangeSpeed(boolean is_Going_To_Change_Speed) {
 		isGoingToChangeSpeed = is_Going_To_Change_Speed;
 	};
-	void setNumberPacers(int number_Pacers)
-	{
+	void setNumberPacers(int number_Pacers) {
 		numberPacers = number_Pacers;
 	};
-	void setSecondsPerLap(double seconds_Per_Lap)
-	{
+	void setSecondsPerLap(double seconds_Per_Lap) {
 		secondsPerLap = seconds_Per_Lap;
 	};
-	void setFutureSecondsPerLap(double future_Seconds_Per_Lap)
-	{
+	void setFutureSecondsPerLap(double future_Seconds_Per_Lap) {
 		futureSecondsPerLap = future_Seconds_Per_Lap;
 	};
-	void setInitialDelay(int initDelay)
-	{
+	void setInitialDelay(int initDelay) {
 		initialDelay = initDelay;
 	};
-	void setInitialHighlightedPanel(int firstHighlightedPanel)
-	{
+	void setInitialHighlightedPanel(int firstHighlightedPanel) {
 		initialHighlightedPanel = firstHighlightedPanel;
 	};
-	void setNumMeters(int meters)
-	{
+	void setNumMeters(int meters) {
 		numMeters = meters;
 	};
 };
@@ -321,10 +259,10 @@ int totalPacingPanels = 26;
 //***********************************************
 // Declarations: Related to strings
 //***********************************************
-const int TRACK_FLAG_SIZE = 15, PARTY_FLAG_SIZE = 11;
-const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip", "a", "pct", "v", "apb", "spb"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
-const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
-String stringSepFlag = ",";	// holds the string that separates the values in the speed change function
+// const int TRACK_FLAG_SIZE = 15, PARTY_FLAG_SIZE = 11;
+// const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip", "a", "pct", "v", "apb", "spb"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
+// const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
+// String stringSepFlag = ",";	// holds the string that separates the values in the speed change function
 String serialStringInput;			// Holds the raw, unformatted serial input from user.
 String printThis = " ";
 String stringHolder = " ";
@@ -413,17 +351,14 @@ void loop() {
 	// getSerialFeedback(); // This overwhelms the program if too many pacers are added
 }
 
-void assignGetTotalPacingPanels(int total_Pacing_Panels)
-{
+void assignGetTotalPacingPanels(int total_Pacing_Panels) {
 	for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 		pacer[i].setTotalPacingPanels(total_Pacing_Panels);
 	}
 }
 
-void assignPacerColors()
-{
-	for (int i=0; i < pacer[0].getNumberPacers(); i++)
-	{
+void assignPacerColors() {
+	for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 		pacer[i].setShade(colorArray[i%8]);
 	}
 }
@@ -593,7 +528,7 @@ void multiIntCommand(YunClient client, String receivedCommand) {
 		  }
 	  }
 	  else {
-		pacer[pacerIndex].setShade(colorArray[thirdCommand%8]);
+		  pacer[pacerIndex].setShade(colorArray[thirdCommand%8]);
 	  }
   }
 
@@ -610,71 +545,59 @@ void multiIntCommand(YunClient client, String receivedCommand) {
 }
 
 void timeCommand(YunClient client) {
-  double new_SecondsPerLap;
-  int pacerIndex;
+	double new_SecondsPerLap;
+	int pacerIndex;
 
-  // Read pin number
-  pacerIndex = client.readStringUntil('/').toInt();
+	// Read pin number
+	pacerIndex = client.readStringUntil('/').toInt();
 
-  new_SecondsPerLap = client.parseInt();
+	new_SecondsPerLap = client.parseInt();
 
-  // If the next character is a '/' it means we have an URL
-  // with a value like: "/digital/13/1"
-  if (pacerIndex == 99) {
-	pacer[getLowestUnusedPacerIndex()].setStartTime(millis());
-	pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (new_SecondsPerLap);
-  }
-  else {
-    pacer[pacerIndex].setStartTime(millis());
-	pacer[pacerIndex].setSecondsPerLap (new_SecondsPerLap);
-  }
+	// If the next character is a '/' it means we have an URL
+	// with a value like: "/digital/13/1"
+	if (pacerIndex == 99) {
+		pacer[getLowestUnusedPacerIndex()].setStartTime(millis());
+		pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (new_SecondsPerLap);
+	}
+	else {
+		pacer[pacerIndex].setStartTime(millis());
+		pacer[pacerIndex].setSecondsPerLap (new_SecondsPerLap);
+	}
 
-  // Send feedback to client
-  client.print(F("Pin D"));
-  client.print(pacerIndex);
-  client.print(F(" set to "));
-  client.println(new_SecondsPerLap);
+	// Send feedback to client
+	client.print(F("Pin D"));
+	client.print(pacerIndex);
+	client.print(F(" set to "));
+	client.println(new_SecondsPerLap);
 
-  // Update datastore key with the current pin value
-  String key = "D";
-  key += pacerIndex;
-  Bridge.put(key, String(new_SecondsPerLap));
+	// Update datastore key with the current pin value
+	String key = "D";
+	key += pacerIndex;
+	Bridge.put(key, String(new_SecondsPerLap));
 }
 
 // Set Each Pixel's color based on what the what the current highlighted pixel (formerly, pacing panel) should be
-void setPixelColorBasedOnTime()
-{
+void setPixelColorBasedOnTime() {
 	// Turn every light off
-	for (int i=0; i < FastLED.size(); i++)
-	{
+	for (int i=0; i < FastLED.size(); i++) {
 		leds[i] = CRGB::Black; // CHSV( 0, 0, 0);
 	}
 
 	// Place the pacers where they are supposed to be with the correct color
-	for (int j=0; j < getHighestActivePacerIndex()+1; j++)		// This can be changed to j < inputPacer (test with actual lights to be sure)
-	{
-		if (pacer[j].getSecondsPerLap() > 0 && pacer[j].getIsVisible())
-		{
+	for (int j=0; j < getHighestActivePacerIndex()+1; j++) {		// This can be changed to j < inputPacer (test with actual lights to be sure)
+		if (pacer[j].getSecondsPerLap() > 0 && pacer[j].getIsVisible()) {
 			leds[pacer[j].getCurrentHighlightedPacingPanel()] = pacer[j].getShade(); // CHSV( 255, 255, 255);
-
 			// strip.setPixelColor(pacer[j].getCurrentHighlightedPacingPanel(), getColorFromInt(pacer[j].getColorInt())); // set one pixel
 		}
 	}
-
-	// Traffic Light Countdown for delayed pacers
-	// delayedPacerTrafficLightCountdown();
-
 	FastLED.show();              // refresh strip display
-
 }
 
 // Returns the lowest available (empty) pacer or return the highest index; returns the index of the lowest pacer instance with getSecondsPerLap() == 0 unless all are greater than 0, in which case it will return the int associated with the instance of the highest pacer
 int getLowestUnusedPacerIndex()
 {
-	for (int i = 0; i < pacer[0].getNumberPacers(); i++)
-	{
-		if (pacer[i].getSecondsPerLap() == 0)
-		{
+	for (int i = 0; i < pacer[0].getNumberPacers(); i++) {
+		if (pacer[i].getSecondsPerLap() == 0) {
 			return i;
 		}
 	}
@@ -684,12 +607,9 @@ int getLowestUnusedPacerIndex()
 }
 
 // Returns the index of the highest pacer instance with getSecondsPerLap() > 0 or returns -1 if no pacers have getSecondsPerLap > 0
-int getHighestActivePacerIndex()
-{
-	for (int i = pacer[0].getNumberPacers()-1; i > -1; i--)
-	{
-		if (pacer[i].getSecondsPerLap() > 0)
-		{
+int getHighestActivePacerIndex() {
+	for (int i = pacer[0].getNumberPacers()-1; i > -1; i--) {
+		if (pacer[i].getSecondsPerLap() > 0) {
 			return i;
 		}
 	}

@@ -38,6 +38,7 @@ public:
 		initialHighlightedPanel = firstHighlightedPanel;
 		numMeters = meters;
 		colorInt = numberPacers%7;
+		// new code: colorInt = numberPacers%8;
 		lightTrainLength = light_Train_Length;
 		isStopwatchStarted = false;
 		isBackwards = false;
@@ -181,6 +182,7 @@ public:
 		if (i>=0 && i<8) {
 			colorInt = i;
 		}
+		// colorInt = i%8;
 	}
 	void setTotalPacingPanels(int total_Pacing_Panels_) {
 		totalPacingPanels = total_Pacing_Panels_;
@@ -287,7 +289,7 @@ double secondsPerLapHolder;
 long tempMillis;		// holds the milliseconds time that a pacer's speed will change
 double newSecondsPerLap; // holds the double (floating point) time that will become the pacer's secondsPerLap
 
-// Listen to the default port 5555, the Yún webserver
+// Listen to the default port 5555, the YÃºn webserver
 // will forward there all the HTTP requests you send
 YunServer server;
 
@@ -351,6 +353,12 @@ void loop() {
 	// getSerialFeedback(); // This overwhelms the program if too many pacers are added
 }
 
+// Use an integer parameter to determine what RGB color value it is associated with
+CRGB getColorFromInt(int i)
+{
+	return colorArray[i];
+}
+
 void assignGetTotalPacingPanels(int total_Pacing_Panels) {
 	for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 		pacer[i].setTotalPacingPanels(total_Pacing_Panels);
@@ -360,6 +368,7 @@ void assignGetTotalPacingPanels(int total_Pacing_Panels) {
 void assignPacerColors() {
 	for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 		pacer[i].setShade(colorArray[i%8]);
+		// new code: pacer[i].setColorInt(i);
 	}
 }
 
@@ -420,28 +429,30 @@ void pacerCommand(YunClient client, String receivedCommand) {
 
 	if (receivedCommand == "reset"){
 		if (isnan(command2.toInt()) != 1){
+			tempMillis = millis();
 			if (value == 99){
 				for (int i=0; i <= getHighestActivePacerIndex(); i++){
-					pacer[i].setStartTimeToNow();
+					pacer[i].setStartTime(tempMillis);
 				}
 				return;
 			}
 			if (value > -1){
-				pacer[value].setStartTimeToNow();
+				pacer[value].setStartTime(tempMillis);
 			}
 		}
 	}
 
 	if (receivedCommand == "resetdelay"){
 		if (isnan(command2.toInt()) != 1){
+			tempMillis = millis();
 			if (value == 99){
 				for (int i=0; i <= getHighestActivePacerIndex(); i++){
-					pacer[i].setStartTimeToNowPlusDelay(10000);
+					pacer[i].setStartTime(tempMillis+resetDelayDefaultDelayTimeMillis);
 				}
 				return;
 			}
 			if (value > -1){
-				pacer[value].setStartTimeToNowPlusDelay(10000);
+				pacer[value].setStartTime(tempMillis+resetDelayDefaultDelayTimeMillis);
 			}
 		}
 	}
@@ -514,6 +525,7 @@ void multiIntCommand(YunClient client, String receivedCommand) {
 		  if (isColorsNormal){
 			  for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 				  pacer[i].setShade(colorArray[thirdCommand%8]);
+				  // new code: pacer[i].setColorInt(thirdCommand);
 			  }
 			  isColorsNormal = false;
 			  if (thirdCommand == 99) {
@@ -529,6 +541,7 @@ void multiIntCommand(YunClient client, String receivedCommand) {
 	  }
 	  else {
 		  pacer[pacerIndex].setShade(colorArray[thirdCommand%8]);
+		  // new code: pacer[pacerIndex].setColorInt(thirdCommand);
 	  }
   }
 
@@ -587,6 +600,7 @@ void setPixelColorBasedOnTime() {
 	for (int j=0; j < getHighestActivePacerIndex()+1; j++) {		// This can be changed to j < inputPacer (test with actual lights to be sure)
 		if (pacer[j].getSecondsPerLap() > 0 && pacer[j].getIsVisible()) {
 			leds[pacer[j].getCurrentHighlightedPacingPanel()] = pacer[j].getShade(); // CHSV( 255, 255, 255);
+			// new code: leds[pacer[j].getCurrentHighlightedPacingPanel()] = getColorFromInt(pacer[j].getColorInt());
 			// strip.setPixelColor(pacer[j].getCurrentHighlightedPacingPanel(), getColorFromInt(pacer[j].getColorInt())); // set one pixel
 		}
 	}

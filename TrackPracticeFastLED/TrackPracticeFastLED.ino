@@ -16,7 +16,6 @@ private:
 				numMeters,						// This determines how many meters the pacing lights will run for
 				totalPacingPanels,				// This is passed as an argument from JpanelPractice
 				lightTrainLength;			//UI// This determines how many lights wide this pacer will be
-	CRGB shade;		//Color shade;		//UI// This determines the color of the pacer's pacing lights
 	bool isStopwatchStarted;
 	bool isBackwards;
 	bool isGoingToChangeSpeed;				// indicates whether the pacer is about to change its speed
@@ -37,8 +36,7 @@ public:
 		currentHighlightedPacingPanel = firstHighlightedPanel;
 		initialHighlightedPanel = firstHighlightedPanel;
 		numMeters = meters;
-		colorInt = numberPacers%7;
-		// new code: colorInt = numberPacers%8;
+		colorInt = numberPacers%8;
 		lightTrainLength = light_Train_Length;
 		isStopwatchStarted = false;
 		isBackwards = false;
@@ -48,13 +46,9 @@ public:
 		numberPacers++;
 		startTime = millis() + (long)initialDelay;
 		double lapTimesArray[20] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-		shade = CRGB::White;
 	};
 	int getNumberPacers() {
 		return numberPacers;
-	};
-	CRGB getShade() {
-		return shade;
 	};
 	bool getIsStopwatchStarted() {
 		return isStopwatchStarted;
@@ -174,9 +168,6 @@ public:
 	}
 	void setIsVisible(bool is_Visible) {
 		isVisible = is_Visible;
-	}
-	void setShade(CRGB newShade) {
-		shade = newShade;
 	}
 	void setColorInt(int i) {
 		if (i>=0 && i<8) {
@@ -367,8 +358,7 @@ void assignGetTotalPacingPanels(int total_Pacing_Panels) {
 
 void assignPacerColors() {
 	for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-		pacer[i].setShade(colorArray[i%8]);
-		// new code: pacer[i].setColorInt(i);
+		pacer[i].setColorInt(i);
 	}
 }
 
@@ -524,8 +514,7 @@ void multiIntCommand(YunClient client, String receivedCommand) {
 	  if (pacerIndex == 99) {
 		  if (isColorsNormal){
 			  for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-				  pacer[i].setShade(colorArray[thirdCommand%8]);
-				  // new code: pacer[i].setColorInt(thirdCommand);
+				  pacer[i].setColorInt(thirdCommand);
 			  }
 			  isColorsNormal = false;
 			  if (thirdCommand == 99) {
@@ -540,8 +529,7 @@ void multiIntCommand(YunClient client, String receivedCommand) {
 		  }
 	  }
 	  else {
-		  pacer[pacerIndex].setShade(colorArray[thirdCommand%8]);
-		  // new code: pacer[pacerIndex].setColorInt(thirdCommand);
+		  pacer[pacerIndex].setColorInt(thirdCommand);
 	  }
   }
 
@@ -599,8 +587,7 @@ void setPixelColorBasedOnTime() {
 	// Place the pacers where they are supposed to be with the correct color
 	for (int j=0; j < getHighestActivePacerIndex()+1; j++) {		// This can be changed to j < inputPacer (test with actual lights to be sure)
 		if (pacer[j].getSecondsPerLap() > 0 && pacer[j].getIsVisible()) {
-			leds[pacer[j].getCurrentHighlightedPacingPanel()] = pacer[j].getShade(); // CHSV( 255, 255, 255);
-			// new code: leds[pacer[j].getCurrentHighlightedPacingPanel()] = getColorFromInt(pacer[j].getColorInt());
+			leds[pacer[j].getCurrentHighlightedPacingPanel()] = getColorFromInt(pacer[j].getColorInt());
 			// strip.setPixelColor(pacer[j].getCurrentHighlightedPacingPanel(), getColorFromInt(pacer[j].getColorInt())); // set one pixel
 		}
 	}

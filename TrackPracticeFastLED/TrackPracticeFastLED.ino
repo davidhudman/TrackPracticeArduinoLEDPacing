@@ -36,7 +36,7 @@ public:
 		currentHighlightedPacingPanel = firstHighlightedPanel;
 		initialHighlightedPanel = firstHighlightedPanel;
 		numMeters = meters;
-		colorInt = numberPacers%8;
+		colorInt = numberPacers;
 		lightTrainLength = light_Train_Length;
 		isStopwatchStarted = false;
 		isBackwards = false;
@@ -170,10 +170,7 @@ public:
 		isVisible = is_Visible;
 	}
 	void setColorInt(int i) {
-		if (i>=0 && i<8) {
-			colorInt = i;
-		}
-		// colorInt = i%8;
+		colorInt = i;
 	}
 	void setTotalPacingPanels(int total_Pacing_Panels_) {
 		totalPacingPanels = total_Pacing_Panels_;
@@ -243,7 +240,8 @@ const int PACER_ARRAY_SIZE = 10;
 Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(2,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), 
 	Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), 
 	Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS) };
-CRGB colorArray[8] = {CRGB::White, CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Blue, CRGB::Orange, CRGB::Purple, CRGB::Pink};
+const int COLOR_ARRAY_SIZE = 8;
+CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::White, CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Blue, CRGB::Orange, CRGB::Purple, CRGB::Pink};
 int totalPacingPanels = 26;
 // const int COLOR_ARRAY_SIZE = 7;
 // const String colorName[COLOR_ARRAY_SIZE] = {"white", "green", "yellow", "red", "magenta", "blue", "cyan"};
@@ -347,7 +345,7 @@ void loop() {
 // Use an integer parameter to determine what RGB color value it is associated with
 CRGB getColorFromInt(int i)
 {
-	return colorArray[i];
+	return colorArray[i%COLOR_ARRAY_SIZE];
 }
 
 void assignGetTotalPacingPanels(int total_Pacing_Panels) {
@@ -364,46 +362,44 @@ void assignPacerColors() {
 
 void process(YunClient client) {
   // read the command
-  String command = client.readStringUntil('/');
+  int command = client.readStringUntil('/').toInt();
 
   // is "digital" command?
-  if (command == "time") {
-    timeCommand(client);
+  if (command == 0) { // clear
+    pacerCommand(client, command);
   }
 
-  if (command == "color") {
+  if (command == 1) { // reset
+    pacerCommand(client, command);
+  }
+
+  if (command == 2) { // reset delay
+    pacerCommand(client, command);
+  }
+
+  if (command == 3) { // visible
+    pacerCommand(client, command);
+  }
+
+  if (command == 4) { // backwards
+    pacerCommand(client, command);
+  }
+
+  if (command == 5) { // color
 	  multiIntCommand(client, command);
   }
 
-  if (command == "clear") {
-    pacerCommand(client, command);
+  if (command == 7) { // time
+    timeCommand(client);
   }
-
-  if (command == "reset") {
-    pacerCommand(client, command);
-  }
-
-  if (command == "resetdelay") {
-    pacerCommand(client, command);
-  }
-
-  if (command == "visible") {
-    pacerCommand(client, command);
-  }
-
-  if (command == "backwards") {
-    pacerCommand(client, command);
-  }
-
-
 }
 
-void pacerCommand(YunClient client, String receivedCommand) {
+void pacerCommand(YunClient client, int receivedCommand) {
 
 	String command2 = client.readString();
 	int value = command2.toInt();
 
-	if (receivedCommand == "clear"){
+	if (receivedCommand == 0){ // clear
 		if (isnan(command2.toInt()) != 1){
 			if (value == 99){
 				for (int i=0; i <= getHighestActivePacerIndex(); i++){
@@ -417,7 +413,7 @@ void pacerCommand(YunClient client, String receivedCommand) {
 		}
 	}
 
-	if (receivedCommand == "reset"){
+	if (receivedCommand == 1){ // reset
 		if (isnan(command2.toInt()) != 1){
 			tempMillis = millis();
 			if (value == 99){
@@ -432,7 +428,7 @@ void pacerCommand(YunClient client, String receivedCommand) {
 		}
 	}
 
-	if (receivedCommand == "resetdelay"){
+	if (receivedCommand == 2){ // resetdelay
 		if (isnan(command2.toInt()) != 1){
 			tempMillis = millis();
 			if (value == 99){
@@ -446,7 +442,7 @@ void pacerCommand(YunClient client, String receivedCommand) {
 			}
 		}
 	}
-	if (receivedCommand == "visible"){
+	if (receivedCommand == 3){ //visible
 		if (isnan(command2.toInt()) != 1){
 			if (value == 99){
 				for (int i=0; i <= pacer[0].getNumberPacers(); i++){
@@ -459,7 +455,7 @@ void pacerCommand(YunClient client, String receivedCommand) {
 			}
 		}
 	}
-	if (receivedCommand == "backwards"){
+	if (receivedCommand == 4){ // backwards
 		if (isnan(command2.toInt()) != 1){
 			if (value == 99){
 				for (int i=0; i <= pacer[0].getNumberPacers(); i++){
@@ -499,7 +495,7 @@ void pacerCommand(YunClient client, String receivedCommand) {
 	}*/
 }
 
-void multiIntCommand(YunClient client, String receivedCommand) {
+void multiIntCommand(YunClient client, int receivedCommand) {
   int pacerIndex;
   int thirdCommand;
 
@@ -510,7 +506,7 @@ void multiIntCommand(YunClient client, String receivedCommand) {
 
   // If the next character is a '/' it means we have an URL
   // with a value like: "/digital/13/1"
-  if (receivedCommand == "color") {
+  if (receivedCommand == 5) { // color
 	  if (pacerIndex == 99) {
 		  if (isColorsNormal){
 			  for (int i=0; i < pacer[0].getNumberPacers(); i++) {
@@ -533,7 +529,7 @@ void multiIntCommand(YunClient client, String receivedCommand) {
 	  }
   }
 
-  /*if (receivedCommand == "lights") {
+  /*if (receivedCommand == 6) { // lights
 	  if (pacerIndex == 99) {
 		  for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 			  assignGetTotalPacingPanels(thirdCommand);
@@ -595,8 +591,7 @@ void setPixelColorBasedOnTime() {
 }
 
 // Returns the lowest available (empty) pacer or return the highest index; returns the index of the lowest pacer instance with getSecondsPerLap() == 0 unless all are greater than 0, in which case it will return the int associated with the instance of the highest pacer
-int getLowestUnusedPacerIndex()
-{
+int getLowestUnusedPacerIndex() {
 	for (int i = 0; i < pacer[0].getNumberPacers(); i++) {
 		if (pacer[i].getSecondsPerLap() == 0) {
 			return i;

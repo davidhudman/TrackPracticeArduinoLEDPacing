@@ -68,6 +68,7 @@ public:
 		}
 		else return false;
 	};
+	// is the time remaining until the start less than the parameter number of seconds
 	bool isStartTimeWithinXSecondsOnly(int seconds) {
 		if ((startTime - millis()) < (seconds*1000)) {
 			return true;
@@ -112,28 +113,42 @@ public:
 	int getCurrentHighlightedPacingPanel() {
 		long tempStartTime = getStartTime();
 		long temp_Millis = millis();
+		// if it's backwards (end to beginning)
 		if (tempStartTime > (temp_Millis-0)) { // make this temp_Millis - 1000 if you want to show green when it's go time
-			if (isBackwards) {
-				if ((tempStartTime - temp_Millis) > (trafficLightCountDownDarkSeconds*1000)) {
-					if ((tempStartTime - temp_Millis) > (trafficLightCountDownYellowSeconds*1000)) {
-						if ((tempStartTime - temp_Millis) > (trafficLightCountDownRedSeconds*1000)) {
-							return (getInitialHighlightedPanel()-3)%getTotalPacingPanels();
+			if (getIsBackwards()) {
+				if (isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds)) {
+					if (isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds)) {
+						if (isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds)) {
+							if (isStartTimeWithinXSecondsOnly(0)) {
+								return (getInitialHighlightedPanel())%getTotalPacingPanels();	// green
+								// setVisible(true);
+							}
+							// setVisible(false);
+							return (getInitialHighlightedPanel()+1)%getTotalPacingPanels();	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
 						}
-						return (getInitialHighlightedPanel()-2)%getTotalPacingPanels();
+						return (getInitialHighlightedPanel()-1)%getTotalPacingPanels(); // yellow
 					}
-					return (getInitialHighlightedPanel()-1)%getTotalPacingPanels();
+					return (getInitialHighlightedPanel()-2)%getTotalPacingPanels(); // red
 				}
+				return (getInitialHighlightedPanel()-2)%getTotalPacingPanels(); // doesn't really matter what number this is
 			}
-			else { // frontwards
-				if ((tempStartTime - temp_Millis) > (trafficLightCountDownDarkSeconds*1000)) {
-					if ((tempStartTime - temp_Millis) > (trafficLightCountDownYellowSeconds*1000)) {
-						if ((tempStartTime - temp_Millis) > (trafficLightCountDownRedSeconds*1000)) {
-							return (getInitialHighlightedPanel()+2)%getTotalPacingPanels();
+			// If it's frontwards (beginning to end)
+			else {
+				if (isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds)) {
+					if (isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds)) {
+						if (isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds)) {
+							if (isStartTimeWithinXSecondsOnly(0)) {
+								return (getInitialHighlightedPanel())%getTotalPacingPanels();	// green
+								// setVisible(true);
+							}
+							// setVisible(false);
+							return (getInitialHighlightedPanel()-1)%getTotalPacingPanels();	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
 						}
-						return (getInitialHighlightedPanel()+1)%getTotalPacingPanels();
+						return (getInitialHighlightedPanel()+1)%getTotalPacingPanels(); // yellow
 					}
-					return (getInitialHighlightedPanel()+0)%getTotalPacingPanels();
+					return (getInitialHighlightedPanel()+2)%getTotalPacingPanels(); // red
 				}
+				return (getInitialHighlightedPanel()+2)%getTotalPacingPanels(); // doesn't really matter what number this is
 			}
 		}
 		else {
@@ -161,7 +176,28 @@ public:
 		return 0;
 	};
 	int getColorInt() {
-		return colorInt;
+		/*long tempStartTime = getStartTime();
+		long temp_Millis = millis();
+		// if it's backwards (end to beginning)
+		if (tempStartTime > (temp_Millis-1000)) { // make this temp_Millis - 1000 if you want to show green when it's go time
+			if (isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds)) {
+				if (isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds)) {
+					if (isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds)) {
+						if (isStartTimeWithinXSecondsOnly(0)) {
+							return 1;	// green
+						}
+						return 2; // yellow (now with change) - would've been: black or "off" - it doesn't really matter what the color is because we're turning visibility off
+					}
+					return 2; // yellow
+				}
+				return 3; // red
+			}
+			return colorInt;
+		}
+		else */
+		{
+			return colorInt;
+		}
 	}
 	bool getIsVisible() {
 		return isVisible;

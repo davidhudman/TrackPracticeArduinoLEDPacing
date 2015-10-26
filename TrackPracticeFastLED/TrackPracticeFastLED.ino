@@ -397,41 +397,150 @@ void assignPacerColors() {
 }
 
 void process(YunClient client) {
-  int command = client.readStringUntil('/').toInt();		// read the command
+	int command = client.readStringUntil('/').toInt();		// read the command
+	int pacerIndex;
+	double thirdCommand;
 
-  switch(command)
-  {
-	  case 0:	// clear
-		  multiInputCommand(client, command);
-		  break;
-	  case 1:	// reset
-		  multiInputCommand(client, command);
-		  break;
-	  case 2:	// resetdelay
-		  multiInputCommand(client, command);
-		  break;
-	  case 3:	// visible
-		  multiInputCommand(client, command);
-		  break;
-	  case 4:	// backwards
-		  multiInputCommand(client, command);
-		  break;
-	  case 5:	// color
-		  multiInputCommand(client, command);
-		  break;
-	  case 6:	// lights
-		  break;
-	  case 7:	// time
-		  multiInputCommand(client, command);
-		  break;
-	  case 8:	// change speed by
-		  multiInputCommand(client, command);
-		  break;
-	  default:
-		  break;
-  }
-}
+	// Read pin number
+	pacerIndex = client.readStringUntil('/').toInt();
+	thirdCommand = client.parseFloat();
 
+	// If the next character is a '/' it means we have an URL
+	// with a value like: "/1/99/0"
+
+	switch(command) {
+		case 0:	// clear
+			if (pacerIndex == 99){
+				for (int i=0; i <= getHighestActivePacerIndex(); i++){
+					pacer[i].setSecondsPerLap(0);
+				}
+				return;
+			}
+			if (pacerIndex > -1){
+				pacer[pacerIndex].setSecondsPerLap(0);
+			}
+			break;
+		case 1:	// reset
+			tempMillis = millis();
+			if (pacerIndex == 99){
+				for (int i=0; i <= getHighestActivePacerIndex(); i++){
+					pacer[i].setStartTime(tempMillis);
+				}
+				return;
+			}
+			if (pacerIndex > -1){
+				pacer[pacerIndex].setStartTime(tempMillis);
+			}
+		break;
+		case 2:	// resetdelay
+			tempMillis = millis();
+			if (pacerIndex == 99){
+				for (int i=0; i <= getHighestActivePacerIndex(); i++){
+					pacer[i].setStartTime(tempMillis+resetDelayDefaultDelayTimeMillis);
+				}
+				return;
+			}
+			if (pacerIndex > -1){
+				pacer[pacerIndex].setStartTime(tempMillis+resetDelayDefaultDelayTimeMillis);
+			}
+		break;
+		case 3:	// visible
+			if (pacerIndex == 99){
+				for (int i=0; i <= pacer[0].getNumberPacers(); i++){
+					pacer[i].setIsVisible(!pacer[i].getIsVisible());
+				}
+				return;
+			}
+			if (pacerIndex > -1){
+				pacer[pacerIndex].setIsVisible(!pacer[pacerIndex].getIsVisible());
+			}
+		break;
+		case 4:	// backwards
+			if (pacerIndex == 99){
+				for (int i=0; i <= pacer[0].getNumberPacers(); i++){
+					pacer[i].setIsBackwards(!pacer[i].getIsBackwards());
+				}
+				return;
+			}
+			if (pacerIndex > -1){
+				pacer[pacerIndex].setIsBackwards(!pacer[pacerIndex].getIsBackwards());
+			}
+			break;
+		case 5:	// color
+			if (pacerIndex == 99) {
+				if (isColorsNormal){
+					for (int i=0; i < pacer[0].getNumberPacers(); i++) {
+						pacer[i].setColorInt((int)thirdCommand);
+					}
+					isColorsNormal = false;
+					if ((int)thirdCommand == 99) {
+						assignPacerColors();
+					}
+					return;
+				}
+				else {
+					assignPacerColors();
+					isColorsNormal = true;
+					return;
+				}
+			}
+			else {
+				pacer[pacerIndex].setColorInt((int)thirdCommand);
+			}
+			break;
+		case 6:	// lights
+			/*
+			if (pacerIndex == 99) {
+				for (int i=0; i < pacer[0].getNumberPacers(); i++) {
+					assignGetTotalPacingPanels(thirdCommand);
+				}
+			}
+			else {
+				assignGetTotalPacingPanels(thirdCommand);
+			}*/
+			break;
+		case 7:	// time
+			// If the next character is a '/' it means we have an URL
+			// with a value like: "/digital/13/1"
+			if (pacerIndex == 99) {
+				pacer[getLowestUnusedPacerIndex()].setStartTime(millis());
+				pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (thirdCommand);
+			}
+			else {
+				pacer[pacerIndex].setStartTime(millis());
+				pacer[pacerIndex].setSecondsPerLap (thirdCommand);
+			}
+
+			/*// Send feedback to client
+			client.print(F("Pin D"));
+			client.print(pacerIndex);
+			client.print(F(" set to "));
+			client.println(thirdCommand);
+
+			// Update datastore key with the current pin value
+			String key = "D";
+			key += pacerIndex;
+			Bridge.put(key, String(thirdCommand));*/
+			break;
+		case 8:	// change speed by
+			if (pacerIndex == 99) {
+				for (int i=0; i < pacer[0].getNumberPacers(); i++) {
+					if (pacer[i].getSecondsPerLap() > 0) {
+						setChangedPacerNewStartTime(i, pacer[i].getSecondsPerLap()+thirdCommand);
+					}
+				}
+			}
+			else {
+				if (pacer[pacerIndex].getSecondsPerLap() > 0) {
+					setChangedPacerNewStartTime(pacerIndex, pacer[pacerIndex].getSecondsPerLap()+thirdCommand);
+				}
+			}
+			break;
+		default:
+		break;
+	}
+	}
+/*
 void multiInputCommand(YunClient client, int receivedCommand) {
   int pacerIndex;
   double thirdCommand;
@@ -564,7 +673,7 @@ void multiInputCommand(YunClient client, int receivedCommand) {
 	  }
   }
 
-  /*if (receivedCommand == 6) { // lights
+  if (receivedCommand == 6) { // lights
 	  if (pacerIndex == 99) {
 		  for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 			  assignGetTotalPacingPanels(thirdCommand);
@@ -573,9 +682,9 @@ void multiInputCommand(YunClient client, int receivedCommand) {
 	  else {
 		  assignGetTotalPacingPanels(thirdCommand);
 	  }
-  }*/
+  }
 }
-
+*/
 // Set Each Pixel's color based on what the what the current highlighted pixel (formerly, pacing panel) should be
 void setPixelColorBasedOnTime() {
 	// Turn every light off

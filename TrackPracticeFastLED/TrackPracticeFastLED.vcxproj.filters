@@ -119,5 +119,8 @@
     <ClInclude Include="power_mgt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="__vm\.TrackPracticeFastLED.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

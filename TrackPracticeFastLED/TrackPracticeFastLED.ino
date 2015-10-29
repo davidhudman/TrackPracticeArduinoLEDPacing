@@ -176,10 +176,9 @@ public:
 		return 0;
 	};
 	int getColorInt() {
-		/*long tempStartTime = getStartTime();
 		long temp_Millis = millis();
 		// if it's backwards (end to beginning)
-		if (tempStartTime > (temp_Millis-1000)) { // make this temp_Millis - 1000 if you want to show green when it's go time
+		if (getStartTime() > (temp_Millis-1000)) { // make this temp_Millis - 1000 if you want to show green when it's go time
 			if (isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds)) {
 				if (isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds)) {
 					if (isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds)) {
@@ -194,7 +193,7 @@ public:
 			}
 			return colorInt;
 		}
-		else */
+		else
 		{
 			return colorInt;
 		}
@@ -539,7 +538,7 @@ void process(YunClient client) {
 		default:
 		break;
 	}
-	}
+}
 /*
 void multiInputCommand(YunClient client, int receivedCommand) {
   int pacerIndex;

@@ -119,12 +119,12 @@ public:
 				if (isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds)) {
 					if (isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds)) {
 						if (isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds)) {
-							if (isStartTimeWithinXSecondsOnly(0)) {
+							/*if (isStartTimeWithinXSecondsOnly(0)) {
 								return (getInitialHighlightedPanel())%getTotalPacingPanels();	// green
 								// setVisible(true);
-							}
+							}*/
 							// setVisible(false);
-							return (getInitialHighlightedPanel()+1)%getTotalPacingPanels();	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+							return (getInitialHighlightedPanel())%getTotalPacingPanels();	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
 						}
 						return (getInitialHighlightedPanel()-1)%getTotalPacingPanels(); // yellow
 					}
@@ -137,10 +137,10 @@ public:
 				if (isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds)) {
 					if (isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds)) {
 						if (isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds)) {
-							if (isStartTimeWithinXSecondsOnly(0)) {
+							/*if (isStartTimeWithinXSecondsOnly(0)) {
 								return (getInitialHighlightedPanel())%getTotalPacingPanels();	// green
 								// setVisible(true);
-							}
+							}*/
 							// setVisible(false);
 							return (getInitialHighlightedPanel()-1)%getTotalPacingPanels();	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
 						}
@@ -182,9 +182,9 @@ public:
 			if (isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds)) {
 				if (isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds)) {
 					if (isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds)) {
-						if (isStartTimeWithinXSecondsOnly(0)) {
+						/*if (isStartTimeWithinXSecondsOnly(0)) {
 							return 1;	// green
-						}
+						}*/
 						return 2; // yellow (now with change) - would've been: black or "off" - it doesn't really matter what the color is because we're turning visibility off
 					}
 					return 2; // yellow

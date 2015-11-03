@@ -257,7 +257,7 @@ public:
 int Pacer::numberPacers = 0;
 
 // How many leds in your strip?
-#define NUM_LEDS 26
+#define NUM_LEDS 100
 
 // For led chips like Neopixels, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
@@ -430,7 +430,7 @@ void process(YunClient client) {
 			if (pacerIndex > -1){
 				pacer[pacerIndex].setStartTime(tempMillis);
 			}
-		break;
+			break;
 		case 2:	// resetdelay
 			tempMillis = millis();
 			if (pacerIndex == 99){
@@ -442,7 +442,7 @@ void process(YunClient client) {
 			if (pacerIndex > -1){
 				pacer[pacerIndex].setStartTime(tempMillis+resetDelayDefaultDelayTimeMillis);
 			}
-		break;
+			break;
 		case 3:	// visible
 			if (pacerIndex == 99){
 				for (int i=0; i <= pacer[0].getNumberPacers(); i++){
@@ -453,7 +453,7 @@ void process(YunClient client) {
 			if (pacerIndex > -1){
 				pacer[pacerIndex].setIsVisible(!pacer[pacerIndex].getIsVisible());
 			}
-		break;
+			break;
 		case 4:	// backwards
 			if (pacerIndex == 99){
 				for (int i=0; i <= pacer[0].getNumberPacers(); i++){
@@ -488,8 +488,7 @@ void process(YunClient client) {
 			}
 			break;
 		case 6:	// lights
-			/*
-			if (pacerIndex == 99) {
+			/*if (pacerIndex == 99) {
 				for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 					assignGetTotalPacingPanels(thirdCommand);
 				}
@@ -497,6 +496,9 @@ void process(YunClient client) {
 			else {
 				assignGetTotalPacingPanels(thirdCommand);
 			}*/
+			for (int i=0; i < pacer[0].getNumberPacers(); i++) {
+					assignGetTotalPacingPanels(thirdCommand);
+			}
 			break;
 		case 7:	// time
 			// If the next character is a '/' it means we have an URL
@@ -536,7 +538,7 @@ void process(YunClient client) {
 			}
 			break;
 		default:
-		break;
+			break;
 	}
 }
 /*

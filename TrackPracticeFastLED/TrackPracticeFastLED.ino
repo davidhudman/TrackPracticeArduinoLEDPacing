@@ -303,7 +303,7 @@ int tempLowestDelayedPacerIndex = -1;
 
 bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need to figure out which pacer is going to change its speed
 bool partyMode = false;				// This mode (now partyMode) String (now bool) has two possible values: "track" and "party" (now true and false). Each value will result in different function calls
-bool isColorsNormal = true;			// temporary for testing
+// bool isColorsNormal = true;			// temporary for testing
 int partyInt = 10;					// This integer controls what party functions will be run; 0 indicates all will be run
 
 //***********************************************
@@ -360,19 +360,13 @@ void setup() {
 }
 
 void loop() { 
-  
 	setPixelColorBasedOnTime();
-	
-	// Get clients coming from server
-	YunClient client = server.accept();
+	YunClient client = server.accept();		// Get clients coming from server
 
 	// There is a new client?
 	if (client) {
-		// Process request
-		process(client);
-
-		// Close connection and free resources.
-		client.stop();
+		process(client);	// Process request
+		client.stop();		// Close connection and free resources.
 	}
 	// getSerialFeedback(); // This overwhelms the program if too many pacers are added
 }
@@ -466,25 +460,21 @@ void process(YunClient client) {
 			}
 			break;
 		case 5:	// color
+			// if "all pacers" is selected
 			if (pacerIndex == 99) {
-				if (isColorsNormal){
-					for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-						pacer[i].setColorInt((int)thirdCommand);
-					}
-					isColorsNormal = false;
-					if ((int)thirdCommand == 99) {
-						assignPacerColors();
-					}
-					return;
+				for (int i=0; i < pacer[0].getNumberPacers(); i++) {
+					pacer[i].setColorInt((int)thirdCommand);
 				}
-				else {
+				// if "normal colors" is selected
+				if ((int)thirdCommand == 99) {
 					assignPacerColors();
-					isColorsNormal = true;
-					return;
 				}
+				return;
 			}
+			// if a specific pacer is selected
 			else {
 				pacer[pacerIndex].setColorInt((int)thirdCommand);
+				// The problem/error/bug here is that if the user selected "normal colors", the pacer color will probably be different from what it was assigned
 			}
 			break;
 		case 6:	// lights
@@ -497,7 +487,7 @@ void process(YunClient client) {
 				assignGetTotalPacingPanels(thirdCommand);
 			}*/
 			for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-					assignGetTotalPacingPanels(thirdCommand);
+					assignGetTotalPacingPanels((int)thirdCommand);
 			}
 			break;
 		case 7:	// time
@@ -541,151 +531,7 @@ void process(YunClient client) {
 			break;
 	}
 }
-/*
-void multiInputCommand(YunClient client, int receivedCommand) {
-  int pacerIndex;
-  double thirdCommand;
 
-  // Read pin number
-  pacerIndex = client.readStringUntil('/').toInt();
-  thirdCommand = client.parseFloat();
-
-  // If the next character is a '/' it means we have an URL
-  // with a value like: "/1/99/0"
-	if (receivedCommand == 0){ // clear
-		if (pacerIndex == 99){
-			for (int i=0; i <= getHighestActivePacerIndex(); i++){
-				pacer[i].setSecondsPerLap(0);
-			}
-			return;
-		}
-		if (pacerIndex > -1){
-			pacer[pacerIndex].setSecondsPerLap(0);
-		}
-	}
-
-	if (receivedCommand == 1){ // reset
-		tempMillis = millis();
-		if (pacerIndex == 99){
-			for (int i=0; i <= getHighestActivePacerIndex(); i++){
-				pacer[i].setStartTime(tempMillis);
-			}
-			return;
-		}
-		if (pacerIndex > -1){
-			pacer[pacerIndex].setStartTime(tempMillis);
-		}
-	}
-
-	if (receivedCommand == 2){ // resetdelay
-		tempMillis = millis();
-		if (pacerIndex == 99){
-			for (int i=0; i <= getHighestActivePacerIndex(); i++){
-				pacer[i].setStartTime(tempMillis+resetDelayDefaultDelayTimeMillis);
-			}
-			return;
-		}
-		if (pacerIndex > -1){
-			pacer[pacerIndex].setStartTime(tempMillis+resetDelayDefaultDelayTimeMillis);
-		}
-	}
-	if (receivedCommand == 3){ //visible
-		if (pacerIndex == 99){
-			for (int i=0; i <= pacer[0].getNumberPacers(); i++){
-				pacer[i].setIsVisible(!pacer[i].getIsVisible());
-			}
-			return;
-		}
-		if (pacerIndex > -1){
-			pacer[pacerIndex].setIsVisible(!pacer[pacerIndex].getIsVisible());
-		}
-	}
-	if (receivedCommand == 4){ // backwards
-		if (pacerIndex == 99){
-			for (int i=0; i <= pacer[0].getNumberPacers(); i++){
-				pacer[i].setIsBackwards(!pacer[i].getIsBackwards());
-			}
-			return;
-		}
-		if (pacerIndex > -1){
-			pacer[pacerIndex].setIsBackwards(!pacer[pacerIndex].getIsBackwards());
-		}
-	}
-
-  if (receivedCommand == 5) { // color
-	  if (pacerIndex == 99) {
-		  if (isColorsNormal){
-			  for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-				  pacer[i].setColorInt((int)thirdCommand);
-			  }
-			  isColorsNormal = false;
-			  if ((int)thirdCommand == 99) {
-				  assignPacerColors();
-			  }
-			  return;
-		  }
-		  else {
-			  assignPacerColors();
-			  isColorsNormal = true;
-			  return;
-		  }
-	  }
-	  else {
-		  pacer[pacerIndex].setColorInt((int)thirdCommand);
-	  }
-  }
-
-  if (receivedCommand == 7) {
-  // If the next character is a '/' it means we have an URL
-	// with a value like: "/digital/13/1"
-	if (pacerIndex == 99) {
-		pacer[getLowestUnusedPacerIndex()].setStartTime(millis());
-		pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (thirdCommand);
-	}
-	else {
-		pacer[pacerIndex].setStartTime(millis());
-		pacer[pacerIndex].setSecondsPerLap (thirdCommand);
-	}
-
-	// Send feedback to client
-	client.print(F("Pin D"));
-	client.print(pacerIndex);
-	client.print(F(" set to "));
-	client.println(thirdCommand);
-
-	// Update datastore key with the current pin value
-	String key = "D";
-	key += pacerIndex;
-	Bridge.put(key, String(thirdCommand));
-  }
-
-  if (receivedCommand == 8) {  // change speed in flight
-	  if (pacerIndex == 99) {
-			for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-				if (pacer[i].getSecondsPerLap() > 0) {
-					setChangedPacerNewStartTime(i, pacer[i].getSecondsPerLap()+thirdCommand);
-				}
-			}
-	  }
-	  else {
-		  if (pacer[pacerIndex].getSecondsPerLap() > 0) {
-			  setChangedPacerNewStartTime(pacerIndex, pacer[pacerIndex].getSecondsPerLap()+thirdCommand);
-		  }
-	  }
-  }
-
-  if (receivedCommand == 6) { // lights
-	  if (pacerIndex == 99) {
-		  for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-			  assignGetTotalPacingPanels(thirdCommand);
-		  }
-	  }
-	  else {
-		  assignGetTotalPacingPanels(thirdCommand);
-	  }
-  }
-}
-*/
 // Set Each Pixel's color based on what the what the current highlighted pixel (formerly, pacing panel) should be
 void setPixelColorBasedOnTime() {
 	// Turn every light off
@@ -745,9 +591,7 @@ int getLowestUnusedPacerIndex() {
 			return i;
 		}
 	}
-
-	// Return the index of the highest pacer if a lower empty one was not found
-	return pacer[0].getNumberPacers()-1;
+	return pacer[0].getNumberPacers()-1;	// Return the index of the highest pacer if a lower empty one was not found
 }
 
 // Returns the index of the highest pacer instance with getSecondsPerLap() > 0 or returns -1 if no pacers have getSecondsPerLap > 0

@@ -462,19 +462,24 @@ void process(YunClient client) {
 		case 5:	// color
 			// if "all pacers" is selected
 			if (pacerIndex == 99) {
-				for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-					pacer[i].setColorInt((int)thirdCommand);
-				}
 				// if "normal colors" is selected
 				if ((int)thirdCommand == 99) {
 					assignPacerColors();
 				}
-				return;
+				else {
+					for (int i=0; i < pacer[0].getNumberPacers(); i++) {
+						pacer[i].setColorInt((int)thirdCommand);
+					}
+				}
 			}
 			// if a specific pacer is selected
 			else {
-				pacer[pacerIndex].setColorInt((int)thirdCommand);
-				// The problem/error/bug here is that if the user selected "normal colors", the pacer color will probably be different from what it was assigned
+				if ((int)thirdCommand == 99){
+					assignPacerColors();
+				}
+				else {
+					pacer[pacerIndex].setColorInt((int)thirdCommand);
+				}
 			}
 			break;
 		case 6:	// lights

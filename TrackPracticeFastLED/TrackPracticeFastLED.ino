@@ -499,11 +499,11 @@ void process(YunClient client) {
 			// If the next character is a '/' it means we have an URL
 			// with a value like: "/digital/13/1"
 			if (pacerIndex == 99) {
-				pacer[getLowestUnusedPacerIndex()].setStartTime(millis());
+				pacer[getLowestUnusedPacerIndex()].setStartTime(millis()+7000);
 				pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (thirdCommand);
 			}
 			else {
-				pacer[pacerIndex].setStartTime(millis());
+				pacer[pacerIndex].setStartTime(millis()+7000);
 				pacer[pacerIndex].setSecondsPerLap (thirdCommand);
 			}
 

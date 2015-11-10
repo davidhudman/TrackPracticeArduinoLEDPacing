@@ -277,6 +277,7 @@ Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(2,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_
 	Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS) };
 const int COLOR_ARRAY_SIZE = 8;
 CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::White, CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Blue, CRGB::Orange, CRGB::Purple, CRGB::Pink};
+// new code: CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Blue, CRGB::Orange, CRGB::Purple, CRGB::Pink};
 int totalPacingPanels = 26;
 // const int COLOR_ARRAY_SIZE = 7;
 // const String colorName[COLOR_ARRAY_SIZE] = {"white", "green", "yellow", "red", "magenta", "blue", "cyan"};
@@ -372,31 +373,30 @@ void loop() {
 }
 
 // Use an integer parameter to determine what RGB color value it is associated with
-CRGB getColorFromInt(int i)
-{
+CRGB getColorFromInt(int i) {
 	return colorArray[i%COLOR_ARRAY_SIZE];
 }
 
+// Sets the number of pacing pixels for each pacer to the number sent in the parameter
 void assignGetTotalPacingPanels(int total_Pacing_Panels) {
 	for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 		pacer[i].setTotalPacingPanels(total_Pacing_Panels);
 	}
 }
 
+// Sets each pacer's color according to the its corresponding element in the colorArray
 void assignPacerColors() {
 	for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 		pacer[i].setColorInt(i);
+		// pacer[i].setColorInt((i%8)+1);
 	}
 }
 
+// Process the cURL command
 void process(YunClient client) {
-	int command = client.readStringUntil('/').toInt();		// read the command
-	int pacerIndex;
-	double thirdCommand;
-
-	// Read pin number
-	pacerIndex = client.readStringUntil('/').toInt();
-	thirdCommand = client.parseFloat();
+	int command = client.readStringUntil('/').toInt(),		// read the command
+		pacerIndex = client.readStringUntil('/').toInt();	// read pin number
+	double thirdCommand = client.parseFloat();
 
 	// If the next character is a '/' it means we have an URL
 	// with a value like: "/1/99/0"
@@ -555,12 +555,15 @@ void setPixelColorBasedOnTime() {
 }
 
 // returns the new start time for a pacer intersecting the given pacer at the current light its on given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
-void setChangedPacerNewStartTime(int index, double new_SecondsPerLap)
-{
-	long temp_Millis, startTime = pacer[index].getStartTime(), new_startTime, currentTime = millis(), divisionResult;
-	int getTotalPacingPanels = pacer[index].getTotalPacingPanels(), initialHighlightedPanel = pacer[index].getInitialHighlightedPanel();
+void setChangedPacerNewStartTime(int index, double new_SecondsPerLap) {
+	long new_startTime,
+		divisionResult,
+		startTime = pacer[index].getStartTime(),
+		currentTime = millis();
+	int getTotalPacingPanels = pacer[index].getTotalPacingPanels(), 
+		initialHighlightedPanel = pacer[index].getInitialHighlightedPanel(),
+		current_Highlighted_Pacing_Panel = pacer[index].getCurrentHighlightedPacingPanel();
 	double getSecondsPerLap = pacer[index].getSecondsPerLap();
-	int current_Highlighted_Pacing_Panel = pacer[index].getCurrentHighlightedPacingPanel();
 
 	// use currentHighlightedPacingPanel and solve for getRunningTime (what myMillis() will be when it hit that panel that you're on)
 	new_startTime = (long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel)*(getSecondsPerLap / getTotalPacingPanels * 1000))+(getSecondsPerLap*1000)) + startTime);
@@ -570,8 +573,7 @@ void setChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 
 	new_startTime = new_startTime + (divisionResult*(getSecondsPerLap*1000)) + (getSecondsPerLap*1000);
 	
-	while (currentTime < new_startTime)
-	{
+	while (currentTime < new_startTime) {
 		new_startTime -= (getSecondsPerLap*1000);
 	}
 
@@ -580,11 +582,9 @@ void setChangedPacerNewStartTime(int index, double new_SecondsPerLap)
 	pacer[index].setStartTime(new_startTime);
 	pacer[index].setSecondsPerLap(new_SecondsPerLap);
 	pacer[index].setInitialHighlightedPanel(initialHighlightedPanel);
-	// tempMillis = temp_Millis;
 
 	// then use the new getRunningTime (actually tempMillis and the new_SecondsPerLap to solve for startTime
 	// new_startTime = -(long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - temp_Millis);
-
 	// we need to return the new_startTime to change the pacer's start time, but we need to do this after myMillis() > tempMillis;
 	// return new_startTime;
 }

@@ -201,6 +201,36 @@ public:
 	bool getIsVisible() {
 		return isVisible;
 	}
+	
+	// returns the new start time for a pacer intersecting the given pacer at the current light its on given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
+	void setChangedPacerNewStartTime(double new_SecondsPerLap) {
+		long new_startTime,
+			divisionResult,
+			currentTime = millis();
+
+		// use currentHighlightedPacingPanel and solve for getRunningTime (what myMillis() will be when it hit that panel that you're on)
+		new_startTime = (long)(((((getCurrentHighlightedPacingPanel() + getTotalPacingPanels()) - getInitialHighlightedPanel())*(getSecondsPerLap() / getTotalPacingPanels() * 1000))+(getSecondsPerLap()*1000)) + getStartTime());
+		// temp_Millis probably needs to be verified bigger than myMillis()
+
+		divisionResult = currentTime / (getSecondsPerLap()*1000);
+
+		new_startTime = new_startTime + (divisionResult*(getSecondsPerLap()*1000)) + (getSecondsPerLap()*1000);
+	
+		while (currentTime < new_startTime) {
+			new_startTime -= (getSecondsPerLap()*1000);
+		}
+
+		new_startTime -= (getCurrentHighlightedPacingPanel() - getInitialHighlightedPanel()) * ((new_SecondsPerLap*1000) / getTotalPacingPanels());	// when this line is added, also make the change below from setting the pacer's initialHighlightedPanel with currentHighlightedPanel to initialHighlightedPanel
+
+		setStartTime(new_startTime);
+		setSecondsPerLap(new_SecondsPerLap);
+		setInitialHighlightedPanel(getInitialHighlightedPanel());
+
+		// then use the new getRunningTime (actually tempMillis and the new_SecondsPerLap to solve for startTime
+		// new_startTime = -(long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - temp_Millis);
+		// we need to return the new_startTime to change the pacer's start time, but we need to do this after myMillis() > tempMillis;
+		// return new_startTime;
+	}
 	void setIsVisible(bool is_Visible) {
 		isVisible = is_Visible;
 	}
@@ -522,13 +552,13 @@ void process(YunClient client) {
 			if (pacerIndex == 99) {
 				for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 					if (pacer[i].getSecondsPerLap() > 0) {
-						setChangedPacerNewStartTime(i, pacer[i].getSecondsPerLap()+thirdCommand);
+						pacer[i].setChangedPacerNewStartTime(pacer[i].getSecondsPerLap()+thirdCommand);
 					}
 				}
 			}
 			else {
 				if (pacer[pacerIndex].getSecondsPerLap() > 0) {
-					setChangedPacerNewStartTime(pacerIndex, pacer[pacerIndex].getSecondsPerLap()+thirdCommand);
+					pacer[pacerIndex].setChangedPacerNewStartTime(pacer[pacerIndex].getSecondsPerLap()+thirdCommand);
 				}
 			}
 			break;
@@ -552,41 +582,6 @@ void setPixelColorBasedOnTime() {
 		}
 	}
 	FastLED.show();              // refresh strip display
-}
-
-// returns the new start time for a pacer intersecting the given pacer at the current light its on given the desired seconds per lap; change the Speed of the Pacer To (command "spt")
-void setChangedPacerNewStartTime(int index, double new_SecondsPerLap) {
-	long new_startTime,
-		divisionResult,
-		startTime = pacer[index].getStartTime(),
-		currentTime = millis();
-	int getTotalPacingPanels = pacer[index].getTotalPacingPanels(), 
-		initialHighlightedPanel = pacer[index].getInitialHighlightedPanel(),
-		current_Highlighted_Pacing_Panel = pacer[index].getCurrentHighlightedPacingPanel();
-	double getSecondsPerLap = pacer[index].getSecondsPerLap();
-
-	// use currentHighlightedPacingPanel and solve for getRunningTime (what myMillis() will be when it hit that panel that you're on)
-	new_startTime = (long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel)*(getSecondsPerLap / getTotalPacingPanels * 1000))+(getSecondsPerLap*1000)) + startTime);
-	// temp_Millis probably needs to be verified bigger than myMillis()
-
-	divisionResult = currentTime / (getSecondsPerLap*1000);
-
-	new_startTime = new_startTime + (divisionResult*(getSecondsPerLap*1000)) + (getSecondsPerLap*1000);
-	
-	while (currentTime < new_startTime) {
-		new_startTime -= (getSecondsPerLap*1000);
-	}
-
-	new_startTime -= (current_Highlighted_Pacing_Panel - initialHighlightedPanel) * ((new_SecondsPerLap*1000) / getTotalPacingPanels);	// when this line is added, also make the change below from setting the pacer's initialHighlightedPanel with currentHighlightedPanel to initialHighlightedPanel
-
-	pacer[index].setStartTime(new_startTime);
-	pacer[index].setSecondsPerLap(new_SecondsPerLap);
-	pacer[index].setInitialHighlightedPanel(initialHighlightedPanel);
-
-	// then use the new getRunningTime (actually tempMillis and the new_SecondsPerLap to solve for startTime
-	// new_startTime = -(long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - temp_Millis);
-	// we need to return the new_startTime to change the pacer's start time, but we need to do this after myMillis() > tempMillis;
-	// return new_startTime;
 }
 
 // Returns the lowest available (empty) pacer or return the highest index; returns the index of the lowest pacer instance with getSecondsPerLap() == 0 unless all are greater than 0, in which case it will return the int associated with the instance of the highest pacer

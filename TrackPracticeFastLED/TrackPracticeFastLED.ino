@@ -301,87 +301,53 @@ CRGB leds[NUM_LEDS];
 //***********************************************
 // Declarations: Related to the pacer objects
 //***********************************************
-const int PACER_ARRAY_SIZE = 10;
+const int PACER_ARRAY_SIZE = 10,
+			COLOR_ARRAY_SIZE = 8;
 Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(2,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), 
 	Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), 
 	Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS) };
-const int COLOR_ARRAY_SIZE = 8;
-CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::White, CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Blue, CRGB::Orange, CRGB::Purple, CRGB::Pink};
+CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::White, CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Blue, CRGB::Orange, CRGB::Purple, CRGB::Pink};	// white, green, yellow, red, blue, lime green, aqua, grey
 // new code: CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Blue, CRGB::Orange, CRGB::Purple, CRGB::Pink};
-int totalPacingPanels = 26;
-// const int COLOR_ARRAY_SIZE = 7;
-// const String colorName[COLOR_ARRAY_SIZE] = {"white", "green", "yellow", "red", "magenta", "blue", "cyan"};
-		// white, red, yellow, green, cyan, blue, magenta
+// alternate line for other WS2811: CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Green, CRGB::Yellow, CRGB::Red, CRGB::Blue, CRGB::Lime, CRGB::Aqua, CRGB::Grey};
 
 //***********************************************
 // Declarations: Related to strings
 //***********************************************
-// const int TRACK_FLAG_SIZE = 15, PARTY_FLAG_SIZE = 11;
-// const String trackFlags[TRACK_FLAG_SIZE] = {"c", "r", "l", "b", "rd", "rdp", "party", "track", "spt", "strip", "a", "pct", "v", "apb", "spb"};	// This array is used to make a hashmap so that I can associate the index of the array with an integer for a switch statement
-// const String partyFlags[PARTY_FLAG_SIZE] = {"red wipe", "green wipe", "blue wipe", "rainbow", "rainbow cycle", "red wipe", "red wipe", "scanner", "multi-color dither", "multi-color colorchase", "multi-color wipe"};	// This array is used to make a hasmap so I can associate the index of the array with its party function
-// String stringSepFlag = ",";	// holds the string that separates the values in the speed change function
-String serialStringInput;			// Holds the raw, unformatted serial input from user.
-String printThis = " ";
-String stringHolder = " ";
+String serialStringInput,			// Holds the raw, unformatted serial input from user.
+		printThis = " ", 
+		stringHolder = " ";
 
 //***********************************************
 // Declarations: All variables predefined
 //***********************************************
-long resetDelayDefaultDelayTimeMillis = 10000;		// the default delay time when resetting pacers on a delay
-int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0;
-int serialCountTo = 50, trafficLightCountTo = 100, partySerialCountTo = 5;
-int tempLowestDelayedPacerIndex = -1;
+long resetDelayDefaultDelayTimeMillis = 10000,		// the default delay time when resetting pacers on a delay
+		tempMillis;		// holds the milliseconds time that a pacer's speed will change
+int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0,
+	serialCountTo = 50, trafficLightCountTo = 100, partySerialCountTo = 5, 
+	tempLowestDelayedPacerIndex = -1, totalPacingPanels = 26;
 
-bool isChangePacerSpeedNeeded = false; // trigger to determine whether we need to figure out which pacer is going to change its speed
-bool partyMode = false;				// This mode (now partyMode) String (now bool) has two possible values: "track" and "party" (now true and false). Each value will result in different function calls
-// bool isColorsNormal = true;			// temporary for testing
-int partyInt = 10;					// This integer controls what party functions will be run; 0 indicates all will be run
+bool isChangePacerSpeedNeeded = false, // trigger to determine whether we need to figure out which pacer is going to change its speed
+		partyMode = false;				// This mode (now partyMode) String (now bool) has two possible values: "track" and "party" (now true and false). Each value will result in different function calls
 
 //***********************************************
 // Declarations: All variables not predefined
 //***********************************************
-double secondsPerLapHolder;
-long tempMillis;		// holds the milliseconds time that a pacer's speed will change
-double newSecondsPerLap; // holds the double (floating point) time that will become the pacer's secondsPerLap
 
-// Listen to the default port 5555, the YÃºn webserver
+// Listen to the default port 5555, the Yun webserver
 // will forward there all the HTTP requests you send
 YunServer server;
 
-
-
 void setup() { 
-      /* Uncomment/edit one of the following lines for your leds arrangement.
-      // FastLED.addLeds<TM1803, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<TM1804, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<TM1809, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);*/
+      // Uncomment/edit one of the following lines for your leds arrangement.      
        FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
-  	  /* FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-      // FastLED.addLeds<APA104, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<UCS1903, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<UCS1903B, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<GW6205, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<GW6205_400, DATA_PIN, RGB>(leds, NUM_LEDS);
-      
-      // FastLED.addLeds<WS2801, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<SM16716, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<LPD8806, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<P9813, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<APA102, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<DOTSTAR, RGB>(leds, NUM_LEDS);
-
-      // FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<SM16716, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<LPD8806, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<P9813, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<DOTSTAR, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);*/
+	  // FastLED.addLeds<firstParameter, DATA_PIN, RGB>(leds, NUM_LEDS);	// firstParameter can be: TM1803, TM1804, TM1809, WS2811, WS2812, APA104, UCS1903, UCS1903B, GW6205, GW6205_400
+	  // FastLED.addLeds<NEOPIXEL,   DATA_PIN>(leds, NUM_LEDS);    
+      // FastLED.addLeds<firstParameter,  RGB>(leds, NUM_LEDS);				// firstParameter can be: WS2801, SM16716, LPD8806, P9813, APA102, DOTSTAR
+	  // FastLED.addLeds<firstParameter, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS); // firstParameter can be: WS2801, SM16716, LPD8806, P9813, APA102, DOTSTAR
+	  // Documentation on constructors can be found in FastLED examples
 
 	   assignPacerColors();
 	   assignGetTotalPacingPanels(totalPacingPanels);
-	   
 	   Bridge.begin();
 
 	   // Listen for incoming connection only from localhost
@@ -526,8 +492,6 @@ void process(YunClient client) {
 			}
 			break;
 		case 7:	// time
-			// If the next character is a '/' it means we have an URL
-			// with a value like: "/digital/13/1"
 			if (pacerIndex == 99) {
 				pacer[getLowestUnusedPacerIndex()].setStartTime(millis()+7000);
 				pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (thirdCommand);
@@ -578,7 +542,6 @@ void setPixelColorBasedOnTime() {
 	for (int j=0; j < getHighestActivePacerIndex()+1; j++) {		// This can be changed to j < inputPacer (test with actual lights to be sure)
 		if (pacer[j].getSecondsPerLap() > 0 && pacer[j].getIsVisible()) {
 			leds[pacer[j].getCurrentHighlightedPacingPanel()] = getColorFromInt(pacer[j].getColorInt());
-			// strip.setPixelColor(pacer[j].getCurrentHighlightedPacingPanel(), getColorFromInt(pacer[j].getColorInt())); // set one pixel
 		}
 	}
 	FastLED.show();              // refresh strip display

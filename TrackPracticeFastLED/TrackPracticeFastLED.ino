@@ -185,16 +185,15 @@ public:
 						/*if (isStartTimeWithinXSecondsOnly(0)) {
 							return 1;	// green
 						}*/
-						return 2; // yellow (now with change) - would've been: black or "off" - it doesn't really matter what the color is because we're turning visibility off
+						return 4; // yellow (now with change) - would've been: black or "off" - it doesn't really matter what the color is because we're turning visibility off
 					}
-					return 2; // yellow
+					return 4; // yellow
 				}
-				return 3; // red
+				return 2; // red
 			}
 			return colorInt;
 		}
-		else
-		{
+		else {
 			return colorInt;
 		}
 	}
@@ -306,16 +305,15 @@ const int PACER_ARRAY_SIZE = 10,
 Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(2,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), 
 	Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), 
 	Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS) };
-CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::White, CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Blue, CRGB::Orange, CRGB::Purple, CRGB::Pink};	// white, green, yellow, red, blue, lime green, aqua, grey
-// new code: CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Red, CRGB::Yellow, CRGB::Green, CRGB::Blue, CRGB::Orange, CRGB::Purple, CRGB::Pink};
-// alternate line for other WS2811: CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Green, CRGB::Yellow, CRGB::Red, CRGB::Blue, CRGB::Lime, CRGB::Aqua, CRGB::Grey};
+CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Green, CRGB::YellowGreen, CRGB::Yellow, CRGB::Red, CRGB::Blue, CRGB::Cyan};
+// white, red, red-orange, yellow, green, dark blue, purple-pink
+// white, green, yellow, red, blue, lime green, aqua(CRGB::Purple), grey (CRGB::Pink)
+// alternate line for other WS2811: CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Red, CRGB::Orange, CRGB::Yellow, CRGB::Green, CRGB::Blue, CRGB::Purple};
 
 //***********************************************
 // Declarations: Related to strings
 //***********************************************
-String serialStringInput,			// Holds the raw, unformatted serial input from user.
-		printThis = " ", 
-		stringHolder = " ";
+// String serialStringInput, printThis, stringHolder;		// Holds the raw, unformatted serial input from user.
 
 //***********************************************
 // Declarations: All variables predefined
@@ -382,8 +380,12 @@ void assignGetTotalPacingPanels(int total_Pacing_Panels) {
 
 // Sets each pacer's color according to the its corresponding element in the colorArray
 void assignPacerColors() {
-	for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-		pacer[i].setColorInt(i);
+	for (int i=0, j=0; i < pacer[0].getNumberPacers(); i++) {
+		if (j%COLOR_ARRAY_SIZE == 0) {
+			j++;
+		}
+		pacer[i].setColorInt(j);
+		j++;
 		// pacer[i].setColorInt((i%8)+1);
 	}
 }
@@ -535,7 +537,7 @@ void process(YunClient client) {
 void setPixelColorBasedOnTime() {
 	// Turn every light off
 	for (int i=0; i < FastLED.size(); i++) {
-		leds[i] = CRGB::Black; // CHSV( 0, 0, 0);
+		leds[i] = colorArray[0]; // CHSV( 0, 0, 0);
 	}
 
 	// Place the pacers where they are supposed to be with the correct color

@@ -9,19 +9,21 @@
 */
 class Pacer {
 private:
-	double initialDelay, 					//UI// How long each pacer should wait before starting
-				secondsPerLap,				//UI// The number of seconds that it will take for the pacing panels to complete one lap
-				futureSecondsPerLap;			// The number of seconds per lap that the pacer will be set to
-	int initialHighlightedPanel, 			//UI// This determines where the pacer starts from
-				numMeters,						// This determines how many meters the pacing lights will run for
-				totalPacingPanels,				// This is passed as an argument from JpanelPractice
-				lightTrainLength;			//UI// This determines how many lights wide this pacer will be
+	double initialDelay, 					// How long each pacer should wait before starting
+			secondsPerLap,					// The number of seconds that it will take for the pacing panels to complete one lap
+			futureSecondsPerLap;			// The number of seconds per lap that the pacer will be set to
+	int initialHighlightedPanel, 			// This determines where the pacer starts from
+			numMeters,						// This determines how many meters the pacing lights will run for
+			totalPacingPanels,				// This is passed as an argument from JpanelPractice
+			lightTrainLength;				// This determines how many lights wide this pacer will be
 	bool isStopwatchStarted;
 	bool isBackwards;
 	bool isGoingToChangeSpeed;				// indicates whether the pacer is about to change its speed
 	bool isVisible;							// indicates whether the pacer should be visible or not (the color black / it logically keeps running)
-	long startTime, futureStartTime;
-	static int numberPacers; // static
+	long startTime,
+			endTime = 100000000,			// Keeps pacer from running more than this amount of time
+			futureStartTime;
+	static int numberPacers;				// static
 	int currentHighlightedPacingPanel;		// This determines which pacing panel is currently lit up
 	int colorInt;							// Determines which color index in the color array that the pacer should be
 	double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
@@ -47,6 +49,9 @@ public:
 		startTime = millis() + (long)initialDelay;
 		double lapTimesArray[20] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 	};
+	long getEndTime() {
+		return endTime;
+	}
 	int getNumberPacers() {
 		return numberPacers;
 	};
@@ -230,6 +235,9 @@ public:
 		// we need to return the new_startTime to change the pacer's start time, but we need to do this after myMillis() > tempMillis;
 		// return new_startTime;
 	}
+	void setEndTime(long end_Time) {
+		endTime = end_Time;
+	}
 	void setIsVisible(bool is_Visible) {
 		isVisible = is_Visible;
 	}
@@ -398,6 +406,7 @@ void process(YunClient client) {
 
 	// If the next character is a '/' it means we have an URL
 	// with a value like: "/1/99/0"
+	// URL will look like "commandInt/pacerIndex/thirdCommand"
 
 	switch(command) {
 		case 0:	// clear

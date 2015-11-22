@@ -27,7 +27,7 @@ private:
 			endTime,			// Keeps pacer from running more than this amount of time
 			futureStartTime;
 	static int numberPacers;				// static
-	double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
+	double trafficLightRedSecs = 7, trafficLightYellowSecs = 4, trafficLightDarkSecs = 2; // Traffic light countdown variables for red, yellow, and dark/go
 
 public:
 	// variables
@@ -66,24 +66,22 @@ public:
 		return isGoingToChangeSpeed;
 	};
 	bool isCurrentlyDelayed() {
-		if ((startTime - millis()) > 0) {
+		if ((startTime - millis()) > 0)
 			return true;
-		}
 		else return false;
 	};
 	bool isStartTimeWithinXSecondsAndGreaterThanZero(int seconds) {
-		if (((startTime - millis()) > 0) && ((startTime - millis()) < (seconds*1000))) {
+		if (((startTime - millis()) > 0) && ((startTime - millis()) < (seconds*1000)))
 			return true;
-		}
 		else return false;
 	};
 	// is the time remaining until the start less than the parameter number of seconds
 	bool isStartTimeWithinXSecondsOnly(int seconds) {
-		if ((startTime - millis()) < (seconds*1000)) {
+		if ((startTime - millis()) < (seconds*1000))
 			return true;
-		}
 		else return false;
 	};
+	// returns true if the parameter is less than the time until the start
 	bool isXmillisFromStart(long timeDiffMillis) {
 		if (getStartTime() > (millis()+(timeDiffMillis)))
 			return true;
@@ -111,12 +109,10 @@ public:
 		return initialDelay;
 	};
 	int getInitialHighlightedPanel() {
-		if (isBackwards) {
+		if (isBackwards)
 			return getTotalPacingPanels()-initialHighlightedPanel;
-		}
-		else {
+		else
 			return initialHighlightedPanel;
-		}
 	};
 	int getNumMeters() {
 		return numMeters;
@@ -127,16 +123,12 @@ public:
 	int getCurrentHighlightedPacingPanel() {
 		long temp_Millis = millis();
 		// if it's backwards (end to beginning)
-		if (getStartTime() > (temp_Millis-500)) { // make this temp_Millis - 1000 if you want to show green when it's go time
+		if (isXmillisFromStart(-500)) { // make this temp_Millis - 1000 if you want to show green when it's go time
 			if (getIsBackwards()) {
 				if (isXmillisFromStart(0)) {
-					if (isXmillisFromStart(trafficLightCountDownDarkSeconds*1000)) {  // old way with isStartTimeWitinXSecondsOnly: (getStartTime() - temp_Millis) < (trafficLightCountDownRedSeconds*1000)
-						if (isXmillisFromStart(trafficLightCountDownYellowSeconds*1000)) {
-							if (isXmillisFromStart(trafficLightCountDownRedSeconds*1000)) {
-								/*if (isStartTimeWithinXSecondsOnly(0)) { // none of this is being executed for some reason
-									colorInt = 7;
-									return (getInitialHighlightedPanel()+1)%getTotalPacingPanels();	// green
-								}*/
+					if (isXmillisFromStart(trafficLightDarkSecs*1000)) {  // old way with isStartTimeWitinXSecondsOnly: (getStartTime() - temp_Millis) < (trafficLightCountDownRedSeconds*1000)
+						if (isXmillisFromStart(trafficLightYellowSecs*1000)) {
+							if (isXmillisFromStart(trafficLightRedSecs*1000)) {
 								return (getInitialHighlightedPanel())%getTotalPacingPanels();	// initial color
 							}
 							colorInt = 2;
@@ -154,13 +146,9 @@ public:
 			// If it's frontwards (beginning to end)
 			else {
 				if (isXmillisFromStart(0)) {
-					if (isXmillisFromStart(trafficLightCountDownDarkSeconds*1000)) {  // old way with isStartTimeWitinXSecondsOnly: (getStartTime() - temp_Millis) < (trafficLightCountDownRedSeconds*1000)
-						if (isXmillisFromStart(trafficLightCountDownYellowSeconds*1000)) {
-							if (isXmillisFromStart(trafficLightCountDownRedSeconds*1000)) {
-								/*if (isStartTimeWithinXSecondsOnly(0)) { // none of this is being executed for some reason
-									colorInt = 7;
-									return (getInitialHighlightedPanel()+1)%getTotalPacingPanels();	// green
-								}*/
+					if (isXmillisFromStart(trafficLightDarkSecs*1000)) {  // old way with isStartTimeWitinXSecondsOnly: (getStartTime() - temp_Millis) < (trafficLightCountDownRedSeconds*1000)
+						if (isXmillisFromStart(trafficLightYellowSecs*1000)) {
+							if (isXmillisFromStart(trafficLightRedSecs*1000)) {
 								return (getInitialHighlightedPanel())%getTotalPacingPanels();	// initial color
 							}
 							colorInt = 2;
@@ -178,7 +166,7 @@ public:
 		}
 		else {
 			colorInt = originalColorInt;		// very inefficient, this is called every time even though they already match
-			if (!isBackwards) {	// if isBackwards is not true
+			if (!isBackwards) {					// if isBackwards is not true
 				currentHighlightedPacingPanel = (int)(((getRunningTime()%(long)(getSecondsPerLap()*(double)1000))/getNextLightDelay())+getInitialHighlightedPanel())%getTotalPacingPanels();
 				return currentHighlightedPacingPanel;
 			}

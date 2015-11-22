@@ -15,17 +15,18 @@ private:
 	int initialHighlightedPanel, 			// This determines where the pacer starts from
 			numMeters,						// This determines how many meters the pacing lights will run for
 			totalPacingPanels,				// This is passed as an argument from JpanelPractice
-			lightTrainLength;				// This determines how many lights wide this pacer will be
-	bool isStopwatchStarted;
-	bool isBackwards;
-	bool isGoingToChangeSpeed;				// indicates whether the pacer is about to change its speed
-	bool isVisible;							// indicates whether the pacer should be visible or not (the color black / it logically keeps running)
+			lightTrainLength,				// This determines how many lights wide this pacer will be
+			currentHighlightedPacingPanel,	// This determines which pacing panel is currently lit up
+			colorInt,						// Determines which color index in the color array that the pacer should be
+			originalColorInt;				// Holds the original colorInt during countdown
+	bool isStopwatchStarted,
+			isBackwards,
+			isGoingToChangeSpeed,			// indicates whether the pacer is about to change its speed
+			isVisible;						// indicates whether the pacer should be visible or not (the color black / it logically keeps running)
 	long startTime,
-			endTime = 100000000,			// Keeps pacer from running more than this amount of time
+			endTime,			// Keeps pacer from running more than this amount of time
 			futureStartTime;
 	static int numberPacers;				// static
-	int currentHighlightedPacingPanel;		// This determines which pacing panel is currently lit up
-	int colorInt;							// Determines which color index in the color array that the pacer should be
 	double trafficLightCountDownRedSeconds = 7, trafficLightCountDownYellowSeconds = 4, trafficLightCountDownDarkSeconds = 2; // Traffic light countdown variables for red, yellow, and dark/go
 
 public:
@@ -49,6 +50,9 @@ public:
 		startTime = millis() + (long)initialDelay;
 		double lapTimesArray[20] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 	};
+	int getOriginalColorInt() {
+		return originalColorInt;
+	}
 	long getEndTime() {
 		return endTime;
 	}
@@ -80,6 +84,11 @@ public:
 		}
 		else return false;
 	};
+	bool isXmillisFromStart(long timeDiffMillis) {
+		if (getStartTime() > (millis()+(timeDiffMillis)))
+			return true;
+		else return false;
+	}
 	bool getIsBackwards() {
 		return isBackwards;
 	};
@@ -116,47 +125,59 @@ public:
 		return ((getSecondsPerLap() / (double)getTotalPacingPanels()*1000));
 	};
 	int getCurrentHighlightedPacingPanel() {
-		long tempStartTime = getStartTime();
 		long temp_Millis = millis();
 		// if it's backwards (end to beginning)
-		if (tempStartTime > (temp_Millis-0)) { // make this temp_Millis - 1000 if you want to show green when it's go time
+		if (getStartTime() > (temp_Millis-500)) { // make this temp_Millis - 1000 if you want to show green when it's go time
 			if (getIsBackwards()) {
-				if (isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds)) {
-					if (isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds)) {
-						if (isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds)) {
-							/*if (isStartTimeWithinXSecondsOnly(0)) {
-								return (getInitialHighlightedPanel())%getTotalPacingPanels();	// green
-								// setVisible(true);
-							}*/
-							// setVisible(false);
-							return (getInitialHighlightedPanel())%getTotalPacingPanels();	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+				if (isXmillisFromStart(0)) {
+					if (isXmillisFromStart(trafficLightCountDownDarkSeconds*1000)) {  // old way with isStartTimeWitinXSecondsOnly: (getStartTime() - temp_Millis) < (trafficLightCountDownRedSeconds*1000)
+						if (isXmillisFromStart(trafficLightCountDownYellowSeconds*1000)) {
+							if (isXmillisFromStart(trafficLightCountDownRedSeconds*1000)) {
+								/*if (isStartTimeWithinXSecondsOnly(0)) { // none of this is being executed for some reason
+									colorInt = 7;
+									return (getInitialHighlightedPanel()+1)%getTotalPacingPanels();	// green
+								}*/
+								return (getInitialHighlightedPanel())%getTotalPacingPanels();	// initial color
+							}
+							colorInt = 2;
+							return (getInitialHighlightedPanel()-2)%getTotalPacingPanels(); // red
 						}
+						colorInt = 4;
 						return (getInitialHighlightedPanel()-1)%getTotalPacingPanels(); // yellow
 					}
-					return (getInitialHighlightedPanel()-2)%getTotalPacingPanels(); // red
+					colorInt = 0;
+					return (getInitialHighlightedPanel())%getTotalPacingPanels();	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
 				}
-				return (getInitialHighlightedPanel()-2)%getTotalPacingPanels(); // doesn't really matter what number this is
+				colorInt = 5;
+				return (getInitialHighlightedPanel())%getTotalPacingPanels(); // green
 			}
 			// If it's frontwards (beginning to end)
 			else {
-				if (isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds)) {
-					if (isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds)) {
-						if (isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds)) {
-							/*if (isStartTimeWithinXSecondsOnly(0)) {
-								return (getInitialHighlightedPanel())%getTotalPacingPanels();	// green
-								// setVisible(true);
-							}*/
-							// setVisible(false);
-							return (getInitialHighlightedPanel()-1)%getTotalPacingPanels();	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
+				if (isXmillisFromStart(0)) {
+					if (isXmillisFromStart(trafficLightCountDownDarkSeconds*1000)) {  // old way with isStartTimeWitinXSecondsOnly: (getStartTime() - temp_Millis) < (trafficLightCountDownRedSeconds*1000)
+						if (isXmillisFromStart(trafficLightCountDownYellowSeconds*1000)) {
+							if (isXmillisFromStart(trafficLightCountDownRedSeconds*1000)) {
+								/*if (isStartTimeWithinXSecondsOnly(0)) { // none of this is being executed for some reason
+									colorInt = 7;
+									return (getInitialHighlightedPanel()+1)%getTotalPacingPanels();	// green
+								}*/
+								return (getInitialHighlightedPanel())%getTotalPacingPanels();	// initial color
+							}
+							colorInt = 2;
+							return (getInitialHighlightedPanel()+2)%getTotalPacingPanels(); // red
 						}
+						colorInt = 4;
 						return (getInitialHighlightedPanel()+1)%getTotalPacingPanels(); // yellow
 					}
-					return (getInitialHighlightedPanel()+2)%getTotalPacingPanels(); // red
+					colorInt = 0;
+					return (getInitialHighlightedPanel())%getTotalPacingPanels();	// black or "off", the reason for leaving this black is so that no other pacer will come up behind it and make runners think that they should be starting
 				}
-				return (getInitialHighlightedPanel()+2)%getTotalPacingPanels(); // doesn't really matter what number this is
+				colorInt = 5;
+				return (getInitialHighlightedPanel())%getTotalPacingPanels(); // green
 			}
 		}
 		else {
+			colorInt = originalColorInt;		// very inefficient, this is called every time even though they already match
 			if (!isBackwards) {	// if isBackwards is not true
 				currentHighlightedPacingPanel = (int)(((getRunningTime()%(long)(getSecondsPerLap()*(double)1000))/getNextLightDelay())+getInitialHighlightedPanel())%getTotalPacingPanels();
 				return currentHighlightedPacingPanel;
@@ -176,31 +197,12 @@ public:
 	long getRunningTime() {
 		// This if statement is meant to solve the problem of pacing panels running before their delay
 		if (millis() > getStartTime())
-		return millis() - getStartTime();		// if the fix doesn't work, just leave this line
+			return millis() - getStartTime();		// if the fix doesn't work, just leave this line
 		else
-		return 0;
+			return 0;
 	};
 	int getColorInt() {
-		long temp_Millis = millis();
-		// if it's backwards (end to beginning)
-		if (getStartTime() > (temp_Millis-1000)) { // make this temp_Millis - 1000 if you want to show green when it's go time
-			if (isStartTimeWithinXSecondsOnly(trafficLightCountDownRedSeconds)) {
-				if (isStartTimeWithinXSecondsOnly(trafficLightCountDownYellowSeconds)) {
-					if (isStartTimeWithinXSecondsOnly(trafficLightCountDownDarkSeconds)) {
-						/*if (isStartTimeWithinXSecondsOnly(0)) {
-							return 1;	// green
-						}*/
-						return 4; // yellow (now with change) - would've been: black or "off" - it doesn't really matter what the color is because we're turning visibility off
-					}
-					return 4; // yellow
-				}
-				return 2; // red
-			}
-			return colorInt;
-		}
-		else {
-			return colorInt;
-		}
+		return colorInt;
 	}
 	bool getIsVisible() {
 		return isVisible;
@@ -234,6 +236,9 @@ public:
 		// new_startTime = -(long)(((((current_Highlighted_Pacing_Panel + getTotalPacingPanels) - initialHighlightedPanel) * (new_SecondsPerLap / getTotalPacingPanels * 1000)) + (new_SecondsPerLap*1000)) - temp_Millis);
 		// we need to return the new_startTime to change the pacer's start time, but we need to do this after myMillis() > tempMillis;
 		// return new_startTime;
+	}
+	void setOriginalColorInt(int original_color_int) {
+		originalColorInt = original_color_int;
 	}
 	void setEndTime(long end_Time) {
 		endTime = end_Time;
@@ -393,6 +398,7 @@ void assignPacerColors() {
 			j++;
 		}
 		pacer[i].setColorInt(j);
+		pacer[i].setOriginalColorInt(j);
 		j++;
 		// pacer[i].setColorInt((i%8)+1);
 	}
@@ -475,6 +481,7 @@ void process(YunClient client) {
 				}
 				else {
 					for (int i=0; i < pacer[0].getNumberPacers(); i++) {
+						pacer[i].setOriginalColorInt((int)thirdCommand);
 						pacer[i].setColorInt((int)thirdCommand);
 					}
 				}
@@ -485,6 +492,7 @@ void process(YunClient client) {
 					assignPacerColors();
 				}
 				else {
+					pacer[pacerIndex].setOriginalColorInt((int)thirdCommand);
 					pacer[pacerIndex].setColorInt((int)thirdCommand);
 				}
 			}

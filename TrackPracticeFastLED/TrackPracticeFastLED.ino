@@ -66,22 +66,24 @@ public:
 		return isGoingToChangeSpeed;
 	};
 	bool isCurrentlyDelayed() {
-		if ((startTime - millis()) > 0)
+		if ((startTime - millis()) > 0) {
 			return true;
+		}
 		else return false;
 	};
 	bool isStartTimeWithinXSecondsAndGreaterThanZero(int seconds) {
-		if (((startTime - millis()) > 0) && ((startTime - millis()) < (seconds*1000)))
+		if (((startTime - millis()) > 0) && ((startTime - millis()) < (seconds*1000))) {
 			return true;
+		}
 		else return false;
 	};
 	// is the time remaining until the start less than the parameter number of seconds
 	bool isStartTimeWithinXSecondsOnly(int seconds) {
-		if ((startTime - millis()) < (seconds*1000))
+		if ((startTime - millis()) < (seconds*1000)) {
 			return true;
+		}
 		else return false;
 	};
-	// returns true if the parameter is less than the time until the start
 	bool isXmillisFromStart(long timeDiffMillis) {
 		if (getStartTime() > (millis()+(timeDiffMillis)))
 			return true;
@@ -109,10 +111,12 @@ public:
 		return initialDelay;
 	};
 	int getInitialHighlightedPanel() {
-		if (isBackwards)
+		if (isBackwards) {
 			return getTotalPacingPanels()-initialHighlightedPanel;
-		else
+		}
+		else {
 			return initialHighlightedPanel;
+		}
 	};
 	int getNumMeters() {
 		return numMeters;
@@ -123,7 +127,7 @@ public:
 	int getCurrentHighlightedPacingPanel() {
 		long temp_Millis = millis();
 		// if it's backwards (end to beginning)
-		if (isXmillisFromStart(-500)) { // make this temp_Millis - 1000 if you want to show green when it's go time
+		if (isXmillisFromStart(0)) { // make this temp_Millis - 1000 if you want to show green when it's go time
 			if (getIsBackwards()) {
 				if (isXmillisFromStart(0)) {
 					if (isXmillisFromStart(trafficLightDarkSecs*1000)) {  // old way with isStartTimeWitinXSecondsOnly: (getStartTime() - temp_Millis) < (trafficLightCountDownRedSeconds*1000)
@@ -531,6 +535,18 @@ void process(YunClient client) {
 				if (pacer[pacerIndex].getSecondsPerLap() > 0) {
 					pacer[pacerIndex].setChangedPacerNewStartTime(pacer[pacerIndex].getSecondsPerLap()+thirdCommand);
 				}
+			}
+			break;
+		case 9: // feedback
+			if (pacerIndex == 99) {
+				client.print(thirdCommand);
+				client.print(" sent to Yun at ");
+				client.print(millis());
+			}
+			else {
+				client.print(pacer[pacerIndex].getSecondsPerLap());
+				client.print("#");
+				client.print(pacer[pacerIndex].getColorInt());
 			}
 			break;
 		default:

@@ -1,0 +1,448 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<title>jQuery Mobile Bootstrap Theme</title>
+		<link rel="stylesheet" href="themes/Bootstrap.css">
+		<link rel="stylesheet" href="jquery.mobile-1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+		<link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+		<script src="jquery-1.8.2.min.js"></script>
+		<script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>
+		<script>
+			colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
+			window.onload=Pinstatus;
+
+			function Pinstatus() {
+				morestatus();
+			}
+
+			function morestatus() {
+				setTimeout(morestatus, 2000);
+				document.getElementById("description").innerHTML = "Processing Status";
+				var pacerIndex = $('#pacerSelect').val();
+				var thirdCommand = $('#lightsNumberInput').val();
+				server = "/arduino/9/"+pacerIndex+"/"+thirdCommand;
+				request = new XMLHttpRequest();
+				request.onreadystatechange = updateasyncstatus;
+				request.open("GET", server, true);
+				request.send(null);
+			}
+
+			function updateasyncstatus() {
+				if ((request.readyState == 4) && (request.status == 200)) {
+					result = request.responseText;
+					var pacerIndex = $('#pacerSelect').val();
+					if (pacerIndex == 99) {
+						document.getElementById("description").innerHTML = result;
+					}
+					else {
+						fullset = result.split("#");
+						// document.getElementById("description").innerHTML = fullset;
+						secondsPerLap = fullset[0];
+						colorInt = fullset[1];
+						document.getElementById("description").innerHTML = secondsPerLap + "# #" + colorArray[colorInt];
+						document.getElementById("feedbackSecs").innerHTML = "Seconds Per Lap: " + secondsPerLap;
+						document.getElementById("feedbackColor").innerHTML = "Color: " + colorArray[colorInt];
+						/* This works to some degree but I couldn't make it work perfectly
+						var i = 0;
+						$("#pacerSelect option").each(function() {
+							var stringHolder = 'Pacer ' + i;
+							$(this).text(stringHolder);
+							if($(this).val() == pacerIndex) {
+								var aNewString = colorArray[colorInt];
+								stringHolder = 'Pacer ' + pacerIndex + ' - ' + secondsPerLap + ' - ' + aNewString;
+								$(this).text(stringHolder);    
+							}
+							i++;
+						});*/
+						// document.getElementById('#pacerSelect').options[pacerIndex].html(pacerIndex); // "Pacer "+pacerIndex+" - "+secondsPerLap+" - "+colorArray[colorInt]);
+
+						// for(i = 1; i < fullset.length; i++) {
+						// }
+					}
+				}
+			}
+			
+			// handle new pacer times
+			function newPacerTime(val) {
+			
+				var newPacerTimeNum = 0;
+				var pacerIndexforTimeSet = $('#pacerSelect').val();
+				var xhr = new XMLHttpRequest();
+				
+				xhr.open("GET", "/arduino/7/"+pacerIndexforTimeSet+"/"+val, false);
+				xhr.send();
+				$("#demo").text("/arduino/7/"+pacerIndexforTimeSet+"/"+val);
+				$("#pacerTimeInput").val("Enter pacer time in seconds");
+			}
+			
+			// handle slowing or speeding up pacers
+			$(document).ready(function(){
+				$(".speedChangeButton").click(function(){
+				
+					var signlessNumber = $("#lightsNumberInput").val();
+					var sign = $(this).attr("otherNum");
+					var speedChange = signlessNumber * sign;
+					
+					if (signlessNumber > 0.0) {
+						var commandURL2 = $(this).attr("url");
+						var pacerIndex2 = $('#pacerSelect').val();
+						var xhr = new XMLHttpRequest();
+						xhr.open("GET", "/arduino/"+commandURL2+"/"+pacerIndex2+"/"+speedChange, false);
+						xhr.send();
+						$("#demo").text("/arduino/"+commandURL2+"/"+pacerIndex2+"/"+speedChange);
+					}
+					else {
+						// do nothing
+					}
+				});
+			});
+			
+			// handles pacer action commands - clear, reset, backwards, etc.
+			$(document).ready(function(){
+				$(".submitButton, .submitButton3").click(function(){
+				
+					var commandURL = $(this).attr("url");
+					var pacerIndex = $('#pacerSelect').val();
+					var newNum = $(this).attr("otherNum");
+					var xhr = new XMLHttpRequest();
+					
+					xhr.open("GET", "/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum, false);
+					xhr.send();
+					$("#demo").text("/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum);
+				});
+			});
+			
+			// handles changing number of lights
+			$(document).ready(function(){
+				$("#lightsSubmit").click(function(){
+				
+					var commandURL = $(this).attr("url");
+					var pacerIndex = $('#pacerSelect').val();
+					var newNum = $("#lightsNumberInput").val();
+					var xhr = new XMLHttpRequest();
+					
+					xhr.open("GET", "/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum, false);
+					xhr.send();
+					$("#demo").text("/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum);
+				});
+			});
+			
+			// handles longpress for reset button to make it into a reset delay button and vice versa
+			$(document).ready(function(){
+				$("#backwardsButton").on( "taphold", function( event ) {
+					var rstBtnUrl = $("#resetButton").attr("url");
+					$("#demo").text("button might be doing something");
+					if (rstBtnUrl == "1") {
+						$("#resetButton").attr("url", "2");
+						$("#resetButton").attr("data-icon", "forward");
+						$("#demo").text("button is now delay");
+					}
+					else {
+						$("#resetButton").attr("url", "1");
+						$("#resetButton").attr("data-icon", "refresh");
+						$("#demo").text("button is now reset");
+					}
+				});
+			});
+			
+			// reveals the secret demo field whenever you click the advancedButton
+			$(document).ready(function(){
+				$("#advancedButton").click(function(){
+					showAdvancedElements();
+				});
+			});
+			
+			// hides the secret demo field whenever you click it
+			$(document).ready(function(){
+				$("#demo").click(function(){
+					hideAdvancedElements();
+				});
+			});
+			
+			// Clear the contents of the new pacer time field when clicked so the user can type theirs
+			$(document).ready(function(){
+				$("#pacerTimeInput, #lightsNumberInput").click(function(){
+					$(this).val("");
+				});
+			});
+			
+			// Do all this stuff as soon as the page loads
+			$(document).ready(function(){
+				hideAdvancedElements();
+				$("input[name='radio-choice-1']").change(radioValueChanged);
+				$("#pacerTimeInput").val("Enter pacer time in seconds");
+				$(".submitButton, .submitButton2").css('display', 'inline-block');
+				$(".submitButton").css( "padding-right", "25px" );
+				$(".speedChangeButton").css('display', 'inline-block');
+				$(".speedChangeButton").css( "padding-right", "25px" );
+				$("#advancedButton").css('display', 'inline-block');
+				$("#advancedButton").css( "padding-right", "10px" );
+				$("#pacerActionDiv").css("padding-top", "35px");
+				$("#colorDiv").css("padding-top", "35px");
+				$("button:even").css("background-color", "LightCoral");
+				$("button:odd").css("background-color", "LightBlue");
+				//$("button:nth-of-type(4n+2)").css("background-color", "green");
+				//$("button:nth-of-type(4n+3)").css("background-color", "blue");
+				// $("button:nth-of-type(4n+4)").css("background-color", "yellow");
+				// $(".lightChange").css('display', 'inline-block');
+				// $(".lightChange").css( "padding-right", "25px" );
+				// $("lightsNumberInput").width("50%");
+			});
+			
+			function showAdvancedElements() {
+				$("#demo").show();
+				$("#description").show();
+				$("#demo").text("Developer feedback");
+				$("#navbar").show();
+				$("#submitCancel").show();
+				$("#selectShipping").show();
+				$("#colorRadio").show();
+				$("#colorRadioB").show();
+				$("#fontStyle").show();
+				$("#snacks").show();
+				$("#slider1").show();
+				$("#slider2").show();
+				
+				$("#advancedButton").hide();
+			}
+			
+			function hideAdvancedElements() {
+				$("#demo").hide();
+				$("#description").hide();
+				$("#resetdelayButton").hide();
+				$("#navbar").hide();
+				$("#submitCancel").hide();
+				$("#selectShipping").hide();
+				$("#colorRadio").hide();
+				$("#colorRadioB").hide();
+				$("#fontStyle").hide();
+				$("#snacks").hide();
+				$("#slider1").hide();
+				$("#slider2").hide();
+				
+				$("#advancedButton").show();
+			}
+			
+			function colorSelectFunc() {
+				// var colorSelectVal = $('#colorSelectFunc').val();
+				// $("#demo").text("myFunction was called");
+				var commandURL = $('#colorSelect').attr("url");
+				var pacerIndex = $('#pacerSelect').val();
+				var newNum = $('#colorSelect').val();
+				var xhr = new XMLHttpRequest();
+				
+				xhr.open("GET", "/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum, false);
+				xhr.send();
+				$("#demo").text("/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum);
+			}
+			
+			function radioValueChanged() {
+				radioValue = $(this).value();
+				var xhr = new XMLHttpRequest();
+				
+				xhr.open("GET", "/arduino"+radioValue, false);
+				xhr.send();
+				$("#demo").text(radioValue);
+			} 
+			
+			function flipSwitchChange(thisURL) {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/arduino"+thisURL, false);
+				xhr.send();
+				$("#demo").text(thisURL);
+			}
+			
+			// End of JavaScript
+		</script>
+	</head>
+	<body>
+		<div data-role="page" data-theme="a">
+			<div data-role="header" data-position="inline">
+				<h1>Track Practice</h1>
+				<div id="navbar" data-role="navbar">
+					<ul>
+						<li><a href="index.html" data-icon="home" class="ui-btn-active">Home</a></li>
+						<li><a href="buttons.html" data-icon="star">Buttons</a></li>
+						<li><a href="listviews.html" data-icon="grid">Lists</a></li>
+						<li><a href="nav.html" data-icon="search">Nav</a></li>
+						<li><a href="forms.html" data-icon="gear">Forms</a></li>
+					</ul>
+				</div>
+			</div>
+			<div data-role="content" data-theme="a">
+				<p id="demo">Developer feedback</p>
+				<p id="description">Description paragraph</p>
+						<select name="select-choice-a" id="pacerSelect" data-native-menu="false">
+							<option value="99">Select Pacer: All Pacers</option>
+							<option value="0">Pacer 0</option>
+							<option value="1">Pacer 1</option>
+							<option value="2">Pacer 2</option>
+							<option value="3">Pacer 3</option>
+							<option value="4">Pacer 4</option>
+							<option value="5">Pacer 5</option>
+							<option value="6">Pacer 6</option>
+							<option value="7">Pacer 7</option>
+							<option value="8">Pacer 8</option>
+							<option value="9">Pacer 9</option>
+						</select>
+						
+						<p id="feedbackSecs">Seconds Per Lap: </p>
+						<p id="feedbackColor">Color: </p>
+						<label for="select-choice-a" class="select">Enter Lap Time in Seconds:</label>
+						<input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" value="2" min="1" max="900" url="7" autocomplete="off" onchange="newPacerTime(this.value)" />
+					
+					<!--<div id="pacerActionDiv">
+						<a id="clearButton" url="0" otherNum="0" class="submitButton" data-theme="a"><img src="redXButton.png" /></a>&nbsp;&nbsp;
+						<a id="resetButton" url="2" otherNum="0" class="submitButton" data-theme="a"><img src="greenRefresh.png" /></a>&nbsp;&nbsp;--> <!-- The quick reset url is "1"-->
+						<!--<a id="visibleButton" url="3" otherNum="0" class="submitButton" data-theme="a"><img src="eyeButton.png" /></a>&nbsp;&nbsp;
+						<a id="backwardsButton" url="4" otherNum="0" class="submitButton" data-theme="a"><img src="backwards.png" /></a>&nbsp;&nbsp;
+					</div>-->
+					
+						<div class="submitButton2" style="width:23%"><button id="clearButton" class="submitButton3" url="0" otherNum="0" data-mini="true" data-icon="delete" data-iconpos="top"></button></div>
+						<div class="submitButton2" style="width:23%"><button id="resetButton" class="submitButton3" url="2" otherNum="0" data-mini="true" data-icon="clock" data-iconpos="top"></button></div>
+						<div class="submitButton2" style="width:23%"><button id="visibleButton" class="submitButton3" url="3" otherNum="0" data-mini="true" data-icon="eye" data-iconpos="top"></button></div>
+						<div class="submitButton2" style="width:23%"><button id="backwardsButton" class="submitButton3" url="4" otherNum="0" data-mini="true" data-icon="back" data-iconpos="top"></button></div>
+					
+						<select onchange="colorSelectFunc()" name="colorSelect" id="colorSelect" url="5" data-native-menu="false">
+							<option>Choose Color:</option>
+							<option value="1" url="5">White</option>
+							<option value="2" url="5">Red</option>
+							<option value="3" url="5">Orange</option>
+							<option value="4" url="5">Yellow</option>
+							<option value="5" url="5">Green</option>
+							<option value="6" url="5">Blue</option>
+							<option value="7" url="5">Purple</option>
+							<option value="99" url="5">Normal</option>
+						</select>
+					
+					<!--<div id="colorDiv">
+						<a id="whiteButton" url="5" otherNum="0" class="submitButton" data-theme="a"><img src="White.png" /></a>&nbsp;&nbsp;
+						<a id="redButton" url="5" otherNum="1" class="submitButton" data-theme="a"><img src="Green.png" /></a>&nbsp;&nbsp;
+						<a id="yellowButton" url="5" otherNum="2" class="submitButton" data-theme="a"><img src="Yellow.png" /></a>&nbsp;&nbsp;
+						<a id="greenButton" url="5" otherNum="99" class="submitButton" data-theme="a"><img src="Normal.png" /></a>&nbsp;&nbsp;
+					</div>-->
+					
+						<div class="submitButton2" style="width:23%"><button id="lightsSubmit" url="6" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="grid" data-iconpos="top"></button></div>
+						<div class="submitButton2" style="width:23%"><button id="accelerate" url="8" otherNum="-1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-u" data-iconpos="top"></button></div>
+						<div class="submitButton2" style="width:23%"><button id="slow" url="8" otherNum="1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-d" data-iconpos="top"></button></div>
+						<!--<a id="lightsSubmit" url="6" otherNum="99" type="submit" data-mini="true" data-theme="a"><img src="light.png" /></a>
+						<a id="lightsSubmit" url="6" otherNum="99" type="submit" data-mini="true" data-theme="a"><img src="light.png" /></a>
+						<a id="lightsSubmit" url="6" otherNum="99" type="submit" data-mini="true" data-theme="a"><img src="light.png" /></a>-->
+						<!--<button id="accelerate" data-icon="arrow-u" data-iconpos="notext" url="8" otherNum="-1.0" class="speedChangeButton" data-theme="a">Accelerate</button>&nbsp;&nbsp;
+						<button id="slow" data-icon="arrow-d" data-iconpos="notext" url="8" otherNum="1.0" class="speedChangeButton" data-theme="a">Slow</button>&nbsp;&nbsp;-->
+				
+					<div>
+						<!--<label class="lightChange" for="name">Number of lights:</label>-->
+						<input class="lightChange" data-mini="true" type="number" name="name" id="lightsNumberInput" oldurl="lights" url="6" value="2" min="0.1" max="100.0" step="0.1" autocomplete="off" />
+					</div>
+					
+					<div data-role="fieldcontain">
+						<button id="advancedButton" data-icon="gear" data-iconpos="notext" url="clear" data-mini="true" data-theme="a"></button>
+					</div>
+					
+					<div id="slider2" data-role="fieldcontain">
+						<label for="slider2">Invisible</label>
+						<select name="slider2" id="slider2" class="flipSwitch" data-role="slider">
+							<option myURL="/visible/99" onclick="flipSwitchChange(this.myURL)" value="off">Off</option>
+							<option myURL="/visible/99" onclick="flipSwitchChange(this.myURL)" value="on">On</option>
+						</select>
+						<label for="slider3">Backwards</label>
+						<select name="slider3" id="slider3" class="flipSwitch" data-role="slider">
+							<option myURL="/backwards/99" onclick="flipSwitchChange(this.myURL)" value="off">Off</option>
+							<option myURL="/backwards/99" onclick="flipSwitchChange(this.myURL)" value="on">On</option>
+						</select>
+					</div>
+
+					<div id="slider1" data-role="fieldcontain">
+						<label for="slider">Slider:</label>
+					 	<input type="range" name="slider" id="slider" value="50" min="0" max="100" step="0.1" data-highlight="true"  />
+					</div>
+
+					<div id="snacks" data-role="fieldcontain">
+						<fieldset data-role="controlgroup">
+							<legend>Choose as many snacks as you'd like:</legend>
+							<input type="checkbox" name="checkbox-1a" id="checkbox-1a" class="custom" />
+							<label for="checkbox-1a">Cheetos</label>
+
+							<input type="checkbox" name="checkbox-2a" id="checkbox-2a" class="custom" />
+							<label for="checkbox-2a">Doritos</label>
+
+							<input type="checkbox" name="checkbox-3a" id="checkbox-3a" class="custom" />
+							<label for="checkbox-3a">Fritos</label>
+
+							<input type="checkbox" name="checkbox-4a" id="checkbox-4a" class="custom" />
+							<label for="checkbox-4a">Sun Chips</label>
+					    </fieldset>
+					</div>
+
+					<div id="fontStyle" data-role="fieldcontain">
+						<fieldset data-role="controlgroup" data-type="horizontal">
+					    	<legend>Font styling:</legend>
+					    	<input type="checkbox" name="checkbox-6" id="checkbox-6" class="custom" />
+							<label for="checkbox-6">b</label>
+
+							<input type="checkbox" name="checkbox-7" id="checkbox-7" class="custom" />
+							<label for="checkbox-7"><em>i</em></label>
+
+							<input type="checkbox" name="checkbox-8" id="checkbox-8" class="custom" />
+							<label for="checkbox-8">u</label>
+					    </fieldset>
+					</div>
+
+					<div id="colorRadio" data-role="fieldcontain">
+					    <fieldset data-role="controlgroup">
+					    	<legend>Color:</legend>
+							<input type="radio" name="radio-choice-1" id="radio-choice-1" value="/color/1" checked="checked" />
+							<label for="radio-choice-1">White</label>
+
+							<input type="radio" name="radio-choice-1" id="radio-choice-2" value="/color/2"  />
+							<label for="radio-choice-2">Green</label>
+
+							<input type="radio" name="radio-choice-1" id="radio-choice-3" value="/color/3"  />
+							<label for="radio-choice-3">Yellow</label>
+
+							<input type="radio" name="radio-choice-1" id="radio-choice-4" value="/color/4"  />
+							<label for="radio-choice-4">Red</label>
+					    </fieldset>
+					</div>
+
+					<div id="colorRadioB" data-role="fieldcontain">
+					    <fieldset data-role="controlgroup" data-type="horizontal">
+							<legend>Color:</legend>
+							<input type="radio" name="radio-choice-b" id="radio-choice-c" value="on" checked="checked" />
+							<label for="radio-choice-c">WHT</label>
+							<input type="radio" name="radio-choice-b" id="radio-choice-d" value="off" />
+							<label for="radio-choice-d">GRN</label>
+							<input type="radio" name="radio-choice-b" id="radio-choice-e" value="off" />
+							<label for="radio-choice-e">YLW</label>
+							<input type="radio" name="radio-choice-b" id="radio-choice-f" value="off" />
+							<label for="radio-choice-f">RED</label>
+					    </fieldset>
+					</div>
+
+					<div id="selectShipping" data-role="fieldcontain">
+						<label for="select-choice-a" class="select">Choose shipping method:</label>
+						<select name="select-choice-a" id="select-choice-a" data-native-menu="false">
+							<option>Custom menu example</option>
+							<option value="standard">Standard: 7 day</option>
+							<option value="rush">Rush: 3 days</option>
+							<option value="express">Express: next day</option>
+							<option value="overnight">Overnight</option>
+						</select>
+					</div>
+
+					<div id="submitCancel" class="ui-body ui-body-b">
+						<fieldset class="ui-grid-a">
+							<div class="ui-block-a"><button type="submit" data-theme="d">Cancel</button></div>
+							<div class="ui-block-b"><button type="submit" data-theme="a">Submit</button></div>
+					    </fieldset>
+					</div>
+
+			</div>
+		</div>
+		
+		<a href="https://github.com/commadelimited/jQuery-Mobile-Bootstrap-Theme" data-role="button" data-icon="star">Get the code</a>
+	</body>
+</html>

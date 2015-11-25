@@ -538,16 +538,18 @@ void process(YunClient client) {
 			}
 			break;
 		case 9: // feedback
-			if (pacerIndex == 99) {
-				client.print(thirdCommand);
-				client.print(" sent to Yun at ");
-				client.print(millis());
-			}
-			else {
+			// for (int i=0; i < pacer[0].getNumberPacers(); i++) {
+			if (pacerIndex != 99) {
 				client.print(pacer[pacerIndex].getSecondsPerLap());
 				client.print("#");
 				client.print(pacer[pacerIndex].getColorInt());
 			}
+			else {
+				client.print(pacer[0].getSecondsPerLap());
+				client.print("#");
+				client.print(pacer[0].getColorInt());
+			}
+			// }
 			break;
 		default:
 			break;

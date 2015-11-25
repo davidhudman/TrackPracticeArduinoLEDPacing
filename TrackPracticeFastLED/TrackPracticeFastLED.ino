@@ -537,7 +537,7 @@ void process(YunClient client) {
 				}
 			}
 			break;
-		case 9: // feedback.
+		case 9: // feedback...
 			// for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 			if (pacerIndex != 99) {
 				client.print(pacer[pacerIndex].getSecondsPerLap());

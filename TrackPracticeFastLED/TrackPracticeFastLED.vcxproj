@@ -68,6 +68,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="..\index.html" />
     <None Include="TrackPracticeFastLED.ino">
       <FileType>CppCode</FileType>
     </None>

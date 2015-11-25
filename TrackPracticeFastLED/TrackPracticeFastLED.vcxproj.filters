@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TrackPracticeFastLED.ino" />
+    <None Include="..\index.html" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FastLED.cpp">

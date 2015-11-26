@@ -40,67 +40,26 @@
 				request.send(null);
 			}
 
+            // Show feedback from the Arduino
 			function updateasyncstatus() {
-				if ((request.readyState == 4) && (request.status == 200)) {
-					result = request.responseText;
-					// var pacerIndex = $('#pacerSelect').val();
-					// if (pacerIndex == 99) {
-					// document.getElementById("description").innerHTML = result;
-					// else {
-					fullset = result.split("#");
-					// document.getElementById("description").innerHTML = fullset;
-					//secondsPerLap = fullset[0];
-					//colorInt = fullset[1];
-					//document.getElementById("description").innerHTML = secondsPerLap + "# #" + colorArray[colorInt];
-					//document.getElementById("feedbackSecs").innerHTML = "Seconds Per Lap: " + secondsPerLap;
-					//document.getElementById("feedbackColor").innerHTML = "Color: " + colorArray[colorInt];
+			    if ((request.readyState == 4) && (request.status == 200)) {
+			        pacerSelected = $('#pacerSelect').val();
+			        result = request.responseText;
+			        for (i = 0; i < fullset.length; i++) {
+			            fullset = result.split("#");
+			            pacerPair = fullset[i];                       //for the value of i=1, PinPair will be "2=0"
+			            singleset = pacerPair.split("=");             //this will cause PinPair to split at "#" into an array of [2,0]
 
+			            lapTime = singleset[0];                          //PN will hold the pin number,example 2
+			            colorInt = singleset[1];
+			            color = colorArray[colorInt];
 
-					//for (i = 1; i < fullset.length; i++) {
-					//    if (i < numPacers) {
-					//        pacerPair = fullset[i];                       //for the value of i=1, PinPair will be "2=0"
-					//        singleset = pacerPair.split("=");             //this will cause PinPair to split at "#" into an array of [2,0]
-					//        lap_Time = singleset[0];                          //PN will hold the pin number,example 2
-					//        color_Num = singleset[1];
-
-					//        $("#pacerSelect option").text("Pacer");
-					var i = -1;
-					$("#pacerSelect option").each(function () {
-					    if (i == -1) {
-					        pacerPair = fullset[i];                       //for the value of i=1, PinPair will be "2=0"
-					        singleset = pacerPair.split("=");             //this will cause PinPair to split at "#" into an array of [2,0]
-					        lap_Time = singleset[0];                          //PN will hold the pin number,example 2
-					        color_Num = singleset[1];
-					        var stringHolder = 'Pacer ' + i;
-					        $(this).text(stringHolder);
-					        var aNewString = colorArray[color_Num];
-					        stringHolder = 'Pacer ' + i + ' - ' + lap_Time + ' - ' + color_Num;
-					        $(this).text(stringHolder);
-					    }
-					    i++;
-				    });
-
-					        // document.getElementById('#pacerSelect').options[i].html("Pacer "); // "Pacer "+i+" - "+secondsPerLap+" - "+colorArray[colorInt]);
-					        // pacer[i] = { secondsPerLap: lap_Time, colorInt: color_Num }
-					        // pacers[i].secondsPerLap = lap_Time;
-					        // pacers[i].colorInt = color_Num;
-					//    }
-					//}
-
-					// This works to some degree but I couldn't make it work perfectly
-					var i = 0;
-					var psStringHolder;
-					var psColorString;
-					//$("#pacerSelect option").each(function() {
-					//	psColorString = colorArray[pacer[i].colorInt];
-					//	psStringHolder = 'Pacer ' + pacerIndex + ' - ' + pacer[i].secondsPerLap + ' - ' + psColorString;
-					//	$(this).text(psStringHolder);
-					//	i++;
-					//});
-					psStringHolder = ":D";
-					document.getElementById("description").innerHTML = psStringHolder;
-					// document.getElementById('#pacerSelect').options[pacerIndex].html(pacerIndex); // "Pacer "+pacerIndex+" - "+secondsPerLap+" - "+colorArray[colorInt]);
-				}
+			            if (pacerSelected == i) {
+			                $('#feedbackSecs').text(lapTime);
+                            $('#feedbackColor').text(color);
+			            }
+			        }
+			    }
 			}
 			
 			// handle new pacer times

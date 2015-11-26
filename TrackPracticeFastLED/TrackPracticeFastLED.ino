@@ -327,7 +327,8 @@ long resetDelayDefaultDelayTimeMillis = 10000,		// the default delay time when r
 		tempMillis;		// holds the milliseconds time that a pacer's speed will change
 int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0,
 	serialCountTo = 50, trafficLightCountTo = 100, partySerialCountTo = 5, 
-	tempLowestDelayedPacerIndex = -1, totalPacingPanels = 26;
+	tempLowestDelayedPacerIndex = -1, totalPacingPanels = 26,
+	minimumLapTime = 0.5;	// user cannot change to a pace faster than 0.5 second lap
 
 bool isChangePacerSpeedNeeded = false, // trigger to determine whether we need to figure out which pacer is going to change its speed
 		partyMode = false;				// This mode (now partyMode) String (now bool) has two possible values: "track" and "party" (now true and false). Each value will result in different function calls
@@ -498,18 +499,22 @@ void process(YunClient client) {
 			else {
 				assignGetTotalPacingPanels(thirdCommand);
 			}*/
-			for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-					assignGetTotalPacingPanels((int)thirdCommand);
+			if (thirdCommand > 0) {
+				for (int i=0; i < pacer[0].getNumberPacers(); i++) {
+						assignGetTotalPacingPanels((int)thirdCommand);
+				}
 			}
 			break;
 		case 7:	// time
-			if (pacerIndex == 99) {
-				pacer[getLowestUnusedPacerIndex()].setStartTime(millis()+7000);
-				pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (thirdCommand);
-			}
-			else {
-				pacer[pacerIndex].setStartTime(millis()+7000);
-				pacer[pacerIndex].setSecondsPerLap (thirdCommand);
+			if (thirdCommand >= minimumLapTime) {
+				if (pacerIndex == 99) {
+					pacer[getLowestUnusedPacerIndex()].setStartTime(millis()+7000);
+					pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (thirdCommand);
+				}
+				else {
+					pacer[pacerIndex].setStartTime(millis()+7000);
+					pacer[pacerIndex].setSecondsPerLap (thirdCommand);
+				}
 			}
 
 			/*// Send feedback to client
@@ -527,12 +532,14 @@ void process(YunClient client) {
 			if (pacerIndex == 99) {
 				for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 					if (pacer[i].getSecondsPerLap() > 0) {
-						pacer[i].setChangedPacerNewStartTime(pacer[i].getSecondsPerLap()+thirdCommand);
+						if ((pacer[i].getSecondsPerLap()+thirdCommand) >= minimumLapTime) {
+							pacer[i].setChangedPacerNewStartTime(pacer[i].getSecondsPerLap()+thirdCommand);
+						}
 					}
 				}
 			}
 			else {
-				if (pacer[pacerIndex].getSecondsPerLap() > 0) {
+				if (pacer[pacerIndex].getSecondsPerLap() > 0 && pacer[pacerIndex].getSecondsPerLap()+thirdCommand >= minimumLapTime) {
 					pacer[pacerIndex].setChangedPacerNewStartTime(pacer[pacerIndex].getSecondsPerLap()+thirdCommand);
 				}
 			}

@@ -150,7 +150,7 @@
 			// hides the secret demo field whenever you click it
 			$(document).ready(function(){
 				$("#demo").click(function(){
-					hideAdvancedElements();
+				    hideAdvancedElements();
 				});
 			});
 			
@@ -160,7 +160,7 @@
 					$(this).val("");
 				});
 			});
-			
+
 			// Do all this stuff as soon as the page loads
 			$(document).ready(function(){
 				hideAdvancedElements();
@@ -184,6 +184,7 @@
 			    // $("lightsNumberInput").width("50%");
 			});
 			
+            // show all the advanced elements and hide the advanced button
 			function showAdvancedElements() {
 				$("#demo").show();
 				$("#description").show();
@@ -201,6 +202,7 @@
 				$("#advancedButton").hide();
 			}
 			
+            // hide all the advanced elements and show the advanced button
 			function hideAdvancedElements() {
 				$("#demo").hide();
 				$("#description").hide();

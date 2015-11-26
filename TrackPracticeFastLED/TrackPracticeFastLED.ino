@@ -545,18 +545,14 @@ void process(YunClient client) {
 			}
 			break;
 		case 9: // feedback...
-			// for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-			if (pacerIndex != 99) {
-				client.print(pacer[pacerIndex].getSecondsPerLap());
-				client.print("#");
-				client.print(pacer[pacerIndex].getColorInt());
+			for (int i=0; i < pacer[0].getNumberPacers(); i++) {
+				if (i != 0) {
+					client.print("#");
+				}
+				client.print(pacer[i].getSecondsPerLap());
+				client.print("=");
+				client.print(pacer[i].getColorInt());
 			}
-			else {
-				client.print(pacer[0].getSecondsPerLap());
-				client.print("#");
-				client.print(pacer[0].getColorInt());
-			}
-			// }
 			break;
 		default:
 			break;

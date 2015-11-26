@@ -10,10 +10,20 @@
 		<script src="jquery-1.8.2.min.js"></script>
 		<script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>
 		<script>
+		    // Pacer object constructor
+		    //function pacerConstructor(lapTime, color_Int) {
+		    //    this.secondsPerLap = lapTime;
+		    //    this.colorInt = color_Int;
+		    //}
+		    var numPacers = 10;
 			colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 			window.onload=Pinstatus;
 
 			function Pinstatus() {
+			    var pacer = [];
+			    for (var i = 0; i < numPacers; i++) {
+			        pacer[i] = {secondsPerLap:0, colorInt:0}
+			    }
 				morestatus();
 			}
 
@@ -33,41 +43,68 @@
 			function updateasyncstatus() {
 				if ((request.readyState == 4) && (request.status == 200)) {
 					result = request.responseText;
-					var pacerIndex = $('#pacerSelect').val();
-					if (pacerIndex == 99) {
-						document.getElementById("description").innerHTML = result;
-					}
-					else {
-						fullset = result.split("#");
-						// document.getElementById("description").innerHTML = fullset;
-						secondsPerLap = fullset[0];
-						colorInt = fullset[1];
-						document.getElementById("description").innerHTML = secondsPerLap + "# #" + colorArray[colorInt];
-						document.getElementById("feedbackSecs").innerHTML = "Seconds Per Lap: " + secondsPerLap;
-						document.getElementById("feedbackColor").innerHTML = "Color: " + colorArray[colorInt];
-						/* This works to some degree but I couldn't make it work perfectly
-						var i = 0;
-						$("#pacerSelect option").each(function() {
-							var stringHolder = 'Pacer ' + i;
-							$(this).text(stringHolder);
-							if($(this).val() == pacerIndex) {
-								var aNewString = colorArray[colorInt];
-								stringHolder = 'Pacer ' + pacerIndex + ' - ' + secondsPerLap + ' - ' + aNewString;
-								$(this).text(stringHolder);    
-							}
-							i++;
-						});*/
-						// document.getElementById('#pacerSelect').options[pacerIndex].html(pacerIndex); // "Pacer "+pacerIndex+" - "+secondsPerLap+" - "+colorArray[colorInt]);
+					// var pacerIndex = $('#pacerSelect').val();
+					// if (pacerIndex == 99) {
+					// document.getElementById("description").innerHTML = result;
+					// else {
+					fullset = result.split("#");
+					// document.getElementById("description").innerHTML = fullset;
+					//secondsPerLap = fullset[0];
+					//colorInt = fullset[1];
+					//document.getElementById("description").innerHTML = secondsPerLap + "# #" + colorArray[colorInt];
+					//document.getElementById("feedbackSecs").innerHTML = "Seconds Per Lap: " + secondsPerLap;
+					//document.getElementById("feedbackColor").innerHTML = "Color: " + colorArray[colorInt];
 
-						// for(i = 1; i < fullset.length; i++) {
-						// }
-					}
+
+					//for (i = 1; i < fullset.length; i++) {
+					//    if (i < numPacers) {
+					//        pacerPair = fullset[i];                       //for the value of i=1, PinPair will be "2=0"
+					//        singleset = pacerPair.split("=");             //this will cause PinPair to split at "#" into an array of [2,0]
+					//        lap_Time = singleset[0];                          //PN will hold the pin number,example 2
+					//        color_Num = singleset[1];
+
+					//        $("#pacerSelect option").text("Pacer");
+					var i = -1;
+					$("#pacerSelect option").each(function () {
+					    if (i == -1) {
+					        pacerPair = fullset[i];                       //for the value of i=1, PinPair will be "2=0"
+					        singleset = pacerPair.split("=");             //this will cause PinPair to split at "#" into an array of [2,0]
+					        lap_Time = singleset[0];                          //PN will hold the pin number,example 2
+					        color_Num = singleset[1];
+					        var stringHolder = 'Pacer ' + i;
+					        $(this).text(stringHolder);
+					        var aNewString = colorArray[color_Num];
+					        stringHolder = 'Pacer ' + i + ' - ' + lap_Time + ' - ' + color_Num;
+					        $(this).text(stringHolder);
+					    }
+					    i++;
+				    });
+
+					        // document.getElementById('#pacerSelect').options[i].html("Pacer "); // "Pacer "+i+" - "+secondsPerLap+" - "+colorArray[colorInt]);
+					        // pacer[i] = { secondsPerLap: lap_Time, colorInt: color_Num }
+					        // pacers[i].secondsPerLap = lap_Time;
+					        // pacers[i].colorInt = color_Num;
+					//    }
+					//}
+
+					// This works to some degree but I couldn't make it work perfectly
+					var i = 0;
+					var psStringHolder;
+					var psColorString;
+					//$("#pacerSelect option").each(function() {
+					//	psColorString = colorArray[pacer[i].colorInt];
+					//	psStringHolder = 'Pacer ' + pacerIndex + ' - ' + pacer[i].secondsPerLap + ' - ' + psColorString;
+					//	$(this).text(psStringHolder);
+					//	i++;
+					//});
+					psStringHolder = ":D";
+					document.getElementById("description").innerHTML = psStringHolder;
+					// document.getElementById('#pacerSelect').options[pacerIndex].html(pacerIndex); // "Pacer "+pacerIndex+" - "+secondsPerLap+" - "+colorArray[colorInt]);
 				}
 			}
 			
 			// handle new pacer times
 			function newPacerTime(val) {
-			
 				var newPacerTimeNum = 0;
 				var pacerIndexforTimeSet = $('#pacerSelect').val();
 				var xhr = new XMLHttpRequest();
@@ -94,16 +131,12 @@
 						xhr.send();
 						$("#demo").text("/arduino/"+commandURL2+"/"+pacerIndex2+"/"+speedChange);
 					}
-					else {
-						// do nothing
-					}
 				});
 			});
 			
 			// handles pacer action commands - clear, reset, backwards, etc.
 			$(document).ready(function(){
 				$(".submitButton, .submitButton3").click(function(){
-				
 					var commandURL = $(this).attr("url");
 					var pacerIndex = $('#pacerSelect').val();
 					var newNum = $(this).attr("otherNum");
@@ -189,7 +222,7 @@
 				// $("button:nth-of-type(4n+4)").css("background-color", "yellow");
 				// $(".lightChange").css('display', 'inline-block');
 				// $(".lightChange").css( "padding-right", "25px" );
-				// $("lightsNumberInput").width("50%");
+			    // $("lightsNumberInput").width("50%");
 			});
 			
 			function showAdvancedElements() {

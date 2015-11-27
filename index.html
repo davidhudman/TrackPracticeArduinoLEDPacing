@@ -45,15 +45,14 @@
 
 		    // .. :)
 		    function morestatus() {
-		        setTimeout(morestatus, 2000);
 		        document.getElementById("description").innerHTML = "Processing Status";
 		        var pacerIndex = $('#pacerSelect').val();
 		        var thirdCommand = $('#lightsNumberInput').val();
 		        server = "/arduino/9/" + pacerIndex + "/" + thirdCommand;
 		        request = new XMLHttpRequest();
-		        request.onreadystatechange = updateasyncstatus;
 		        request.open("GET", server, true);
 		        request.send(null);
+		        request.onreadystatechange = updateasyncstatus;
 		    }
 
 		    // Show feedback from the Arduino
@@ -75,7 +74,7 @@
 		            document.getElementById("feedbackSecs").innerHTML = "Seconds Per Lap: " + secondsPerLap;
 		            document.getElementById("feedbackColor").innerHTML = "Color: " + pacerIndex; // "Color: " + color;
 		            var options = [
-                        { text: "Select Pacer: All Pacers", value: 99 },
+                        { text: "All Pacers - Lap Time - Color", value: 99 },
                         { text: pacer[0].text, value: 0 },
                         { text: pacer[1].text, value: 1 },
                         { text: pacer[2].text, value: 2 },
@@ -327,7 +326,7 @@
 			<div data-role="content" data-theme="a">
 				<p id="demo">Developer feedback</p>
 				<p id="description">Description paragraph</p>
-						<select name="select-choice-a" id="pacerSelect" data-native-menu="false">
+						<select name="select-choice-a" id="pacerSelect" data-native-menu="false" onchange="morestatus()">
 							<option value="99">Select Pacer: All Pacers</option>
 							<option value="0">Pacer 0</option>
 							<option value="1">Pacer 1</option>

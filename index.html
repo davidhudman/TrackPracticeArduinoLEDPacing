@@ -19,7 +19,23 @@
 		    var secondsPerLap = [];
 		    var colorInt = [];
 			colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
-			window.onload=Pinstatus;
+			window.onload = Pinstatus;
+
+			(function ($, window) {
+			    $.fn.replaceOptions = function (options) {
+			        var self, $option;
+
+			        this.empty();
+			        self = this;
+
+			        $.each(options, function (index, option) {
+			            $option = $("<option></option>")
+                          .attr("value", option.value)
+                          .text(option.text);
+			            self.append($option);
+			        });
+			    };
+			})(jQuery, window);
 
 			function Pinstatus() {
 			    //var pacer = [];
@@ -47,34 +63,48 @@
 			    if ((request.readyState == 4) && (request.status == 200)) {
 			        result = request.responseText;
 			        var pacerIndex = $('#pacerSelect').val();
-			        if (pacerIndex == 99) {
-			            document.getElementById("description").innerHTML = result;
-			        }
-			        else {
-			            fullset = result.split("#");
-			            // document.getElementById("description").innerHTML = fullset;
-			            secondsPerLap = fullset[0];
-			            color = fullset[1];
-			            document.getElementById("description").innerHTML = secondsPerLap + "# #" + color;
-			            document.getElementById("feedbackSecs").innerHTML = "Seconds Per Lap: " + secondsPerLap;
-			            document.getElementById("feedbackColor").innerHTML = "Color: " + color;
-			            /* This works to some degree but I couldn't make it work perfectly
-						var i = 0;
-						$("#pacerSelect option").each(function() {
-							var stringHolder = 'Pacer ' + i;
-							$(this).text(stringHolder);
-							if($(this).val() == pacerIndex) {
-								var aNewString = colorArray[colorInt];
-								stringHolder = 'Pacer ' + pacerIndex + ' - ' + secondsPerLap + ' - ' + aNewString;
-								$(this).text(stringHolder);    
-							}
-							i++;
-						});*/
-			            // document.getElementById('#pacerSelect').options[pacerIndex].html(pacerIndex); // "Pacer "+pacerIndex+" - "+secondsPerLap+" - "+colorArray[colorInt]);
+			        
+			        fullset = result.split("#");
+			        // document.getElementById("description").innerHTML = fullset;
+			        secondsPerLap = fullset[0];
+			        color = fullset[1];
+			        document.getElementById("description").innerHTML = secondsPerLap + "# #" + color;
+			        document.getElementById("feedbackSecs").innerHTML = "Seconds Per Lap: " + secondsPerLap;
+			        document.getElementById("feedbackColor").innerHTML = "Color: " + pacerIndex; // "Color: " + color;
+			        var options = [
+                        { text: "New Pacer 1", value: 1 },
+                        { text: "New Pacer 2", value: 2 }
+			        ];
 
-			            // for(i = 1; i < fullset.length; i++) {
-			            // }
-			        }
+			        $("#pacerSelect").replaceOptions(options);
+                    
+                    // These three lines worked to clear all the options out, but didn't change text for any. It just made them unclickable
+			        //$("#pacerSelect").empty();
+			        //var option = $('<option></option>').attr("value", "99").text("New All Pacers");
+			        //$("#pacerSelect").append(option);
+
+                    // These four lines didn't do anything
+			        //for (i = 0; i < numPacers; i++) {
+			        //    option = $('<option></option>').attr("value", i).text("New Pacer "+i);
+			        //    $("#pacerSelect").append(option);
+			        //}
+
+			        /* This works to some degree but I couldn't make it work perfectly
+					var i = 0;
+					$("#pacerSelect option").each(function() {
+						var stringHolder = 'Pacer ' + i;
+						$(this).text(stringHolder);
+						if($(this).val() == pacerIndex) {
+							var aNewString = colorArray[colorInt];
+							stringHolder = 'Pacer ' + pacerIndex + ' - ' + secondsPerLap + ' - ' + aNewString;
+							$(this).text(stringHolder);    
+						}
+						i++;
+					});*/
+			        // document.getElementById('#pacerSelect').options[pacerIndex].html(pacerIndex); // "Pacer "+pacerIndex+" - "+secondsPerLap+" - "+colorArray[colorInt]);
+
+			        // for(i = 1; i < fullset.length; i++) {
+			        // }
 			    }
 			}
 			

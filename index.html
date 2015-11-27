@@ -63,24 +63,28 @@
 		                newSet = fullset[pacerIndex].split("=");
 		                secondsPerLap = newSet[0];
 		                color = colorArray[newSet[1]];
-                        document.getElementById("description").innerHTML = secondsPerLap + " | " + color;
-                        document.getElementById("feedbackData").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;
+		                document.getElementById("description").innerHTML = secondsPerLap + " | " + color;
+		                document.getElementById("feedbackData").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;
 		            }
-		            var options = [
-                        { text: "All Pacers - Lap Time - Color", value: 99 },
-                        { text: pacer[0].text, value: 0 },
-                        { text: pacer[1].text, value: 1 },
-                        { text: pacer[2].text, value: 2 },
-                        { text: pacer[3].text, value: 3 },
-                        { text: pacer[4].text, value: 4 },
-                        { text: pacer[5].text, value: 5 },
-                        { text: pacer[6].text, value: 6 },
-                        { text: pacer[7].text, value: 7 },
-                        { text: pacer[8].text, value: 8 },
-                        { text: pacer[9].text, value: 9 }
-		            ];
+		            else {
+		                document.getElementById("description").innerHTML = "N/A"
+		                document.getElementById("feedbackData").innerHTML = "Lap Time: " + "N/A" + ", Color: " + "N/A";
+		            }
+		            //var options = [
+                    //    { text: "All Pacers - Lap Time - Color", val: 99 },
+                    //    { text: pacer[0].text, val: 0 },
+                    //    { text: pacer[1].text, val: 1 },
+                    //    { text: pacer[2].text, val: 2 },
+                    //    { text: pacer[3].text, val: 3 },
+                    //    { text: pacer[4].text, val: 4 },
+                    //    { text: pacer[5].text, val: 5 },
+                    //    { text: pacer[6].text, val: 6 },
+                    //    { text: pacer[7].text, val: 7 },
+                    //    { text: pacer[8].text, val: 8 },
+                    //    { text: pacer[9].text, val: 9 }
+		            //];
 
-		            $("#pacerSelect").replaceOptions(options);
+		            //$("#pacerSelect").replaceOptions(options);
 		        }
 		    }
 

@@ -59,6 +59,7 @@
             // Show feedback from the Arduino
 			function updateasyncstatus() {
 			    var pacer = [];
+			    var options = [];
 			    if ((request.readyState == 4) && (request.status == 200)) {
 			        result = request.responseText;
 			        var pacerIndex = $('#pacerSelect').val();
@@ -67,26 +68,29 @@
 			        // document.getElementById("description").innerHTML = fullset;
 			        secondsPerLap = fullset[0];
 			        color = fullset[1];
+			        options.empty();
 			        for (i = 1; i < fullset.length; i++) {
 			            myset = fullset[i].split("=");
-			            pacers = { lapTime: myset[0], color: colorArray[myset[1]], text:"Pacer "+i+" "+myset[0] }
+			            pacers = { lapTime: myset[0], color: colorArray[myset[1]], text: "Pacer " + i + " " + myset[0] }
+			            optionsHolder = { text: pacers.text, value: i }
+			            options.append(optionsHolder);
 			        }
 			        document.getElementById("description").innerHTML = secondsPerLap + "# #" + color;
 			        document.getElementById("feedbackSecs").innerHTML = "Seconds Per Lap: " + secondsPerLap;
 			        document.getElementById("feedbackColor").innerHTML = "Color: " + pacerIndex; // "Color: " + color;
-			        var options = [
-                        { text: "Select Pacer: All Pacers", value: 99 },
-                        { text: pacers.text, value: 0 },
-                        { text: "New Pacer 1", value: 1 },
-                        { text: "New Pacer 2", value: 2 },
-                        { text: "New Pacer 3", value: 3 },
-                        { text: "New Pacer 4", value: 4 },
-                        { text: "New Pacer 5", value: 5 },
-                        { text: "New Pacer 6", value: 6 },
-                        { text: "New Pacer 7", value: 7 },
-                        { text: "New Pacer 8", value: 8 },
-                        { text: "New Pacer 9", value: 9 }
-			        ];
+			        //var options = [
+                    //    { text: "Select Pacer: All Pacers", value: 99 },
+                    //    { text: pacers.text, value: 0 },
+                    //    { text: "New Pacer 1", value: 1 },
+                    //    { text: "New Pacer 2", value: 2 },
+                    //    { text: "New Pacer 3", value: 3 },
+                    //    { text: "New Pacer 4", value: 4 },
+                    //    { text: "New Pacer 5", value: 5 },
+                    //    { text: "New Pacer 6", value: 6 },
+                    //    { text: "New Pacer 7", value: 7 },
+                    //    { text: "New Pacer 8", value: 8 },
+                    //    { text: "New Pacer 9", value: 9 }
+			        //];
 
 			        $("#pacerSelect").replaceOptions(options);
                     

@@ -10,11 +10,6 @@
 		<script src="jquery-1.8.2.min.js"></script>
 		<script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>
 		<script>
-		    // Pacer object constructor
-		    //function pacerConstructor(lapTime, color_Int) {
-		    //    this.secondsPerLap = lapTime;
-		    //    this.colorInt = color_Int;
-		    //}
 		    var numPacers = 10;
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 		    window.onload = Pinstatus;
@@ -36,10 +31,6 @@
 		    })(jQuery, window);
 
 		    function Pinstatus() {
-		        //var pacer = [];
-		        //for (var i = 0; i < numPacers; i++) {
-		        //    pacer[i] = {secondsPerLap:0, colorInt:0}
-		        //}
 		        morestatus();
 		    }
 
@@ -61,18 +52,20 @@
 		        if ((request.readyState == 4) && (request.status == 200)) {
 		            result = request.responseText;
 		            var pacerIndex = $('#pacerSelect').val();
-
 		            fullset = result.split("#");
-		            // document.getElementById("description").innerHTML = fullset;
-		            secondsPerLap = fullset[0];
-		            color = fullset[1];
+
 		            for (i = 0; i < fullset.length; i++) {
 		                myset = fullset[i].split("=");
 		                pacer[i] = { lapTime: myset[0], color: colorArray[myset[1] % colorArray.length], text: "Pacer " + i + " - " + myset[0] + " - " + colorArray[myset[1] % colorArray.length] }
 		            }
-		            document.getElementById("description").innerHTML = secondsPerLap + "# #" + color;
-		            document.getElementById("feedbackSecs").innerHTML = "Seconds Per Lap: " + secondsPerLap;
-		            document.getElementById("feedbackColor").innerHTML = "Color: " + pacerIndex; // "Color: " + color;
+
+		            if (pacerIndex != 99) {
+		                newSet = fullset[pacerIndex].split("=");
+		                secondsPerLap = newSet[0];
+		                color = colorArray[newSet[1]];
+                        document.getElementById("description").innerHTML = secondsPerLap + " | " + color;
+                        document.getElementById("feedbackData").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;
+		            }
 		            var options = [
                         { text: "All Pacers - Lap Time - Color", value: 99 },
                         { text: pacer[0].text, value: 0 },
@@ -88,34 +81,6 @@
 		            ];
 
 		            $("#pacerSelect").replaceOptions(options);
-
-		            // These three lines worked to clear all the options out, but didn't change text for any. It just made them unclickable
-		            //$("#pacerSelect").empty();
-		            //var option = $('<option></option>').attr("value", "99").text("New All Pacers");
-		            //$("#pacerSelect").append(option);
-
-		            // These four lines didn't do anything
-		            //for (i = 0; i < numPacers; i++) {
-		            //    option = $('<option></option>').attr("value", i).text("New Pacer "+i);
-		            //    $("#pacerSelect").append(option);
-		            //}
-
-		            /* This works to some degree but I couldn't make it work perfectly
-					var i = 0;
-					$("#pacerSelect option").each(function() {
-						var stringHolder = 'Pacer ' + i;
-						$(this).text(stringHolder);
-						if($(this).val() == pacerIndex) {
-							var aNewString = colorArray[colorInt];
-							stringHolder = 'Pacer ' + pacerIndex + ' - ' + secondsPerLap + ' - ' + aNewString;
-							$(this).text(stringHolder);    
-						}
-						i++;
-					});*/
-		            // document.getElementById('#pacerSelect').options[pacerIndex].html(pacerIndex); // "Pacer "+pacerIndex+" - "+secondsPerLap+" - "+colorArray[colorInt]);
-
-		            // for(i = 1; i < fullset.length; i++) {
-		            // }
 		        }
 		    }
 
@@ -340,8 +305,7 @@
 							<option value="9">Pacer 9</option>
 						</select>
 						
-						<p id="feedbackSecs">Seconds Per Lap: </p>
-						<p id="feedbackColor">Color: </p>
+						<p id="feedbackData">Lap Time: ----, Color: ----- </p>
 						<label for="select-choice-a" class="select">Enter Lap Time in Seconds:</label>
 						<input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" value="2" min="1" max="900" url="7" autocomplete="off" onchange="newPacerTime(this.value)" />
 					

@@ -16,96 +16,92 @@
 		    //    this.colorInt = color_Int;
 		    //}
 		    var numPacers = 10;
-			colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
-			window.onload = Pinstatus;
+		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
+		    window.onload = Pinstatus;
 
-			(function ($, window) {
-			    $.fn.replaceOptions = function (options) {
-			        var self, $option;
+		    (function ($, window) {
+		        $.fn.replaceOptions = function (options) {
+		            var self, $option;
 
-			        this.empty();
-			        self = this;
+		            this.empty();
+		            self = this;
 
-			        $.each(options, function (index, option) {
-			            $option = $("<option></option>")
+		            $.each(options, function (index, option) {
+		                $option = $("<option></option>")
                           .attr("value", option.value)
                           .text(option.text);
-			            self.append($option);
-			        });
-			    };
-			})(jQuery, window);
+		                self.append($option);
+		            });
+		        };
+		    })(jQuery, window);
 
-			function Pinstatus() {
-			    //var pacer = [];
-			    //for (var i = 0; i < numPacers; i++) {
-			    //    pacer[i] = {secondsPerLap:0, colorInt:0}
-			    //}
-				morestatus();
-			}
+		    function Pinstatus() {
+		        //var pacer = [];
+		        //for (var i = 0; i < numPacers; i++) {
+		        //    pacer[i] = {secondsPerLap:0, colorInt:0}
+		        //}
+		        morestatus();
+		    }
 
-            // .. :)
-			function morestatus() {
-				setTimeout(morestatus, 2000);
-				document.getElementById("description").innerHTML = "Processing Status";
-				var pacerIndex = $('#pacerSelect').val();
-				var thirdCommand = $('#lightsNumberInput').val();
-				server = "/arduino/9/"+pacerIndex+"/"+thirdCommand;
-				request = new XMLHttpRequest();
-				request.onreadystatechange = updateasyncstatus;
-				request.open("GET", server, true);
-				request.send(null);
-			}
+		    // .. :)
+		    function morestatus() {
+		        setTimeout(morestatus, 2000);
+		        document.getElementById("description").innerHTML = "Processing Status";
+		        var pacerIndex = $('#pacerSelect').val();
+		        var thirdCommand = $('#lightsNumberInput').val();
+		        server = "/arduino/9/" + pacerIndex + "/" + thirdCommand;
+		        request = new XMLHttpRequest();
+		        request.onreadystatechange = updateasyncstatus;
+		        request.open("GET", server, true);
+		        request.send(null);
+		    }
 
-            // Show feedback from the Arduino
-			function updateasyncstatus() {
-			    var pacer = [];
-			    var options = [];
-			    if ((request.readyState == 4) && (request.status == 200)) {
-			        result = request.responseText;
-			        var pacerIndex = $('#pacerSelect').val();
-			        
-			        fullset = result.split("#");
-			        // document.getElementById("description").innerHTML = fullset;
-			        secondsPerLap = fullset[0];
-			        color = fullset[1];
-			        options.empty();
-			        for (i = 1; i < fullset.length; i++) {
-			            myset = fullset[i].split("=");
-			            pacers = { lapTime: myset[0], color: colorArray[myset[1]], text: "Pacer " + i + " " + myset[0] }
-			            optionsHolder = { text: pacers.text, value: i }
-			            options.append(optionsHolder);
-			        }
-			        document.getElementById("description").innerHTML = secondsPerLap + "# #" + color;
-			        document.getElementById("feedbackSecs").innerHTML = "Seconds Per Lap: " + secondsPerLap;
-			        document.getElementById("feedbackColor").innerHTML = "Color: " + pacerIndex; // "Color: " + color;
-			        //var options = [
-                    //    { text: "Select Pacer: All Pacers", value: 99 },
-                    //    { text: pacers.text, value: 0 },
-                    //    { text: "New Pacer 1", value: 1 },
-                    //    { text: "New Pacer 2", value: 2 },
-                    //    { text: "New Pacer 3", value: 3 },
-                    //    { text: "New Pacer 4", value: 4 },
-                    //    { text: "New Pacer 5", value: 5 },
-                    //    { text: "New Pacer 6", value: 6 },
-                    //    { text: "New Pacer 7", value: 7 },
-                    //    { text: "New Pacer 8", value: 8 },
-                    //    { text: "New Pacer 9", value: 9 }
-			        //];
+		    // Show feedback from the Arduino
+		    function updateasyncstatus() {
+		        var pacer = [];
+		        if ((request.readyState == 4) && (request.status == 200)) {
+		            result = request.responseText;
+		            var pacerIndex = $('#pacerSelect').val();
 
-			        $("#pacerSelect").replaceOptions(options);
-                    
-                    // These three lines worked to clear all the options out, but didn't change text for any. It just made them unclickable
-			        //$("#pacerSelect").empty();
-			        //var option = $('<option></option>').attr("value", "99").text("New All Pacers");
-			        //$("#pacerSelect").append(option);
+		            fullset = result.split("#");
+		            // document.getElementById("description").innerHTML = fullset;
+		            secondsPerLap = fullset[0];
+		            color = fullset[1];
+		            for (i = 0; i < fullset.length; i++) {
+		                myset = fullset[i].split("=");
+		                pacer[i] = { lapTime: myset[0], color: colorArray[myset[1] % colorArray.length], text: "Pacer " + i + " - " + myset[0] + " - " + colorArray[myset[1] % colorArray.length] }
+		            }
+		            document.getElementById("description").innerHTML = secondsPerLap + "# #" + color;
+		            document.getElementById("feedbackSecs").innerHTML = "Seconds Per Lap: " + secondsPerLap;
+		            document.getElementById("feedbackColor").innerHTML = "Color: " + pacerIndex; // "Color: " + color;
+		            var options = [
+                        { text: "Select Pacer: All Pacers", value: 99 },
+                        { text: pacer[0].text, value: 0 },
+                        { text: pacer[1].text, value: 1 },
+                        { text: pacer[2].text, value: 2 },
+                        { text: pacer[3].text, value: 3 },
+                        { text: pacer[4].text, value: 4 },
+                        { text: pacer[5].text, value: 5 },
+                        { text: pacer[6].text, value: 6 },
+                        { text: pacer[7].text, value: 7 },
+                        { text: pacer[8].text, value: 8 },
+                        { text: pacer[9].text, value: 9 }
+		            ];
 
-                    // These four lines didn't do anything
-			        //for (i = 0; i < numPacers; i++) {
-			        //    option = $('<option></option>').attr("value", i).text("New Pacer "+i);
-			        //    $("#pacerSelect").append(option);
-			        //}
+		            $("#pacerSelect").replaceOptions(options);
 
-			        /* This works to some degree but I couldn't make it work perfectly
+		            // These three lines worked to clear all the options out, but didn't change text for any. It just made them unclickable
+		            //$("#pacerSelect").empty();
+		            //var option = $('<option></option>').attr("value", "99").text("New All Pacers");
+		            //$("#pacerSelect").append(option);
+
+		            // These four lines didn't do anything
+		            //for (i = 0; i < numPacers; i++) {
+		            //    option = $('<option></option>').attr("value", i).text("New Pacer "+i);
+		            //    $("#pacerSelect").append(option);
+		            //}
+
+		            /* This works to some degree but I couldn't make it work perfectly
 					var i = 0;
 					$("#pacerSelect option").each(function() {
 						var stringHolder = 'Pacer ' + i;
@@ -117,201 +113,201 @@
 						}
 						i++;
 					});*/
-			        // document.getElementById('#pacerSelect').options[pacerIndex].html(pacerIndex); // "Pacer "+pacerIndex+" - "+secondsPerLap+" - "+colorArray[colorInt]);
+		            // document.getElementById('#pacerSelect').options[pacerIndex].html(pacerIndex); // "Pacer "+pacerIndex+" - "+secondsPerLap+" - "+colorArray[colorInt]);
 
-			        // for(i = 1; i < fullset.length; i++) {
-			        // }
-			    }
-			}
-			
-			// handle new pacer times
-			function newPacerTime(val) {
-				var newPacerTimeNum = 0;
-				var pacerIndexforTimeSet = $('#pacerSelect').val();
-				var xhr = new XMLHttpRequest();
-				
-				xhr.open("GET", "/arduino/7/"+pacerIndexforTimeSet+"/"+val, false);
-				xhr.send();
-				$("#demo").text("/arduino/7/"+pacerIndexforTimeSet+"/"+val);
-				$("#pacerTimeInput").val("Enter pacer time in seconds");
-			}
-			
-			// handle slowing or speeding up pacers
-			$(document).ready(function(){
-				$(".speedChangeButton").click(function(){
-				
-					var signlessNumber = $("#lightsNumberInput").val();
-					var sign = $(this).attr("otherNum");
-					var speedChange = signlessNumber * sign;
-					
-					if (signlessNumber > 0.0) {
-						var commandURL2 = $(this).attr("url");
-						var pacerIndex2 = $('#pacerSelect').val();
-						var xhr = new XMLHttpRequest();
-						xhr.open("GET", "/arduino/"+commandURL2+"/"+pacerIndex2+"/"+speedChange, false);
-						xhr.send();
-						$("#demo").text("/arduino/"+commandURL2+"/"+pacerIndex2+"/"+speedChange);
-					}
-				});
-			});
-			
-			// handles pacer action commands - clear, reset, backwards, etc.
-			$(document).ready(function(){
-				$(".submitButton, .submitButton3").click(function(){
-					var commandURL = $(this).attr("url");
-					var pacerIndex = $('#pacerSelect').val();
-					var newNum = $(this).attr("otherNum");
-					var xhr = new XMLHttpRequest();
-					
-					xhr.open("GET", "/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum, false);
-					xhr.send();
-					$("#demo").text("/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum);
-				});
-			});
-			
-			// handles changing number of lights
-			$(document).ready(function(){
-				$("#lightsSubmit").click(function(){
-				
-					var commandURL = $(this).attr("url");
-					var pacerIndex = $('#pacerSelect').val();
-					var newNum = $("#lightsNumberInput").val();
-					var xhr = new XMLHttpRequest();
-					
-					xhr.open("GET", "/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum, false);
-					xhr.send();
-					$("#demo").text("/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum);
-				});
-			});
-			
-			// handles longpress for reset button to make it into a reset delay button and vice versa
-			$(document).ready(function(){
-				$("#backwardsButton").on( "taphold", function( event ) {
-					var rstBtnUrl = $("#resetButton").attr("url");
-					$("#demo").text("button might be doing something");
-					if (rstBtnUrl == "1") {
-						$("#resetButton").attr("url", "2");
-						$("#resetButton").attr("data-icon", "forward");
-						$("#demo").text("button is now delay");
-					}
-					else {
-						$("#resetButton").attr("url", "1");
-						$("#resetButton").attr("data-icon", "refresh");
-						$("#demo").text("button is now reset");
-					}
-				});
-			});
-			
-			// reveals the secret demo field whenever you click the advancedButton
-			$(document).ready(function(){
-				$("#advancedButton").click(function(){
-					showAdvancedElements();
-				});
-			});
-			
-			// hides the secret demo field whenever you click it
-			$(document).ready(function(){
-				$("#demo").click(function(){
-				    hideAdvancedElements();
-				});
-			});
-			
-			// Clear the contents of the new pacer time field when clicked so the user can type theirs
-			$(document).ready(function(){
-				$("#pacerTimeInput, #lightsNumberInput").click(function(){
-					$(this).val("");
-				});
-			});
+		            // for(i = 1; i < fullset.length; i++) {
+		            // }
+		        }
+		    }
 
-			// Do all this stuff as soon as the page loads
-			$(document).ready(function(){
-				hideAdvancedElements();
-				$("input[name='radio-choice-1']").change(radioValueChanged);
-				$("#pacerTimeInput").val("Enter pacer time in seconds");
-				$(".submitButton, .submitButton2").css('display', 'inline-block');
-				$(".submitButton").css( "padding-right", "25px" );
-				$(".speedChangeButton").css('display', 'inline-block');
-				$(".speedChangeButton").css( "padding-right", "25px" );
-				$("#advancedButton").css('display', 'inline-block');
-				$("#advancedButton").css( "padding-right", "10px" );
-				$("#pacerActionDiv").css("padding-top", "35px");
-				$("#colorDiv").css("padding-top", "35px");
-				$("button:even").css("background-color", "LightCoral");
-				$("button:odd").css("background-color", "LightBlue");
-				//$("button:nth-of-type(4n+2)").css("background-color", "green");
-				//$("button:nth-of-type(4n+3)").css("background-color", "blue");
-				// $("button:nth-of-type(4n+4)").css("background-color", "yellow");
-				// $(".lightChange").css('display', 'inline-block');
-				// $(".lightChange").css( "padding-right", "25px" );
-			    // $("lightsNumberInput").width("50%");
-			});
-			
-            // show all the advanced elements and hide the advanced button
-			function showAdvancedElements() {
-				$("#demo").show();
-				$("#description").show();
-				$("#demo").text("Developer feedback");
-				$("#navbar").show();
-				$("#submitCancel").show();
-				$("#selectShipping").show();
-				$("#colorRadio").show();
-				$("#colorRadioB").show();
-				$("#fontStyle").show();
-				$("#snacks").show();
-				$("#slider1").show();
-				$("#slider2").show();
-				
-				$("#advancedButton").hide();
-			}
-			
-            // hide all the advanced elements and show the advanced button
-			function hideAdvancedElements() {
-				$("#demo").hide();
-				$("#description").hide();
-				$("#resetdelayButton").hide();
-				$("#navbar").hide();
-				$("#submitCancel").hide();
-				$("#selectShipping").hide();
-				$("#colorRadio").hide();
-				$("#colorRadioB").hide();
-				$("#fontStyle").hide();
-				$("#snacks").hide();
-				$("#slider1").hide();
-				$("#slider2").hide();
-				
-				$("#advancedButton").show();
-			}
-			
-			function colorSelectFunc() {
-				// var colorSelectVal = $('#colorSelectFunc').val();
-				// $("#demo").text("myFunction was called");
-				var commandURL = $('#colorSelect').attr("url");
-				var pacerIndex = $('#pacerSelect').val();
-				var newNum = $('#colorSelect').val();
-				var xhr = new XMLHttpRequest();
-				
-				xhr.open("GET", "/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum, false);
-				xhr.send();
-				$("#demo").text("/arduino/"+commandURL+"/"+pacerIndex+"/"+newNum);
-			}
-			
-			function radioValueChanged() {
-				radioValue = $(this).value();
-				var xhr = new XMLHttpRequest();
-				
-				xhr.open("GET", "/arduino"+radioValue, false);
-				xhr.send();
-				$("#demo").text(radioValue);
-			} 
-			
-			function flipSwitchChange(thisURL) {
-				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/arduino"+thisURL, false);
-				xhr.send();
-				$("#demo").text(thisURL);
-			}
-			
-			// End of JavaScript
+		    // handle new pacer times
+		    function newPacerTime(val) {
+		        var newPacerTimeNum = 0;
+		        var pacerIndexforTimeSet = $('#pacerSelect').val();
+		        var xhr = new XMLHttpRequest();
+
+		        xhr.open("GET", "/arduino/7/" + pacerIndexforTimeSet + "/" + val, false);
+		        xhr.send();
+		        $("#demo").text("/arduino/7/" + pacerIndexforTimeSet + "/" + val);
+		        $("#pacerTimeInput").val("Enter pacer time in seconds");
+		    }
+
+		    // handle slowing or speeding up pacers
+		    $(document).ready(function () {
+		        $(".speedChangeButton").click(function () {
+
+		            var signlessNumber = $("#lightsNumberInput").val();
+		            var sign = $(this).attr("otherNum");
+		            var speedChange = signlessNumber * sign;
+
+		            if (signlessNumber > 0.0) {
+		                var commandURL2 = $(this).attr("url");
+		                var pacerIndex2 = $('#pacerSelect').val();
+		                var xhr = new XMLHttpRequest();
+		                xhr.open("GET", "/arduino/" + commandURL2 + "/" + pacerIndex2 + "/" + speedChange, false);
+		                xhr.send();
+		                $("#demo").text("/arduino/" + commandURL2 + "/" + pacerIndex2 + "/" + speedChange);
+		            }
+		        });
+		    });
+
+		    // handles pacer action commands - clear, reset, backwards, etc.
+		    $(document).ready(function () {
+		        $(".submitButton, .submitButton3").click(function () {
+		            var commandURL = $(this).attr("url");
+		            var pacerIndex = $('#pacerSelect').val();
+		            var newNum = $(this).attr("otherNum");
+		            var xhr = new XMLHttpRequest();
+
+		            xhr.open("GET", "/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum, false);
+		            xhr.send();
+		            $("#demo").text("/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum);
+		        });
+		    });
+
+		    // handles changing number of lights
+		    $(document).ready(function () {
+		        $("#lightsSubmit").click(function () {
+
+		            var commandURL = $(this).attr("url");
+		            var pacerIndex = $('#pacerSelect').val();
+		            var newNum = $("#lightsNumberInput").val();
+		            var xhr = new XMLHttpRequest();
+
+		            xhr.open("GET", "/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum, false);
+		            xhr.send();
+		            $("#demo").text("/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum);
+		        });
+		    });
+
+		    // handles longpress for reset button to make it into a reset delay button and vice versa
+		    $(document).ready(function () {
+		        $("#backwardsButton").on("taphold", function (event) {
+		            var rstBtnUrl = $("#resetButton").attr("url");
+		            $("#demo").text("button might be doing something");
+		            if (rstBtnUrl == "1") {
+		                $("#resetButton").attr("url", "2");
+		                $("#resetButton").attr("data-icon", "forward");
+		                $("#demo").text("button is now delay");
+		            }
+		            else {
+		                $("#resetButton").attr("url", "1");
+		                $("#resetButton").attr("data-icon", "refresh");
+		                $("#demo").text("button is now reset");
+		            }
+		        });
+		    });
+
+		    // reveals the secret demo field whenever you click the advancedButton
+		    $(document).ready(function () {
+		        $("#advancedButton").click(function () {
+		            showAdvancedElements();
+		        });
+		    });
+
+		    // hides the secret demo field whenever you click it
+		    $(document).ready(function () {
+		        $("#demo").click(function () {
+		            hideAdvancedElements();
+		        });
+		    });
+
+		    // Clear the contents of the new pacer time field when clicked so the user can type theirs
+		    $(document).ready(function () {
+		        $("#pacerTimeInput, #lightsNumberInput").click(function () {
+		            $(this).val("");
+		        });
+		    });
+
+		    // Do all this stuff as soon as the page loads
+		    $(document).ready(function () {
+		        hideAdvancedElements();
+		        $("input[name='radio-choice-1']").change(radioValueChanged);
+		        $("#pacerTimeInput").val("Enter pacer time in seconds");
+		        $(".submitButton, .submitButton2").css('display', 'inline-block');
+		        $(".submitButton").css("padding-right", "25px");
+		        $(".speedChangeButton").css('display', 'inline-block');
+		        $(".speedChangeButton").css("padding-right", "25px");
+		        $("#advancedButton").css('display', 'inline-block');
+		        $("#advancedButton").css("padding-right", "10px");
+		        $("#pacerActionDiv").css("padding-top", "35px");
+		        $("#colorDiv").css("padding-top", "35px");
+		        $("button:even").css("background-color", "LightCoral");
+		        $("button:odd").css("background-color", "LightBlue");
+		        //$("button:nth-of-type(4n+2)").css("background-color", "green");
+		        //$("button:nth-of-type(4n+3)").css("background-color", "blue");
+		        // $("button:nth-of-type(4n+4)").css("background-color", "yellow");
+		        // $(".lightChange").css('display', 'inline-block');
+		        // $(".lightChange").css( "padding-right", "25px" );
+		        // $("lightsNumberInput").width("50%");
+		    });
+
+		    // show all the advanced elements and hide the advanced button
+		    function showAdvancedElements() {
+		        $("#demo").show();
+		        $("#description").show();
+		        $("#demo").text("Developer feedback");
+		        $("#navbar").show();
+		        $("#submitCancel").show();
+		        $("#selectShipping").show();
+		        $("#colorRadio").show();
+		        $("#colorRadioB").show();
+		        $("#fontStyle").show();
+		        $("#snacks").show();
+		        $("#slider1").show();
+		        $("#slider2").show();
+
+		        $("#advancedButton").hide();
+		    }
+
+		    // hide all the advanced elements and show the advanced button
+		    function hideAdvancedElements() {
+		        $("#demo").hide();
+		        $("#description").hide();
+		        $("#resetdelayButton").hide();
+		        $("#navbar").hide();
+		        $("#submitCancel").hide();
+		        $("#selectShipping").hide();
+		        $("#colorRadio").hide();
+		        $("#colorRadioB").hide();
+		        $("#fontStyle").hide();
+		        $("#snacks").hide();
+		        $("#slider1").hide();
+		        $("#slider2").hide();
+
+		        $("#advancedButton").show();
+		    }
+
+		    function colorSelectFunc() {
+		        // var colorSelectVal = $('#colorSelectFunc').val();
+		        // $("#demo").text("myFunction was called");
+		        var commandURL = $('#colorSelect').attr("url");
+		        var pacerIndex = $('#pacerSelect').val();
+		        var newNum = $('#colorSelect').val();
+		        var xhr = new XMLHttpRequest();
+
+		        xhr.open("GET", "/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum, false);
+		        xhr.send();
+		        $("#demo").text("/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum);
+		    }
+
+		    function radioValueChanged() {
+		        radioValue = $(this).value();
+		        var xhr = new XMLHttpRequest();
+
+		        xhr.open("GET", "/arduino" + radioValue, false);
+		        xhr.send();
+		        $("#demo").text(radioValue);
+		    }
+
+		    function flipSwitchChange(thisURL) {
+		        var xhr = new XMLHttpRequest();
+		        xhr.open("GET", "/arduino" + thisURL, false);
+		        xhr.send();
+		        $("#demo").text(thisURL);
+		    }
+
+		    // End of JavaScript
 		</script>
 	</head>
 	<body>
@@ -401,7 +397,7 @@
 					
 					<div id="slider2" data-role="fieldcontain">
 						<label for="slider2">Invisible</label>
-						<select name="slider2" id="slider2" class="flipSwitch" data-role="slider">
+						<select name="slider2" id="Select1" class="flipSwitch" data-role="slider">
 							<option myURL="/visible/99" onclick="flipSwitchChange(this.myURL)" value="off">Off</option>
 							<option myURL="/visible/99" onclick="flipSwitchChange(this.myURL)" value="on">On</option>
 						</select>

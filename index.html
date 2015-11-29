@@ -38,8 +38,7 @@
 		    function morestatus() {
 		        document.getElementById("description").innerHTML = "Processing Status";
 		        var pacerIndex = $('#pacerSelect').val();
-		        var thirdCommand = $('#lightsNumberInput').val();
-		        server = "/arduino/9/" + pacerIndex + "/" + thirdCommand;
+		        server = "/arduino/9/" + pacerIndex + "/" + 0;
 		        request = new XMLHttpRequest();
 		        request.open("GET", server, true);
 		        request.send(null);
@@ -52,14 +51,14 @@
 		        if ((request.readyState == 4) && (request.status == 200)) {
 		            result = request.responseText;
 		            var pacerIndex = $('#pacerSelect').val();
-		            fullset = result.split("#");
-
-		            for (i = 0; i < fullset.length; i++) {
-		                myset = fullset[i].split("=");
-		                pacer[i] = { lapTime: myset[0], color: colorArray[myset[1] % colorArray.length], text: "Pacer " + i + " - " + myset[0] + " - " + colorArray[myset[1] % colorArray.length] }
-		            }
 
 		            if (pacerIndex != 99) {
+		                fullset = result.split("#");
+		                for (i = 0; i < fullset.length; i++) {
+		                    myset = fullset[i].split("=");
+		                    pacer[i] = { lapTime: myset[0], color: colorArray[myset[1] % colorArray.length], text: "Pacer " + i + " - " + myset[0] + " - " + colorArray[myset[1] % colorArray.length] }
+		                }
+
 		                newSet = fullset[pacerIndex].split("=");
 		                secondsPerLap = newSet[0];
 		                color = colorArray[newSet[1]];
@@ -67,8 +66,8 @@
 		                document.getElementById("feedbackData").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;
 		            }
 		            else {
-		                document.getElementById("description").innerHTML = "N/A"
-		                document.getElementById("feedbackData").innerHTML = "Lap Time: " + "N/A" + ", Color: " + "N/A";
+		                document.getElementById("description").innerHTML = "Lights: " + result;
+		                document.getElementById("feedbackData").innerHTML = "Lap Time: " + "N/A" + ", Color: " + "N/A" + ", Lights: " + result;
 		            }
 		            //var options = [
                     //    { text: "All Pacers - Lap Time - Color", val: 99 },
@@ -86,6 +85,14 @@
 
 		            //$("#pacerSelect").replaceOptions(options);
 		        }
+		        testCommand();
+		    }
+            
+            // send an extra command in case Arduino is lagging because it is still waiting for something
+		    function testCommand() {
+		        var xhr = new XMLHttpRequest();
+		        xhr.open("GET", "/arduino/-1/" + 0 + "/" + 0, false);
+		        xhr.send();
 		    }
 
 		    // handle new pacer times
@@ -148,20 +155,30 @@
 		        });
 		    });
 
-		    // handles longpress for reset button to make it into a reset delay button and vice versa
+		    // handles longpress of all buttons to show their help text
 		    $(document).ready(function () {
-		        $("#backwardsButton").on("taphold", function (event) {
+		        $(".submitButton3, #lightsSubmit, .speedChangeButton, #advancedButton, #helpButton").on("taphold", function (event) {
+		            var text = $(this).attr("help");
+		            alert(text);
+		        });
+		    });
+
+		    // handles longpress for of description button to make it into a reset delay button and vice versa
+		    $(document).ready(function () {
+		        $("#tpHeader").on("taphold", function (event) {
 		            var rstBtnUrl = $("#resetButton").attr("url");
 		            $("#demo").text("button might be doing something");
 		            if (rstBtnUrl == "1") {
 		                $("#resetButton").attr("url", "2");
-		                $("#resetButton").attr("data-icon", "forward");
+		                $("#resetButton").attr("data-icon", "clock");
 		                $("#demo").text("button is now delay");
+		                alert("Reset button will now reset pacers on a delay.");
 		            }
 		            else {
 		                $("#resetButton").attr("url", "1");
 		                $("#resetButton").attr("data-icon", "refresh");
 		                $("#demo").text("button is now reset");
+		                alert("Reset button will now reset pacers immediately when pressed.");
 		            }
 		        });
 		    });
@@ -187,11 +204,20 @@
 		        });
 		    });
 
+		    // Display help when the help button is clicked
+		    $(document).ready(function () {
+		        $("#helpButton").click(function () {
+		            var text = $(this).attr("help");
+		            alert(text);
+		        });
+		    });
+
 		    // Do all this stuff as soon as the page loads
 		    $(document).ready(function () {
 		        hideAdvancedElements();
+		        assignHelpTextToButtons();
 		        $("input[name='radio-choice-1']").change(radioValueChanged);
-		        $("#pacerTimeInput").val("Enter pacer time in seconds");
+		        $("#pacerTimeInput, #lightsNumberInput").attr('autocomplete', 'off');
 		        $(".submitButton, .submitButton2").css('display', 'inline-block');
 		        $(".submitButton").css("padding-right", "25px");
 		        $(".speedChangeButton").css('display', 'inline-block');
@@ -203,6 +229,22 @@
 		        $("button:even").css("background-color", "LightCoral");
 		        $("button:odd").css("background-color", "LightBlue");
 		    });
+
+            // Define a help attribute for all buttons and dropdowns that can be used when the user requests help
+		    function assignHelpTextToButtons() {
+		        $("#pacerSelect").attr('help', 'Use this dropdown to select the pacer that you want to use or select "all pacers" to deal with them all at the same time.');
+		        $("#clearButton").attr('help', 'Stop the selected pacer(s) from running.');
+		        $("#resetButton").attr('help', 'Reset the selected pacer(s) on a delay at your defined starting point.');
+		        $("#visibleButton").attr('help', 'Make the selected pacer(s) visible or invisible');
+		        $("#backwardsButton").attr('help', 'Make the selected pacer(s) run backwards or forwards.');
+		        $("#colorSelect").attr('help', 'Use this dropdown to select the color for the currently selected pacer(s).');
+		        $("#lightsSubmit").attr('help', 'Pressing this button changes the (logical) number of lights in the strip to whatever number is in the textbox below');
+		        $("#accelerate").attr('help', 'Increase the selected pacer(s) speed by the number of seconds per lap that is in the textbox below.');
+		        $("#slow").attr('help', 'Decrease the selected pacer(s) speed by the number of seconds per lap that is in the textbox below.');
+		        $("#advancedButton").attr('help', 'Show the advanced buttons.');
+		        $("#helpButton").attr('help', 'Long-press any button to find out what it does.');
+
+		    }
 
 		    // show all the advanced elements and hide the advanced button
 		    function showAdvancedElements() {
@@ -273,7 +315,7 @@
 	<body>
 		<div data-role="page" data-theme="a">
 			<div data-role="header" data-position="inline">
-				<h1>Track Practice</h1>
+				<h1 id="tpHeader">Track Practice</h1>
 				<div id="navbar" data-role="navbar">
 					<ul>
 						<li><a href="index.html" data-icon="home" class="ui-btn-active">Home</a></li>
@@ -287,158 +329,168 @@
 			<div data-role="content" data-theme="a">
 				<p id="demo">Developer feedback</p>
 				<p id="description">Description paragraph</p>
-						<select name="select-choice-a" id="pacerSelect" data-native-menu="false" onchange="morestatus()">
-							<option value="99">Select Pacer: All Pacers</option>
-							<option value="0">Pacer 0</option>
-							<option value="1">Pacer 1</option>
-							<option value="2">Pacer 2</option>
-							<option value="3">Pacer 3</option>
-							<option value="4">Pacer 4</option>
-							<option value="5">Pacer 5</option>
-							<option value="6">Pacer 6</option>
-							<option value="7">Pacer 7</option>
-							<option value="8">Pacer 8</option>
-							<option value="9">Pacer 9</option>
-						</select>
+
+				<select name="select-choice-a" id="pacerSelect" data-native-menu="false" onchange="morestatus()">
+					<option value="99">Select Pacer: All Pacers</option>
+					<option value="0">Pacer 0</option>
+					<option value="1">Pacer 1</option>
+					<option value="2">Pacer 2</option>
+					<option value="3">Pacer 3</option>
+					<option value="4">Pacer 4</option>
+					<option value="5">Pacer 5</option>
+					<option value="6">Pacer 6</option>
+					<option value="7">Pacer 7</option>
+					<option value="8">Pacer 8</option>
+					<option value="9">Pacer 9</option>
+				</select>
 						
-						<p id="feedbackData">Lap Time: ----, Color: ----- </p>
-						<label for="select-choice-a" class="select">Enter Lap Time in Seconds:</label>
-						<input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" value="2" min="1" max="900" url="7" autocomplete="off" onchange="newPacerTime(this.value)" />
+				<p id="feedbackData">Lap Time: ----, Color: ----- </p>
+				<label for="select-choice-a" class="select">Enter Lap Time in Seconds:</label>
+				<input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" onchange="newPacerTime(this.value)" />
 					
-						<div class="submitButton2" style="width:23%">
-                            <button id="clearButton" class="submitButton3" url="0" otherNum="0" data-mini="true" data-icon="delete" data-iconpos="top"></button>
-						</div>
-						<div class="submitButton2" style="width:23%">
-                            <button id="resetButton" class="submitButton3" url="2" otherNum="0" data-mini="true" data-icon="clock" data-iconpos="top"></button>
-						</div>
-						<div class="submitButton2" style="width:23%">
-                            <button id="visibleButton" class="submitButton3" url="3" otherNum="0" data-mini="true" data-icon="eye" data-iconpos="top"></button>
-						</div>
-						<div class="submitButton2" style="width:23%">
-                            <button id="backwardsButton" class="submitButton3" url="4" otherNum="0" data-mini="true" data-icon="back" data-iconpos="top"></button>
-						</div>
+				<div class="submitButton2" style="width:23%">
+                    <button id="clearButton" class="submitButton3" url="0" otherNum="0" data-mini="true" data-icon="delete" data-iconpos="top"></button>
+				</div>
+				<div class="submitButton2" style="width:23%">
+                    <button id="resetButton" class="submitButton3" url="2" otherNum="0" data-mini="true" data-icon="clock" data-iconpos="top"></button>
+				</div>
+				<div class="submitButton2" style="width:23%">
+                    <button id="visibleButton" class="submitButton3" url="3" otherNum="0" data-mini="true" data-icon="eye" data-iconpos="top"></button>
+				</div>
+				<div class="submitButton2" style="width:23%">
+                    <button id="backwardsButton" class="submitButton3" url="4" otherNum="0" data-mini="true" data-icon="back" data-iconpos="top"></button>
+				</div>
 					
-						<select onchange="colorSelectFunc()" name="colorSelect" id="colorSelect" url="5" data-native-menu="false">
-							<option>Choose Color:</option>
-							<option value="1" url="5">White</option>
-							<option value="2" url="5">Red</option>
-							<option value="3" url="5">Orange</option>
-							<option value="4" url="5">Yellow</option>
-							<option value="5" url="5">Green</option>
-							<option value="6" url="5">Blue</option>
-							<option value="7" url="5">Purple</option>
-							<option value="99" url="5">Normal</option>
-						</select>
+				<select onchange="colorSelectFunc()" name="colorSelect" id="colorSelect" url="5" data-native-menu="false">
+					<option>Choose Color:</option>
+					<option value="1" url="5">White</option>
+					<option value="2" url="5">Red</option>
+					<option value="3" url="5">Orange</option>
+					<option value="4" url="5">Yellow</option>
+					<option value="5" url="5">Green</option>
+					<option value="6" url="5">Blue</option>
+					<option value="7" url="5">Purple</option>
+					<option value="99" url="5">Normal</option>
+				</select>
 					
-					<div class="submitButton2" style="width:23%"><button id="lightsSubmit" url="6" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="grid" data-iconpos="top"></button></div>
-					<div class="submitButton2" style="width:23%"><button id="accelerate" url="8" otherNum="-1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-u" data-iconpos="top"></button></div>
-					<div class="submitButton2" style="width:23%"><button id="slow" url="8" otherNum="1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-d" data-iconpos="top"></button></div>
+				<div class="submitButton2" style="width:23%">
+                    <button id="lightsSubmit" url="6" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="grid" data-iconpos="top"></button>
+				</div>
+				<div class="submitButton2" style="width:23%">
+                    <button id="accelerate" url="8" otherNum="-1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-u" data-iconpos="top"></button>
+				</div>
+				<div class="submitButton2" style="width:23%">
+                    <button id="slow" url="8" otherNum="1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-d" data-iconpos="top"></button>
+				</div>
+                <div class="submitButton2" style="width:23%">
+                    <button id="helpButton" url="-1" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="info" data-iconpos="top"></button>
+				</div>
 				
-					<div>
-						<input class="lightChange" data-mini="true" type="number" name="name" id="lightsNumberInput" oldurl="lights" url="6" value="2" min="0.1" max="100.0" step="0.1" autocomplete="off" />
-					</div>
+				<div>
+					<input class="lightChange" data-mini="true" type="number" name="name" id="lightsNumberInput" oldurl="lights" url="6" value="2" min="0.1" max="100.0" step="0.1" />
+				</div>
 					
-					<div data-role="fieldcontain">
-						<button id="advancedButton" data-icon="gear" data-iconpos="notext" url="clear" data-mini="true" data-theme="a"></button>
-					</div>
+				<div data-role="fieldcontain">
+					<button id="advancedButton" data-icon="gear" data-iconpos="notext" url="clear" data-mini="true" data-theme="a"></button>
+				</div>
 					
-					<div id="slider2" data-role="fieldcontain">
-						<label for="slider2">Invisible</label>
-						<select name="slider2" id="Select1" class="flipSwitch" data-role="slider">
-							<option myURL="/visible/99" onclick="flipSwitchChange(this.myURL)" value="off">Off</option>
-							<option myURL="/visible/99" onclick="flipSwitchChange(this.myURL)" value="on">On</option>
-						</select>
-						<label for="slider3">Backwards</label>
-						<select name="slider3" id="slider3" class="flipSwitch" data-role="slider">
-							<option myURL="/backwards/99" onclick="flipSwitchChange(this.myURL)" value="off">Off</option>
-							<option myURL="/backwards/99" onclick="flipSwitchChange(this.myURL)" value="on">On</option>
-						</select>
-					</div>
+				<div id="slider2" data-role="fieldcontain">
+					<label for="slider2">Invisible</label>
+					<select name="slider2" id="Select1" class="flipSwitch" data-role="slider">
+						<option myURL="/visible/99" onclick="flipSwitchChange(this.myURL)" value="off">Off</option>
+						<option myURL="/visible/99" onclick="flipSwitchChange(this.myURL)" value="on">On</option>
+					</select>
+					<label for="slider3">Backwards</label>
+					<select name="slider3" id="slider3" class="flipSwitch" data-role="slider">
+						<option myURL="/backwards/99" onclick="flipSwitchChange(this.myURL)" value="off">Off</option>
+						<option myURL="/backwards/99" onclick="flipSwitchChange(this.myURL)" value="on">On</option>
+					</select>
+				</div>
 
-					<div id="slider1" data-role="fieldcontain">
-						<label for="slider">Slider:</label>
-					 	<input type="range" name="slider" id="slider" value="50" min="0" max="100" step="0.1" data-highlight="true"  />
-					</div>
+				<div id="slider1" data-role="fieldcontain">
+					<label for="slider">Slider:</label>
+					<input type="range" name="slider" id="slider" value="50" min="0" max="100" step="0.1" data-highlight="true"  />
+				</div>
 
-					<div id="snacks" data-role="fieldcontain">
-						<fieldset data-role="controlgroup">
-							<legend>Choose as many snacks as you'd like:</legend>
-							<input type="checkbox" name="checkbox-1a" id="checkbox-1a" class="custom" />
-							<label for="checkbox-1a">Cheetos</label>
+				<div id="snacks" data-role="fieldcontain">
+					<fieldset data-role="controlgroup">
+						<legend>Choose as many snacks as you'd like:</legend>
+						<input type="checkbox" name="checkbox-1a" id="checkbox-1a" class="custom" />
+						<label for="checkbox-1a">Cheetos</label>
 
-							<input type="checkbox" name="checkbox-2a" id="checkbox-2a" class="custom" />
-							<label for="checkbox-2a">Doritos</label>
+						<input type="checkbox" name="checkbox-2a" id="checkbox-2a" class="custom" />
+						<label for="checkbox-2a">Doritos</label>
 
-							<input type="checkbox" name="checkbox-3a" id="checkbox-3a" class="custom" />
-							<label for="checkbox-3a">Fritos</label>
+						<input type="checkbox" name="checkbox-3a" id="checkbox-3a" class="custom" />
+						<label for="checkbox-3a">Fritos</label>
 
-							<input type="checkbox" name="checkbox-4a" id="checkbox-4a" class="custom" />
-							<label for="checkbox-4a">Sun Chips</label>
-					    </fieldset>
-					</div>
+						<input type="checkbox" name="checkbox-4a" id="checkbox-4a" class="custom" />
+						<label for="checkbox-4a">Sun Chips</label>
+					</fieldset>
+				</div>
 
-					<div id="fontStyle" data-role="fieldcontain">
-						<fieldset data-role="controlgroup" data-type="horizontal">
-					    	<legend>Font styling:</legend>
-					    	<input type="checkbox" name="checkbox-6" id="checkbox-6" class="custom" />
-							<label for="checkbox-6">b</label>
+				<div id="fontStyle" data-role="fieldcontain">
+					<fieldset data-role="controlgroup" data-type="horizontal">
+					    <legend>Font styling:</legend>
+					    <input type="checkbox" name="checkbox-6" id="checkbox-6" class="custom" />
+						<label for="checkbox-6">b</label>
 
-							<input type="checkbox" name="checkbox-7" id="checkbox-7" class="custom" />
-							<label for="checkbox-7"><em>i</em></label>
+						<input type="checkbox" name="checkbox-7" id="checkbox-7" class="custom" />
+						<label for="checkbox-7"><em>i</em></label>
 
-							<input type="checkbox" name="checkbox-8" id="checkbox-8" class="custom" />
-							<label for="checkbox-8">u</label>
-					    </fieldset>
-					</div>
+						<input type="checkbox" name="checkbox-8" id="checkbox-8" class="custom" />
+						<label for="checkbox-8">u</label>
+					</fieldset>
+				</div>
 
-					<div id="colorRadio" data-role="fieldcontain">
-					    <fieldset data-role="controlgroup">
-					    	<legend>Color:</legend>
-							<input type="radio" name="radio-choice-1" id="radio-choice-1" value="/color/1" checked="checked" />
-							<label for="radio-choice-1">White</label>
+				<div id="colorRadio" data-role="fieldcontain">
+					<fieldset data-role="controlgroup">
+					    <legend>Color:</legend>
+						<input type="radio" name="radio-choice-1" id="radio-choice-1" value="/color/1" checked="checked" />
+						<label for="radio-choice-1">White</label>
 
-							<input type="radio" name="radio-choice-1" id="radio-choice-2" value="/color/2"  />
-							<label for="radio-choice-2">Green</label>
+						<input type="radio" name="radio-choice-1" id="radio-choice-2" value="/color/2"  />
+						<label for="radio-choice-2">Green</label>
 
-							<input type="radio" name="radio-choice-1" id="radio-choice-3" value="/color/3"  />
-							<label for="radio-choice-3">Yellow</label>
+						<input type="radio" name="radio-choice-1" id="radio-choice-3" value="/color/3"  />
+						<label for="radio-choice-3">Yellow</label>
 
-							<input type="radio" name="radio-choice-1" id="radio-choice-4" value="/color/4"  />
-							<label for="radio-choice-4">Red</label>
-					    </fieldset>
-					</div>
+						<input type="radio" name="radio-choice-1" id="radio-choice-4" value="/color/4"  />
+						<label for="radio-choice-4">Red</label>
+					</fieldset>
+				</div>
 
-					<div id="colorRadioB" data-role="fieldcontain">
-					    <fieldset data-role="controlgroup" data-type="horizontal">
-							<legend>Color:</legend>
-							<input type="radio" name="radio-choice-b" id="radio-choice-c" value="on" checked="checked" />
-							<label for="radio-choice-c">WHT</label>
-							<input type="radio" name="radio-choice-b" id="radio-choice-d" value="off" />
-							<label for="radio-choice-d">GRN</label>
-							<input type="radio" name="radio-choice-b" id="radio-choice-e" value="off" />
-							<label for="radio-choice-e">YLW</label>
-							<input type="radio" name="radio-choice-b" id="radio-choice-f" value="off" />
-							<label for="radio-choice-f">RED</label>
-					    </fieldset>
-					</div>
+				<div id="colorRadioB" data-role="fieldcontain">
+					<fieldset data-role="controlgroup" data-type="horizontal">
+						<legend>Color:</legend>
+						<input type="radio" name="radio-choice-b" id="radio-choice-c" value="on" checked="checked" />
+						<label for="radio-choice-c">WHT</label>
+						<input type="radio" name="radio-choice-b" id="radio-choice-d" value="off" />
+						<label for="radio-choice-d">GRN</label>
+						<input type="radio" name="radio-choice-b" id="radio-choice-e" value="off" />
+						<label for="radio-choice-e">YLW</label>
+						<input type="radio" name="radio-choice-b" id="radio-choice-f" value="off" />
+						<label for="radio-choice-f">RED</label>
+					</fieldset>
+				</div>
 
-					<div id="selectShipping" data-role="fieldcontain">
-						<label for="select-choice-a" class="select">Choose shipping method:</label>
-						<select name="select-choice-a" id="select-choice-a" data-native-menu="false">
-							<option>Custom menu example</option>
-							<option value="standard">Standard: 7 day</option>
-							<option value="rush">Rush: 3 days</option>
-							<option value="express">Express: next day</option>
-							<option value="overnight">Overnight</option>
-						</select>
-					</div>
+				<div id="selectShipping" data-role="fieldcontain">
+					<label for="select-choice-a" class="select">Choose shipping method:</label>
+					<select name="select-choice-a" id="select-choice-a" data-native-menu="false">
+						<option>Custom menu example</option>
+						<option value="standard">Standard: 7 day</option>
+						<option value="rush">Rush: 3 days</option>
+						<option value="express">Express: next day</option>
+						<option value="overnight">Overnight</option>
+					</select>
+				</div>
 
-					<div id="submitCancel" class="ui-body ui-body-b">
-						<fieldset class="ui-grid-a">
-							<div class="ui-block-a"><button type="submit" data-theme="d">Cancel</button></div>
-							<div class="ui-block-b"><button type="submit" data-theme="a">Submit</button></div>
-					    </fieldset>
-					</div>
+				<div id="submitCancel" class="ui-body ui-body-b">
+					<fieldset class="ui-grid-a">
+						<div class="ui-block-a"><button type="submit" data-theme="d">Cancel</button></div>
+						<div class="ui-block-b"><button type="submit" data-theme="a">Submit</button></div>
+					</fieldset>
+				</div>
 
 			</div>
 		</div>

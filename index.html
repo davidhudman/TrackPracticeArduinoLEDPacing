@@ -34,7 +34,7 @@
 		        morestatus();
 		    }
 
-		    // .. :)
+		    // Makes a request to Arduino for feedback
 		    function morestatus() {
 		        document.getElementById("description").innerHTML = "Processing Status";
 		        var pacerIndex = $('#pacerSelect').val();
@@ -97,7 +97,6 @@
 
 		    // handle new pacer times
 		    function newPacerTime(val) {
-		        var newPacerTimeNum = 0;
 		        var pacerIndexforTimeSet = $('#pacerSelect').val();
 		        var xhr = new XMLHttpRequest();
 
@@ -107,52 +106,9 @@
 		        $("#pacerTimeInput").val("Enter pacer time in seconds");
 		    }
 
-		    // handle slowing or speeding up pacers
+		    // handles pacer action commands - clear, reset, backwards, new number of lights, change in speed, etc.
 		    $(document).ready(function () {
-		        $(".speedChangeButton").click(function () {
-
-		            var signlessNumber = $("#lightsNumberInput").val();
-		            var sign = $(this).attr("otherNum");
-		            var speedChange = signlessNumber * sign;
-
-		            if (signlessNumber > 0.0) {
-		                var commandURL2 = $(this).attr("url");
-		                var pacerIndex2 = $('#pacerSelect').val();
-		                var xhr = new XMLHttpRequest();
-		                xhr.open("GET", "/arduino/" + commandURL2 + "/" + pacerIndex2 + "/" + speedChange, false);
-		                xhr.send();
-		                $("#demo").text("/arduino/" + commandURL2 + "/" + pacerIndex2 + "/" + speedChange);
-		            }
-		        });
-		    });
-
-		    // handles pacer action commands - clear, reset, backwards, etc.
-		    $(document).ready(function () {
-		        $(".submitButton, .submitButton3").click(function () {
-		            var commandURL = $(this).attr("url");
-		            var pacerIndex = $('#pacerSelect').val();
-		            var newNum = $(this).attr("otherNum");
-		            var xhr = new XMLHttpRequest();
-
-		            xhr.open("GET", "/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum, false);
-		            xhr.send();
-		            $("#demo").text("/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum);
-		        });
-		    });
-
-		    // handles changing number of lights
-		    $(document).ready(function () {
-		        $("#lightsSubmit").click(function () {
-
-		            var commandURL = $(this).attr("url");
-		            var pacerIndex = $('#pacerSelect').val();
-		            var newNum = $("#lightsNumberInput").val();
-		            var xhr = new XMLHttpRequest();
-
-		            xhr.open("GET", "/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum, false);
-		            xhr.send();
-		            $("#demo").text("/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum);
-		        });
+		        $(".submitButton, .submitButton3, .speedChangeButton, #lightsSubmit").click(userInputHandlerFunction());
 		    });
 
 		    // handles longpress of all buttons to show their help text
@@ -206,7 +162,7 @@
 
 		    // Display help when the help button is clicked
 		    $(document).ready(function () {
-		        $("#helpButton").click(function () {
+		        $("#helpButton, #helpLink").click(function () {
 		            var text = $(this).attr("help");
 		            alert(text);
 		        });
@@ -230,6 +186,44 @@
 		        $("button:odd").css("background-color", "LightBlue");
 		    });
 
+		    function userInputHandlerFunction(val) {
+		        var val = parseFloat(val) || 0;
+		        var commandURL;
+		        var newNum;
+		        if (val != 0) {
+		            commandURL = 7;
+		            newNum = val;
+		        }
+		        else {
+		            commandURL = parseInt($(this).attr("url"), 10);
+		            var pacerIndex = parseInt($('#pacerSelect').val(), 10);
+		            newNum = parseFloat($(this).attr("otherNum"));
+		            var signlessNum = parseFloat($("#lightsNumberInput").val());
+		        }
+		        
+		        var xhr = new XMLHttpRequest();
+
+		        switch (commandURL) {
+		            case 6:         // light change
+		                newNum = signlessNum;
+		                break;
+		            case 8:         // speed change
+		                if (signlessNum <= 0.0) {
+		                    return;
+		                }
+		                else {
+		                    newNum = signlessNum * newNum;   // multiply by newNum because '$(this).attr("otherNum")' is actually the "sign" of the number
+		                }
+		                break;
+		            default:
+		                break;
+		        }
+
+		        xhr.open("GET", "/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum, false);
+		        xhr.send();
+		        $("#demo").text("/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum);
+		    }
+
             // Define a help attribute for all buttons and dropdowns that can be used when the user requests help
 		    function assignHelpTextToButtons() {
 		        $("#pacerSelect").attr('help', 'Use this dropdown to select the pacer that you want to use or select "all pacers" to deal with them all at the same time.');
@@ -242,7 +236,7 @@
 		        $("#accelerate").attr('help', 'Increase the selected pacer(s) speed by the number of seconds per lap that is in the textbox below.');
 		        $("#slow").attr('help', 'Decrease the selected pacer(s) speed by the number of seconds per lap that is in the textbox below.');
 		        $("#advancedButton").attr('help', 'Show the advanced buttons.');
-		        $("#helpButton").attr('help', 'Long-press any button to find out what it does.');
+		        $("#helpButton, #helpLink").attr('help', 'Long-press any button to find out what it does.');
 
 		    }
 
@@ -345,7 +339,7 @@
 				</select>
 						
 				<p id="feedbackData">Lap Time: ----, Color: ----- </p>
-				<label for="select-choice-a" class="select">Enter Lap Time in Seconds:</label>
+				<label for="select-choice-a" class="select">Enter Lap Time in Seconds: <a href="#" id="helpLink">Need Help?</a></label>
 				<input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" onchange="newPacerTime(this.value)" />
 					
 				<div class="submitButton2" style="width:23%">

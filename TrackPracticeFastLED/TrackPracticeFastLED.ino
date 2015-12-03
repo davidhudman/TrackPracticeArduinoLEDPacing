@@ -2,6 +2,7 @@
 #include <Bridge.h>
 #include <YunServer.h>
 #include <YunClient.h>
+#include <FileIO.h>
 
 /**
 *	Pacer Class - public in java program
@@ -354,6 +355,8 @@ void setup() {
 	   assignGetTotalPacingPanels(totalPacingPanels);
 	   Bridge.begin();
 
+	   FileSystem.begin();
+
 	   // Listen for incoming connection only from localhost
 	   // (no one from the external network could connect)
 	   server.listenOnLocalhost();
@@ -370,6 +373,13 @@ void loop() {
 		client.stop();		// Close connection and free resources.
 	}
 	// getSerialFeedback(); // This overwhelms the program if too many pacers are added
+	/*if (serialCountTo > 0) {
+		writeToOutputFile();
+		serialCountTo = 50;
+	}
+	else {
+		serialCountTo--;
+	}*/
 }
 
 // Use an integer parameter to determine what RGB color value it is associated with
@@ -394,6 +404,23 @@ void assignPacerColors() {
 		pacer[i].setOriginalColorInt(j);
 		j++;
 		// pacer[i].setColorInt((i%8)+1);
+	}
+}
+
+// writes output to a TXT file
+void writeToOutputFile() {
+	File dataFile = FileSystem.open("/mnt/sda1/arduino/www/TrackPractice/datalog.txt", FILE_APPEND);
+
+	// if the file is available, write to it:
+	if (dataFile) {
+		dataFile.println("You da man");
+		dataFile.close();
+		// print to the serial port too:
+		Serial.println(millis());
+	}
+	// if the file isn't open, pop up an error:
+	else {
+		Serial.println("error opening datalog.txt");
 	}
 }
 
@@ -515,6 +542,7 @@ void process(YunClient client) {
 					pacer[pacerIndex].setStartTime(millis()+7000);
 					pacer[pacerIndex].setSecondsPerLap (thirdCommand);
 				}
+				writeToOutputFile();
 			}
 
 			/*// Send feedback to client

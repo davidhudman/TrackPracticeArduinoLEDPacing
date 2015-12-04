@@ -409,14 +409,29 @@ void assignPacerColors() {
 
 // writes output to a TXT file
 void writeToOutputFile() {
-	File dataFile = FileSystem.open("/mnt/sda1/arduino/www/TrackPractice/datalog.txt", FILE_APPEND);
+	File dataFile = FileSystem.open("/mnt/sda1/arduino/www/TrackPractice/datalog.txt", FILE_WRITE);
 
 	// if the file is available, write to it:
 	if (dataFile) {
-		dataFile.println("You da man");
+		String myString = " ", tempString;
+		for (int i=0; i < pacer[0].getNumberPacers(); i++) {
+			tempString = String("//");
+			myString += tempString;
+			tempString = String(i);
+			myString += tempString;
+			tempString = String("/");
+			myString += tempString;
+			tempString = String(pacer[i].getSecondsPerLap());
+			myString += tempString;
+			tempString = String("/");
+			myString += tempString;
+			tempString = String(pacer[i].getColorInt());
+			myString += tempString;
+		}
+
+		dataFile.println(myString);
 		dataFile.close();
 		// print to the serial port too:
-		Serial.println(millis());
 	}
 	// if the file isn't open, pop up an error:
 	else {

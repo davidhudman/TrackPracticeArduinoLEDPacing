@@ -34,10 +34,23 @@
 		        morestatus();
 		    }
 
+		    // reads DataLogger.txt file that is updated with by Yun feedback
+		    function readFeedbackFile() {
+		        var xhttp = new XMLHttpRequest();
+		        xhttp.onreadystatechange = function () {
+		            if (xhttp.readyState == 4 && xhttp.status == 200) {
+		                document.getElementById("newFeedBack").innerHTML = xhttp.responseText;
+		            }
+		        };
+		        xhttp.open("GET", "datalog.txt", true);
+		        xhttp.send();
+		    }
+
 		    // Makes a request to Arduino for feedback
 		    function morestatus() {
 		        document.getElementById("description").innerHTML = "Processing Status";
 		        var pacerIndex = $('#pacerSelect').val();
+		        readFeedbackFile();
 		        server = "/arduino/9/" + pacerIndex + "/" + 0;
 		        request = new XMLHttpRequest();
 		        request.open("GET", server, true);
@@ -246,6 +259,7 @@
 		        $("#snacks").show();
 		        $("#slider1").show();
 		        $("#slider2").show();
+		        $("#newFeedBack").show()
 
 		        $("#advancedButton").hide();
 		    }
@@ -264,6 +278,7 @@
 		        $("#snacks").hide();
 		        $("#slider1").hide();
 		        $("#slider2").hide();
+		        $("#newFeedBack").hide()
 
 		        $("#advancedButton").show();
 		    }
@@ -315,6 +330,7 @@
 			<div data-role="content" data-theme="a">
 				<p id="demo">Developer feedback</p>
 				<p id="description">Description paragraph</p>
+                <p id="newFeedBack" onclick="readFeedbackFile()">New Feedback</p>
 
 				<select name="select-choice-a" id="pacerSelect" data-native-menu="false" onchange="morestatus()">
 					<option value="99">Select Pacer: All Pacers</option>

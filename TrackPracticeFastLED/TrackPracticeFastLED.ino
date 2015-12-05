@@ -320,6 +320,7 @@ CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Green, CRGB
 // Declarations: Related to strings
 //***********************************************
 // String serialStringInput, printThis, stringHolder;		// Holds the raw, unformatted serial input from user.
+String printThisString = " ", tempString;
 
 //***********************************************
 // Declarations: All variables predefined
@@ -413,23 +414,25 @@ void writeToOutputFile() {
 
 	// if the file is available, write to it:
 	if (dataFile) {
-		String myString = " ", tempString;
+		printThisString = " ";
 		for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-			tempString = String("//");
-			myString += tempString;
+			tempString = String("{");
+			printThisString += tempString;
 			tempString = String(i);
-			myString += tempString;
-			tempString = String("/");
-			myString += tempString;
+			printThisString += tempString;
+			tempString = String(",");
+			printThisString += tempString;
 			tempString = String(pacer[i].getSecondsPerLap());
-			myString += tempString;
-			tempString = String("/");
-			myString += tempString;
+			printThisString += tempString;
+			tempString = String(",");
+			printThisString += tempString;
 			tempString = String(pacer[i].getColorInt());
-			myString += tempString;
+			printThisString += tempString;
+			tempString = String("}");
+			printThisString += tempString;
 		}
 
-		dataFile.println(myString);
+		dataFile.println(printThisString);
 		dataFile.close();
 		// print to the serial port too:
 	}

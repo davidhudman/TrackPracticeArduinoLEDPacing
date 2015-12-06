@@ -11,6 +11,7 @@
 		<script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>
 		<script>
 		    var numPacers = 10;
+		    var pacerButton = [];
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 		    window.onload = Pinstatus;
 
@@ -206,6 +207,10 @@
 		            var text = $(this).attr("help");
 		            alert(text);
 		        });
+		        $("#allPacersButton").click(function () {
+		            hideEverything();
+		            $("#pacerButtonView").show();
+		        });
 		    });
 
 		    // Do all this stuff as soon as the page loads
@@ -225,6 +230,19 @@
 		        $("button:even").css("background-color", "LightCoral");
 		        $("button:odd").css("background-color", "LightBlue");
 		    });
+
+		    // Create Pacer Buttons - not working yet
+		    function createPacerButtons() {
+		        var pacerButtonText;
+		        var pacerButtonId;
+		        // var txt2 = $("<p></p>").text("Text.");
+		        // <a href="index.html" id="allPacersButton" data-role="button" style="background-color:white" data-icon="arrow-l">
+		        for (var i = 0; i < 10; i++) {    // later, "10" should be changed to the highest index from the parse of the datalogger.txt file
+		            pacerButtonText = "Pacer " + i;
+		            pacerButton[i] = $("<button style=\"background-color:white\" data-icon=\"arrow-l\"></button>").text(pacerButtonText);
+		            $("#pacerButtonView").append(pacerButton[i]);
+		        }
+		    }
 
             // Define a help attribute for all buttons and dropdowns that can be used when the user requests help
 		    function assignHelpTextToButtons() {
@@ -283,6 +301,15 @@
 		        $("#advancedButton").show();
 		    }
 
+		    // hide everything except the top header
+		    function hideEverything() {
+		        hideAdvancedElements();
+		        $("#advancedButton").hide();
+		        $("#pacerSelect, #pacerButtonView, #pacerActionGroup, #colorSelect, #PacerActionButtons, #pacerTimeInputDiv, #feedbackParagraph2, #pacerSelect, #feedbackParagraphs").hide();
+		    }
+
+
+
 		    function colorSelectFunc() {
 		        var commandURL = $('#colorSelect').attr("url");
 		        var pacerIndex = $('#pacerSelect').val();
@@ -328,10 +355,12 @@
 				</div>
 			</div>
 			<div data-role="content" data-theme="a">
-				<p id="demo">Developer feedback</p>
-				<p id="description">Description paragraph</p>
-                <p id="newFeedBack" onclick="readFeedbackFile()">New Feedback</p>
-
+                <div id="feedbackParagraphs">
+				    <p id="demo">Developer feedback</p>
+				    <p id="description">Description paragraph</p>
+                    <p id="newFeedBack" onclick="readFeedbackFile()">New Feedback</p>
+                </div>
+                
 				<select onchange="morestatus()" name="select-choice-a" id="pacerSelect" data-native-menu="false">
 					<option value="99">Select Pacer: All Pacers</option>
 					<option value="0">Pacer 0</option>
@@ -345,23 +374,30 @@
 					<option value="8">Pacer 8</option>
 					<option value="9">Pacer 9</option>
 				</select>
-						
-				<p id="feedbackData">Lap Time: ----, Color: ----- </p>
-				<label for="select-choice-a" class="select">Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></label>
-				<input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" onchange="newPacerTime(this.value)" />
-					
-				<div class="submitButton2" style="width:23%">
-                    <button id="clearButton" class="submitButton3" url="0" otherNum="0" data-mini="true" data-icon="delete" data-iconpos="top"></button>
+				
+                <div id="feedbackParagraph2">		
+				    <p id="feedbackData">Lap Time: ----, Color: ----- </p>
+                </div>
+
+                <div id="pacerTimeInputDiv">
+				    <label for="select-choice-a" class="select">Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></label>
+				    <input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" onchange="newPacerTime(this.value)" />
 				</div>
-				<div class="submitButton2" style="width:23%">
-                    <button id="resetButton" class="submitButton3" url="2" otherNum="0" data-mini="true" data-icon="clock" data-iconpos="top"></button>
-				</div>
-				<div class="submitButton2" style="width:23%">
-                    <button id="visibleButton" class="submitButton3" url="3" otherNum="0" data-mini="true" data-icon="eye" data-iconpos="top"></button>
-				</div>
-				<div class="submitButton2" style="width:23%">
-                    <button id="backwardsButton" class="submitButton3" url="4" otherNum="0" data-mini="true" data-icon="back" data-iconpos="top"></button>
-				</div>
+
+                <div id="pacerActionButtons">
+				    <div class="submitButton2" style="width:23%">
+                        <button id="clearButton" class="submitButton3" url="0" otherNum="0" data-mini="true" data-icon="delete" data-iconpos="top"></button>
+				    </div>
+				    <div class="submitButton2" style="width:23%">
+                        <button id="resetButton" class="submitButton3" url="2" otherNum="0" data-mini="true" data-icon="clock" data-iconpos="top"></button>
+				    </div>
+				    <div class="submitButton2" style="width:23%">
+                        <button id="visibleButton" class="submitButton3" url="3" otherNum="0" data-mini="true" data-icon="eye" data-iconpos="top"></button>
+				    </div>
+				    <div class="submitButton2" style="width:23%">
+                        <button id="backwardsButton" class="submitButton3" url="4" otherNum="0" data-mini="true" data-icon="back" data-iconpos="top"></button>
+				    </div>
+                </div>
 					
 				<select onchange="colorSelectFunc()" name="colorSelect" id="colorSelect" url="5" data-native-menu="false">
 					<option>Choose Color:</option>
@@ -374,27 +410,79 @@
 					<option value="7" url="5">Purple</option>
 					<option value="99" url="5">Normal</option>
 				</select>
-					
-				<div class="submitButton2" style="width:23%">
-                    <button id="lightsSubmit" url="6" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="grid" data-iconpos="top"></button>
-				</div>
-				<div class="submitButton2" style="width:23%">
-                    <button id="accelerate" url="8" otherNum="-1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-u" data-iconpos="top"></button>
-				</div>
-				<div class="submitButton2" style="width:23%">
-                    <button id="slow" url="8" otherNum="1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-d" data-iconpos="top"></button>
-				</div>
-                <div class="submitButton2" style="width:23%">
-                    <button id="helpButton" url="-1" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="info" data-iconpos="top"></button>
-				</div>
 				
-				<div>
-					<input class="lightChange" data-mini="true" type="number" name="name" id="lightsNumberInput" oldurl="lights" url="6" value="2" min="0.1" max="100.0" step="0.1" />
-				</div>
+                <div id="pacerActionGroup">	
+				    <div class="submitButton2" style="width:23%">
+                        <button id="lightsSubmit" url="6" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="grid" data-iconpos="top"></button>
+				    </div>
+				    <div class="submitButton2" style="width:23%">
+                        <button id="accelerate" url="8" otherNum="-1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-u" data-iconpos="top"></button>
+				    </div>
+				    <div class="submitButton2" style="width:23%">
+                        <button id="slow" url="8" otherNum="1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-d" data-iconpos="top"></button>
+				    </div>
+                    <div class="submitButton2" style="width:23%">
+                        <button id="helpButton" url="-1" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="info" data-iconpos="top"></button>
+				    </div>
+				
+				    <div>
+					    <input class="lightChange" data-mini="true" type="number" name="name" id="lightsNumberInput" oldurl="lights" url="6" value="2" min="0.1" max="100.0" step="0.1" />
+				    </div>
+                </div>
 					
 				<div data-role="fieldcontain">
 					<button id="advancedButton" data-icon="gear" data-iconpos="notext" url="clear" data-mini="true" data-theme="a"></button>
 				</div>
+
+                <div id="pacerButtonView">
+                    <a id="allPacersButton" data-role="button" style="background-color:white" data-icon="arrow-l">All Pacers</a>
+                    <a href="index.html" id="0" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 0</a>
+                    <a href="index.html" id="1" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 1</a>
+                    <a href="index.html" id="2" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 2</a>
+                    <a href="index.html" id="3" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 3</a>
+                    <a href="index.html" id="4" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 4</a>
+                    <a href="index.html" id="5" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 5</a>
+                    <a href="index.html" id="6" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 6</a>
+                    <a href="index.html" id="7" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 7</a>
+                    <a href="index.html" id="8" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 8</a>
+                    <a href="index.html" id="9" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 9</a>
+                </div>
+
+                <div id="pacerListView">
+                    <ul data-role="listview" data-inset="true" data-divider-theme="a">
+					    <li data-role="list-divider">Swatch A</li>
+					    <li data-icon="gear"><a href="">A list item</a></li>
+				    </ul>
+
+				    <ul data-role="listview" data-inset="true" data-divider-theme="b">
+					    <li data-role="list-divider">Swatch B</li>
+					    <li data-icon="info"><a href="">A list item</a></li>
+				    </ul>
+
+				    <ul data-role="listview" data-inset="true" data-divider-theme="c">
+					    <li data-role="list-divider">Swatch C</li>
+					    <li data-icon="check"><a href="">A list item</a></li>
+				    </ul>
+
+				    <ul data-role="listview" data-inset="true" data-divider-theme="d">
+					    <li data-role="list-divider">Swatch D</li>
+					    <li data-icon="grid"><a href="">A list item</a></li>
+				    </ul>
+
+				    <ul data-role="listview" data-inset="true" data-divider-theme="e">
+					    <li data-role="list-divider">Swatch E</li>
+					    <li data-icon="alert"><a href="">A list item</a></li>
+				    </ul>
+
+				    <ul data-role="listview" data-inset="true" data-divider-theme="f">
+					    <li data-role="list-divider">Swatch F</li>
+					    <li data-icon="refresh"><a href="">A list item</a></li>
+				    </ul>
+                </div>
+
+                <div id="pacerTrueButtonView">
+                    <button style="background-color:lightgreen">Button</button>
+                </div>
                 	
 				<div id="slider2" data-role="fieldcontain">
 					<label for="slider2">Invisible</label>

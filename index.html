@@ -121,20 +121,20 @@
 		        $("#pacerTimeInput").val("Enter pacer time in seconds");
 		    }
 
-		    // handles pacer action commands - clear, reset, backwards, new number of lights, change in speed, etc.
 		    $(document).ready(function () {
+		        // handles pacer action commands - clear, reset, backwards, new number of lights, change in speed, etc.
 		        $(".submitButton, .submitButton3, .speedChangeButton, #lightsSubmit").click(function () {
-		            var commandURL = parseInt(      $(this).attr("url"), 10);
-		            var pacerIndex = parseInt(      $('#pacerSelect').val(), 10);
-		            var newNum = parseFloat(        $(this).attr("otherNum"));
-		            var signlessNum = parseFloat(   $("#lightsNumberInput").val());
+		            var commandURL = parseInt($(this).attr("url"), 10);
+		            var pacerIndex = parseInt($('#pacerSelect').val(), 10);
+		            var newNum = parseFloat($(this).attr("otherNum"));
+		            var signlessNum = parseFloat($("#lightsNumberInput").val());
 		            var xhr = new XMLHttpRequest();
 
 		            switch (commandURL) {
 		                case 6:         // light change
 		                    newNum = signlessNum;
 		                    break;
-                        case 8:         // speed change
+		                case 8:         // speed change
 		                    if (signlessNum <= 0.0) {
 		                        return;
 		                    }
@@ -150,18 +150,14 @@
 		            xhr.send();
 		            $("#demo").text("/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum);
 		        });
-		    });
 
-		    // handles longpress of all buttons to show their help text
-		    $(document).ready(function () {
+		        // handles longpress of all buttons to show their help text
 		        $(".submitButton3, #lightsSubmit, .speedChangeButton, #advancedButton, #helpButton").on("taphold", function (event) {
 		            var text = $(this).attr("help");
 		            alert(text);
 		        });
-		    });
 
-		    // handles longpress for of description button to make it into a reset delay button and vice versa
-		    $(document).ready(function () {
+		        // handles longpress for of description button to make it into a reset delay button and vice versa
 		        $("#tpHeader").on("taphold", function (event) {
 		            var rstBtnUrl = $("#resetButton").attr("url");
 		            $("#demo").text("button might be doing something");
@@ -178,39 +174,34 @@
 		                alert("Reset button will now reset pacers immediately when pressed.");
 		            }
 		        });
-		    });
 
-		    // reveals the secret demo field whenever you click the advancedButton
-		    $(document).ready(function () {
+		        // reveals the secret demo field whenever you click the advancedButton
 		        $("#advancedButton").click(function () {
 		            showAdvancedElements();
 		        });
-		    });
 
-		    // hides the secret demo field whenever you click it
-		    $(document).ready(function () {
-		        $("#demo").click(function () {
-		            hideAdvancedElements();
-		        });
-		    });
-
-		    // Clear the contents of the new pacer time field when clicked so the user can type theirs
-		    $(document).ready(function () {
-		        $("#pacerTimeInput, #lightsNumberInput").click(function () {
-		            $(this).val("");
-		        });
-		    });
-
-		    // Display help when the help button is clicked
-		    $(document).ready(function () {
+		        // Display help when the help button is clicked
 		        $("#helpButton, #helpLink").click(function () {
 		            var text = $(this).attr("help");
 		            alert(text);
 		        });
+
+                // hide everything when the allPacersButton is clicked except the group of pacerButtons
 		        $("#allPacersButton").click(function () {
 		            hideEverything();
 		            $("#pacerButtonView").show();
 		        });
+
+		        // Clear the contents of the new pacer time field when clicked so the user can type theirs
+		        $("#pacerTimeInput, #lightsNumberInput").click(function () {
+		            $(this).val("");
+		        });
+
+		        // hides the secret demo field whenever you click it
+		        $("#demo").click(function () {
+		            hideAdvancedElements();
+		        });
+
 		    });
 
 		    // Do all this stuff as soon as the page loads
@@ -266,37 +257,18 @@
 		    // show all the advanced elements and hide the advanced button
 		    function showAdvancedElements() {
 		        $("#demo").show();
-		        $("#description").show();
 		        $("#demo").text("Developer feedback");
-		        $("#navbar").show();
-		        $("#submitCancel").show();
-		        $("#selectShipping").show();
-		        $("#colorRadio").show();
-		        $("#colorRadioB").show();
-		        $("#fontStyle").show();
-		        $("#snacks").show();
-		        $("#slider1").show();
-		        $("#slider2").show();
-		        $("#newFeedBack").show()
+
+		        $("#feedbackParagraphs, #description, #navbar, #submitCancel, #selectShipping, #colorRadio, #colorRadioB, #fontStyle, #snacks, #slider1, #slider2, #newFeedBack").show();
+		        $("#pacerButtonView, #pacerTrueButtonView, #pacerListView").show();
 
 		        $("#advancedButton").hide();
 		    }
 
 		    // hide all the advanced elements and show the advanced button
 		    function hideAdvancedElements() {
-		        $("#demo").hide();
-		        $("#description").hide();
-		        $("#resetdelayButton").hide();
-		        $("#navbar").hide();
-		        $("#submitCancel").hide();
-		        $("#selectShipping").hide();
-		        $("#colorRadio").hide();
-		        $("#colorRadioB").hide();
-		        $("#fontStyle").hide();
-		        $("#snacks").hide();
-		        $("#slider1").hide();
-		        $("#slider2").hide();
-		        $("#newFeedBack").hide()
+		        $("#feedbackParagraphs, #resetdelayButton, #description, #navbar, #submitCancel, #selectShipping, #colorRadio, #colorRadioB, #fontStyle, #snacks, #slider1, #slider2, #newFeedBack").hide();
+		        $("#pacerButtonView, #pacerTrueButtonView, #pacerListView").hide();
 
 		        $("#advancedButton").show();
 		    }
@@ -304,11 +276,8 @@
 		    // hide everything except the top header
 		    function hideEverything() {
 		        hideAdvancedElements();
-		        $("#advancedButton").hide();
-		        $("#pacerSelect, #pacerButtonView, #pacerActionGroup, #colorSelect, #PacerActionButtons, #pacerTimeInputDiv, #feedbackParagraph2, #pacerSelect, #feedbackParagraphs").hide();
+		        $("#advancedButton, #pacerSelectDiv, #pacerButtonView, #pacerTrueButtonView, #pacerListView, #pacerActionGroup, #colorSelectDiv, .submitButton2, #PacerActionButtons, #pacerTimeInputDiv, #feedbackParagraph2, #pacerSelect, #feedbackParagraphs").hide();
 		    }
-
-
 
 		    function colorSelectFunc() {
 		        var commandURL = $('#colorSelect').attr("url");
@@ -356,24 +325,26 @@
 			</div>
 			<div data-role="content" data-theme="a">
                 <div id="feedbackParagraphs">
-				    <p id="demo">Developer feedback</p>
+				    <p id="demo">Demo feedback</p>
 				    <p id="description">Description paragraph</p>
-                    <p id="newFeedBack" onclick="readFeedbackFile()">New Feedback</p>
+                    <p id="newFeedBack" onclick="readFeedbackFile()">New Feedback Paragraph</p>
                 </div>
                 
-				<select onchange="morestatus()" name="select-choice-a" id="pacerSelect" data-native-menu="false">
-					<option value="99">Select Pacer: All Pacers</option>
-					<option value="0">Pacer 0</option>
-					<option value="1">Pacer 1</option>
-					<option value="2">Pacer 2</option>
-					<option value="3">Pacer 3</option>
-					<option value="4">Pacer 4</option>
-					<option value="5">Pacer 5</option>
-					<option value="6">Pacer 6</option>
-					<option value="7">Pacer 7</option>
-					<option value="8">Pacer 8</option>
-					<option value="9">Pacer 9</option>
-				</select>
+                <div id="pacerSelectDiv">
+				    <select onchange="morestatus()" name="select-choice-a" id="pacerSelect" data-native-menu="false">
+					    <option value="99">Select Pacer: All Pacers</option>
+					    <option value="0">Pacer 0</option>
+					    <option value="1">Pacer 1</option>
+					    <option value="2">Pacer 2</option>
+					    <option value="3">Pacer 3</option>
+					    <option value="4">Pacer 4</option>
+					    <option value="5">Pacer 5</option>
+					    <option value="6">Pacer 6</option>
+					    <option value="7">Pacer 7</option>
+					    <option value="8">Pacer 8</option>
+					    <option value="9">Pacer 9</option>
+				    </select>
+                </div>
 				
                 <div id="feedbackParagraph2">		
 				    <p id="feedbackData">Lap Time: ----, Color: ----- </p>
@@ -384,32 +355,32 @@
 				    <input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" onchange="newPacerTime(this.value)" />
 				</div>
 
-                <div id="pacerActionButtons">
-				    <div class="submitButton2" style="width:23%">
-                        <button id="clearButton" class="submitButton3" url="0" otherNum="0" data-mini="true" data-icon="delete" data-iconpos="top"></button>
-				    </div>
-				    <div class="submitButton2" style="width:23%">
-                        <button id="resetButton" class="submitButton3" url="2" otherNum="0" data-mini="true" data-icon="clock" data-iconpos="top"></button>
-				    </div>
-				    <div class="submitButton2" style="width:23%">
-                        <button id="visibleButton" class="submitButton3" url="3" otherNum="0" data-mini="true" data-icon="eye" data-iconpos="top"></button>
-				    </div>
-				    <div class="submitButton2" style="width:23%">
-                        <button id="backwardsButton" class="submitButton3" url="4" otherNum="0" data-mini="true" data-icon="back" data-iconpos="top"></button>
-				    </div>
-                </div>
-					
-				<select onchange="colorSelectFunc()" name="colorSelect" id="colorSelect" url="5" data-native-menu="false">
-					<option>Choose Color:</option>
-					<option value="1" url="5">White</option>
-					<option value="2" url="5">Red</option>
-					<option value="3" url="5">Orange</option>
-					<option value="4" url="5">Yellow</option>
-					<option value="5" url="5">Green</option>
-					<option value="6" url="5">Blue</option>
-					<option value="7" url="5">Purple</option>
-					<option value="99" url="5">Normal</option>
-				</select>
+				<div class="submitButton2" style="width:23%">
+                    <button id="clearButton" class="submitButton3" url="0" otherNum="0" data-mini="true" data-icon="delete" data-iconpos="top"></button>
+				</div>
+				<div class="submitButton2" style="width:23%">
+                    <button id="resetButton" class="submitButton3" url="2" otherNum="0" data-mini="true" data-icon="clock" data-iconpos="top"></button>
+				</div>
+				<div class="submitButton2" style="width:23%">
+                    <button id="visibleButton" class="submitButton3" url="3" otherNum="0" data-mini="true" data-icon="eye" data-iconpos="top"></button>
+				</div>
+				<div class="submitButton2" style="width:23%">
+                    <button id="backwardsButton" class="submitButton3" url="4" otherNum="0" data-mini="true" data-icon="back" data-iconpos="top"></button>
+				</div>
+				
+                <div id="colorSelectDiv">
+				    <select onchange="colorSelectFunc()" name="colorSelect" id="colorSelect" url="5" data-native-menu="false">
+					    <option>Choose Color:</option>
+					    <option value="1" url="5">White</option>
+					    <option value="2" url="5">Red</option>
+					    <option value="3" url="5">Orange</option>
+					    <option value="4" url="5">Yellow</option>
+					    <option value="5" url="5">Green</option>
+					    <option value="6" url="5">Blue</option>
+					    <option value="7" url="5">Purple</option>
+					    <option value="99" url="5">Normal</option>
+				    </select>
+                </div>	
 				
                 <div id="pacerActionGroup">	
 				    <div class="submitButton2" style="width:23%">

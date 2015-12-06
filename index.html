@@ -12,6 +12,7 @@
 		<script>
 		    var numPacers = 10;
 		    var pacerButton = [];
+		    var advancedButtonPressed = false;
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 		    window.onload = Pinstatus;
 
@@ -177,7 +178,14 @@
 
 		        // reveals the secret demo field whenever you click the advancedButton
 		        $("#advancedButton").click(function () {
-		            showAdvancedElements();
+		            if (advancedButtonPressed == false) {
+		                showEverything();
+		                advancedButtonPressed = true;
+		            }
+		            else {
+		                showNormalMode();
+		                advancedButtonPressed = false;
+		            }
 		        });
 
 		        // Display help when the help button is clicked
@@ -186,10 +194,9 @@
 		            alert(text);
 		        });
 
-                // hide everything when the allPacersButton is clicked except the group of pacerButtons
+                // hide everything when the allPacersButton is clicked except the group of pacerButtons and its escape button
 		        $("#allPacersButton").click(function () {
-		            hideEverything();
-		            $("#pacerButtonView").show();
+		            showButtonView();
 		        });
 
 		        // Clear the contents of the new pacer time field when clicked so the user can type theirs
@@ -197,16 +204,22 @@
 		            $(this).val("");
 		        });
 
-		        // hides the secret demo field whenever you click it
+		        // Takes you back to the normal view
 		        $("#demo").click(function () {
-		            hideAdvancedElements();
+		            showNormalMode();
+		        });
+
+                // Takes you back to the normal view
+		        $("#pacerViewEscapeButton").click(function () {
+		            showNormalMode();
 		        });
 
 		    });
 
 		    // Do all this stuff as soon as the page loads
 		    $(document).ready(function () {
-		        hideAdvancedElements();
+		        // hideAdvancedElements();
+		        showNormalMode();
 		        assignHelpTextToButtons();
 		        $("input[name='radio-choice-1']").change(radioValueChanged);
 		        $("#pacerTimeInput, #lightsNumberInput").attr('autocomplete', 'off');
@@ -254,29 +267,53 @@
 
 		    }
 
+		    // show the Button View "page"
+		    function showButtonView() {
+		        hideEverything();
+		        $("#pacerButtonView").show();
+		        $("#pacerViewEscape").show();
+		    }
+
+            // The view that we want for the end-user when the app loads
+		    function showNormalMode() {
+		        showEverything();
+		        hideAdvancedElements();
+		    }
+
 		    // show all the advanced elements and hide the advanced button
 		    function showAdvancedElements() {
-		        $("#demo").show();
+		        $(".advancedElement").show()
+		        /*$("#demo").show();
 		        $("#demo").text("Developer feedback");
 
 		        $("#feedbackParagraphs, #description, #navbar, #submitCancel, #selectShipping, #colorRadio, #colorRadioB, #fontStyle, #snacks, #slider1, #slider2, #newFeedBack").show();
 		        $("#pacerButtonView, #pacerTrueButtonView, #pacerListView").show();
 
-		        $("#advancedButton").hide();
+		        $("#advancedButton").hide();*/
 		    }
 
 		    // hide all the advanced elements and show the advanced button
 		    function hideAdvancedElements() {
-		        $("#feedbackParagraphs, #resetdelayButton, #description, #navbar, #submitCancel, #selectShipping, #colorRadio, #colorRadioB, #fontStyle, #snacks, #slider1, #slider2, #newFeedBack").hide();
-		        $("#pacerButtonView, #pacerTrueButtonView, #pacerListView").hide();
+		        $(".advancedElement").hide()
+		        /*$("#feedbackParagraphs, #resetdelayButton, #description, #navbar, #submitCancel, #selectShipping, #colorRadio, #colorRadioB, #fontStyle, #snacks, #slider1, #slider2, #newFeedBack").hide();
+		        $("#pacerButtonView, #pacerViewEscape, #pacerTrueButtonView, #pacerListView").hide();
 
-		        $("#advancedButton").show();
+		        $("#advancedButton").show();*/
 		    }
 
 		    // hide everything except the top header
 		    function hideEverything() {
-		        hideAdvancedElements();
-		        $("#advancedButton, #pacerSelectDiv, #pacerButtonView, #pacerTrueButtonView, #pacerListView, #pacerActionGroup, #colorSelectDiv, .submitButton2, #PacerActionButtons, #pacerTimeInputDiv, #feedbackParagraph2, #pacerSelect, #feedbackParagraphs").hide();
+		        $(".contentElement").hide();
+		        // hideAdvancedElements();
+		        // $("#pacerButtonView").show();
+		        // $("#pacerViewEscape").show();
+		        // $("#advancedButton, #pacerSelectDiv, #pacerActionGroup, #colorSelectDiv, .submitButton2, #PacerActionButtons, #pacerTimeInputDiv, #feedbackParagraph2, #pacerSelect").hide();
+		    }
+
+		    function showEverything() {
+		        $(".contentElement").show();
+		        // showAdvancedElements();
+		        // $("#advancedButton, #pacerSelectDiv, #pacerActionGroup, #colorSelectDiv, .submitButton2, #PacerActionButtons, #pacerTimeInputDiv, #feedbackParagraph2, #pacerSelect").show();
 		    }
 
 		    function colorSelectFunc() {
@@ -313,7 +350,7 @@
 		<div data-role="page" data-theme="a">
 			<div data-role="header" data-position="inline">
 				<h1 id="tpHeader">Track Practice</h1>
-				<div id="navbar" data-role="navbar">
+				<div id="navbar" class="contentElement advancedElement" data-role="navbar">
 					<ul>
 						<li><a href="index.html" data-icon="home" class="ui-btn-active">Home</a></li>
 						<li><a href="buttons.html" data-icon="star">Buttons</a></li>
@@ -324,13 +361,13 @@
 				</div>
 			</div>
 			<div data-role="content" data-theme="a">
-                <div id="feedbackParagraphs">
+                <div id="feedbackParagraphs" class="contentElement advancedElement">
 				    <p id="demo">Demo feedback</p>
 				    <p id="description">Description paragraph</p>
                     <p id="newFeedBack" onclick="readFeedbackFile()">New Feedback Paragraph</p>
                 </div>
                 
-                <div id="pacerSelectDiv">
+                <div id="pacerSelectDiv" class="contentElement">
 				    <select onchange="morestatus()" name="select-choice-a" id="pacerSelect" data-native-menu="false">
 					    <option value="99">Select Pacer: All Pacers</option>
 					    <option value="0">Pacer 0</option>
@@ -346,29 +383,29 @@
 				    </select>
                 </div>
 				
-                <div id="feedbackParagraph2">		
+                <div id="feedbackParagraph2" class="contentElement">		
 				    <p id="feedbackData">Lap Time: ----, Color: ----- </p>
                 </div>
 
-                <div id="pacerTimeInputDiv">
+                <div id="pacerTimeInputDiv" class="contentElement">
 				    <label for="select-choice-a" class="select">Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></label>
 				    <input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" onchange="newPacerTime(this.value)" />
 				</div>
 
-				<div class="submitButton2" style="width:23%">
+				<div class="submitButton2 contentElement" style="width:23%">
                     <button id="clearButton" class="submitButton3" url="0" otherNum="0" data-mini="true" data-icon="delete" data-iconpos="top"></button>
 				</div>
-				<div class="submitButton2" style="width:23%">
+				<div class="submitButton2 contentElement" style="width:23%">
                     <button id="resetButton" class="submitButton3" url="2" otherNum="0" data-mini="true" data-icon="clock" data-iconpos="top"></button>
 				</div>
-				<div class="submitButton2" style="width:23%">
+				<div class="submitButton2 contentElement" style="width:23%">
                     <button id="visibleButton" class="submitButton3" url="3" otherNum="0" data-mini="true" data-icon="eye" data-iconpos="top"></button>
 				</div>
-				<div class="submitButton2" style="width:23%">
+				<div class="submitButton2 contentElement" style="width:23%">
                     <button id="backwardsButton" class="submitButton3" url="4" otherNum="0" data-mini="true" data-icon="back" data-iconpos="top"></button>
 				</div>
 				
-                <div id="colorSelectDiv">
+                <div id="colorSelectDiv" class="contentElement" >
 				    <select onchange="colorSelectFunc()" name="colorSelect" id="colorSelect" url="5" data-native-menu="false">
 					    <option>Choose Color:</option>
 					    <option value="1" url="5">White</option>
@@ -382,7 +419,7 @@
 				    </select>
                 </div>	
 				
-                <div id="pacerActionGroup">	
+                <div id="pacerActionGroup" class="contentElement" >	
 				    <div class="submitButton2" style="width:23%">
                         <button id="lightsSubmit" url="6" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="grid" data-iconpos="top"></button>
 				    </div>
@@ -401,11 +438,15 @@
 				    </div>
                 </div>
 					
-				<div data-role="fieldcontain">
+				<div id="advancedButtonDiv" data-role="fieldcontain" class="contentElement" >
 					<button id="advancedButton" data-icon="gear" data-iconpos="notext" url="clear" data-mini="true" data-theme="a"></button>
 				</div>
 
-                <div id="pacerButtonView">
+                <div id="pacerViewEscape" class="contentElement advancedElement" >
+                    <a id="pacerViewEscapeButton" data-role="button" style="background-color:white" data-icon="arrow-l">Back</a>
+                </div>
+
+                <div id="pacerButtonView" class="contentElement advancedElement" >
                     <a id="allPacersButton" data-role="button" style="background-color:white" data-icon="arrow-l">All Pacers</a>
                     <a href="index.html" id="0" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 0</a>
                     <a href="index.html" id="1" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 1</a>
@@ -419,7 +460,7 @@
                     <a href="index.html" id="9" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 9</a>
                 </div>
 
-                <div id="pacerListView">
+                <div id="pacerListView" class="contentElement advancedElement" >
                     <ul data-role="listview" data-inset="true" data-divider-theme="a">
 					    <li data-role="list-divider">Swatch A</li>
 					    <li data-icon="gear"><a href="">A list item</a></li>
@@ -451,11 +492,11 @@
 				    </ul>
                 </div>
 
-                <div id="pacerTrueButtonView">
+                <div id="pacerTrueButtonView" class="contentElement advancedElement" >
                     <button style="background-color:lightgreen">Button</button>
                 </div>
                 	
-				<div id="slider2" data-role="fieldcontain">
+				<div id="slider2" class="contentElement advancedElement" data-role="fieldcontain">
 					<label for="slider2">Invisible</label>
 					<select name="slider2" id="Select1" class="flipSwitch" data-role="slider">
 						<option myURL="/visible/99" onclick="flipSwitchChange(this.myURL)" value="off">Off</option>
@@ -468,12 +509,12 @@
 					</select>
 				</div>
 
-				<div id="slider1" data-role="fieldcontain">
+				<div id="slider1" class="contentElement advancedElement" data-role="fieldcontain">
 					<label for="slider">Slider:</label>
 					<input type="range" name="slider" id="slider" value="50" min="0" max="100" step="0.1" data-highlight="true"  />
 				</div>
 
-				<div id="snacks" data-role="fieldcontain">
+				<div id="snacks" class="contentElement advancedElement" data-role="fieldcontain">
 					<fieldset data-role="controlgroup">
 						<legend>Choose as many snacks as you'd like:</legend>
 						<input type="checkbox" name="checkbox-1a" id="checkbox-1a" class="custom" />
@@ -490,7 +531,7 @@
 					</fieldset>
 				</div>
 
-				<div id="fontStyle" data-role="fieldcontain">
+				<div id="fontStyle" class="contentElement advancedElement" data-role="fieldcontain">
 					<fieldset data-role="controlgroup" data-type="horizontal">
 					    <legend>Font styling:</legend>
 					    <input type="checkbox" name="checkbox-6" id="checkbox-6" class="custom" />
@@ -504,7 +545,7 @@
 					</fieldset>
 				</div>
 
-				<div id="colorRadio" data-role="fieldcontain">
+				<div id="colorRadio" class="contentElement advancedElement" data-role="fieldcontain">
 					<fieldset data-role="controlgroup">
 					    <legend>Color:</legend>
 						<input type="radio" name="radio-choice-1" id="radio-choice-1" value="/color/1" checked="checked" />
@@ -521,7 +562,7 @@
 					</fieldset>
 				</div>
 
-				<div id="colorRadioB" data-role="fieldcontain">
+				<div id="colorRadioB" class="contentElement advancedElement" data-role="fieldcontain">
 					<fieldset data-role="controlgroup" data-type="horizontal">
 						<legend>Color:</legend>
 						<input type="radio" name="radio-choice-b" id="radio-choice-c" value="on" checked="checked" />
@@ -535,7 +576,7 @@
 					</fieldset>
 				</div>
 
-				<div id="selectShipping" data-role="fieldcontain">
+				<div id="selectShipping" class="contentElement advancedElement" data-role="fieldcontain">
 					<label for="select-choice-a" class="select">Choose shipping method:</label>
 					<select name="select-choice-a" id="select-choice-a" data-native-menu="false">
 						<option>Custom menu example</option>
@@ -546,7 +587,7 @@
 					</select>
 				</div>
 
-				<div id="submitCancel" class="ui-body ui-body-b">
+				<div id="submitCancel" class="contentElement advancedElement" class="ui-body ui-body-b">
 					<fieldset class="ui-grid-a">
 						<div class="ui-block-a"><button type="submit" data-theme="d">Cancel</button></div>
 						<div class="ui-block-b"><button type="submit" data-theme="a">Submit</button></div>

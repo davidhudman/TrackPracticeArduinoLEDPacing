@@ -207,11 +207,17 @@
 		        // Takes you back to the normal view
 		        $("#demo").click(function () {
 		            showNormalMode();
+		            advancedButtonPressed = false;
 		        });
 
                 // Takes you back to the normal view
 		        $("#pacerViewEscapeButton").click(function () {
 		            showNormalMode();
+		        });
+
+                // Updates the paragraph with new feedback
+		        $("#newFeedBack").click(function () {
+		            readFeedbackFile();
 		        });
 
 		    });
@@ -364,7 +370,7 @@
                 <div id="feedbackParagraphs" class="contentElement advancedElement">
 				    <p id="demo">Demo feedback</p>
 				    <p id="description">Description paragraph</p>
-                    <p id="newFeedBack" onclick="readFeedbackFile()">New Feedback Paragraph</p>
+                    <p id="newFeedBack">New Feedback Paragraph</p>
                 </div>
                 
                 <div id="pacerSelectDiv" class="contentElement">

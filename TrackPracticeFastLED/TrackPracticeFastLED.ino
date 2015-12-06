@@ -320,7 +320,8 @@ CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Green, CRGB
 // Declarations: Related to strings
 //***********************************************
 // String serialStringInput, printThis, stringHolder;		// Holds the raw, unformatted serial input from user.
-String printThisString = " ", tempString;
+String printThisString = " ";
+char feedbackSeparators[] = "{,}";
 
 //***********************************************
 // Declarations: All variables predefined
@@ -411,27 +412,20 @@ void assignPacerColors() {
 // writes output to a TXT file
 void writeToOutputFile() {
 	File dataFile = FileSystem.open("/mnt/sda1/arduino/www/TrackPractice/datalog.txt", FILE_WRITE);
+	printThisString = "";
 
 	// if the file is available, write to it:
 	if (dataFile) {
-		printThisString = "";
-		tempString = String(pacer[0].getTotalPacingPanels());
-		printThisString += tempString;
+		
+		printThisString += String(pacer[0].getTotalPacingPanels());
 		for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-			tempString = String("{");
-			printThisString += tempString;
-			tempString = String(i);
-			printThisString += tempString;
-			tempString = String(",");
-			printThisString += tempString;
-			tempString = String(pacer[i].getSecondsPerLap());
-			printThisString += tempString;
-			tempString = String(",");
-			printThisString += tempString;
-			tempString = String(pacer[i].getColorInt());
-			printThisString += tempString;
-			tempString = String("}");
-			printThisString += tempString;
+			printThisString += String(feedbackSeparators[0]);
+			printThisString += String(i);
+			printThisString += String(feedbackSeparators[1]);
+			printThisString += String(pacer[i].getSecondsPerLap());
+			printThisString += String(feedbackSeparators[1]);
+			printThisString += String(pacer[i].getColorInt());
+			printThisString += String(feedbackSeparators[2]);
 		}
 
 		dataFile.println(printThisString);

@@ -39,9 +39,12 @@
 		    // reads DataLogger.txt file that is updated with by Yun feedback
 		    function readFeedbackFile() {
 		        var xhttp = new XMLHttpRequest();
+		        var feedbackText;   // holds text from datalog.txt file
 		        xhttp.onreadystatechange = function () {
 		            if (xhttp.readyState == 4 && xhttp.status == 200) {
-		                document.getElementById("newFeedBack").innerHTML = xhttp.responseText;
+		                feedbackText = xhttp.responseText;
+		                // parseFeedbackFile(feedbackText);
+		                document.getElementById("newFeedBack").innerHTML = feedbackText;
 		            }
 		        };
 		        xhttp.open("GET", "datalog.txt", true);
@@ -241,6 +244,23 @@
 		        $("button:odd").css("background-color", "LightBlue");
 		    });
 
+            // Parse the datalog.txt file - not working yet
+		    function parseFeedbackFile(txtFeedback) {
+		        fullset = result.split("#");
+		        for (i = 0; i < fullset.length; i++) {
+		            myset = fullset[i].split(",");
+		            if (i != 0) {
+		                pacer[i] = { lapTime: myset[0], color: colorArray[myset[1] % colorArray.length], text: "Pacer " + i + " - " + myset[0] + " - " + colorArray[myset[1] % colorArray.length] }
+		            }
+		        }
+
+		        newSet = fullset[pacerIndex].split(",");
+		        secondsPerLap = newSet[0];
+		        color = colorArray[newSet[1]];
+		        document.getElementById("description").innerHTML = secondsPerLap + " | " + color;
+		        document.getElementById("newFeedBack2").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;
+		    }
+
 		    // Create Pacer Buttons - not working yet
 		    function createPacerButtons() {
 		        var pacerButtonText;
@@ -371,6 +391,7 @@
 				    <p id="demo">Demo feedback</p>
 				    <p id="description">Description paragraph</p>
                     <p id="newFeedBack">New Feedback Paragraph</p>
+                    <p id="newFeedBack2">New Feedback Paragraph2</p>
                 </div>
                 
                 <div id="pacerSelectDiv" class="contentElement">

@@ -321,7 +321,7 @@ CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Green, CRGB
 //***********************************************
 // String serialStringInput, printThis, stringHolder;		// Holds the raw, unformatted serial input from user.
 String printThisString = " ";
-char feedbackSeparators[] = "{,}";
+char feedbackSeparators[] = "#,#";
 
 //***********************************************
 // Declarations: All variables predefined
@@ -416,16 +416,17 @@ void writeToOutputFile() {
 
 	// if the file is available, write to it:
 	if (dataFile) {
-		
+		printThisString += feedbackSeparators[0];	// {
 		printThisString += String(pacer[0].getTotalPacingPanels());
+		// printThisString += feedbackSeparators[2];	// }
 		for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-			printThisString += String(feedbackSeparators[0]);
+			printThisString += feedbackSeparators[0];	// {
 			printThisString += String(i);
-			printThisString += String(feedbackSeparators[1]);
+			printThisString += feedbackSeparators[1];	// ,
 			printThisString += String(pacer[i].getSecondsPerLap());
-			printThisString += String(feedbackSeparators[1]);
+			printThisString += feedbackSeparators[1];	// ,
 			printThisString += String(pacer[i].getColorInt());
-			printThisString += String(feedbackSeparators[2]);
+			// printThisString += feedbackSeparators[2];	// }
 		}
 
 		dataFile.println(printThisString);

@@ -229,13 +229,11 @@
 		            showButtonView();
 		        });
 
-		        // Updates the paragraph with new feedback
+		        // Goes back to normal view after a pacerButton is clicked
 		        $(".pacerButtonClass").click(function () {
 		            showNormalMode();
 		            masterPacerSelected = $(this).attr("otherNum");
 		            $("#pacerSelect").text($(this).text());
-		            // tempString = "background-color" + $(this).css("background-color");
-		            // $("#pacerSelect").attr('style', tempString);
 		            tempString = "background-color:"+$(this).css("background-color");
 		            $("#pacerSelect").attr('style', tempString);
 		            morestatus();

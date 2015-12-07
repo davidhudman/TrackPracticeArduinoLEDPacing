@@ -13,6 +13,7 @@
 		    var numPacers = 10;
 		    var pacerButton = [];
 		    var advancedButtonPressed = false;
+		    var masterPacerSelected = 99;
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 		    window.onload = Pinstatus;
 
@@ -43,7 +44,7 @@
 		        xhttp.onreadystatechange = function () {
 		            if (xhttp.readyState == 4 && xhttp.status == 200) {
 		                feedbackText = xhttp.responseText;
-		                // parseFeedbackFile(feedbackText);
+		                parseFeedbackFile(feedbackText);
 		                document.getElementById("newFeedBack").innerHTML = feedbackText;
 		            }
 		        };
@@ -53,14 +54,14 @@
 
 		    // Makes a request to Arduino for feedback
 		    function morestatus() {
-		        document.getElementById("description").innerHTML = "Processing Status";
-		        var pacerIndex = $('#pacerSelect').val();
 		        readFeedbackFile();
+		        /*document.getElementById("description").innerHTML = "Processing Status";
+		        var pacerIndex = $('#pacerSelect').val();
 		        server = "/arduino/9/" + pacerIndex + "/" + 0;
 		        request = new XMLHttpRequest();
 		        request.open("GET", server, true);
 		        request.send(null);
-		        request.onreadystatechange = updateasyncstatus;
+		        request.onreadystatechange = updateasyncstatus;*/
 		    }
 
 		    // Show feedback from the Arduino
@@ -246,19 +247,42 @@
 
             // Parse the datalog.txt file - not working yet
 		    function parseFeedbackFile(txtFeedback) {
-		        fullset = result.split("#");
+		        var lights;
+		        var pacerIndex = $('#pacerSelect').val();
+		        var newPacer = [];
+
+		        fullset = txtFeedback.split("#");
 		        for (i = 0; i < fullset.length; i++) {
-		            myset = fullset[i].split(",");
 		            if (i != 0) {
-		                pacer[i] = { lapTime: myset[0], color: colorArray[myset[1] % colorArray.length], text: "Pacer " + i + " - " + myset[0] + " - " + colorArray[myset[1] % colorArray.length] }
+		                myset = fullset[i].split(",");
+		                newPacer[i - 1] = { index: myset[0], lapTime: myset[1], color: colorArray[myset[2] % colorArray.length], colorText: "background-color:"+colorArray[myset[2] % colorArray.length], text: "Pacer " + myset[0] + " - " + myset[1] + " - " + colorArray[myset[2] % colorArray.length] }
+		                if (i - 1 == pacerIndex) {
+		                    $("#newFeedBack2").text("newPacer[i] text: " + newPacer[i - 1].text);
+		                    document.getElementById("description").innerHTML = newPacer[i - 1].lapTime + " | " + newPacer[i - 1].color;
+		                    document.getElementById("feedbackData").innerHTML = "Lap Time: " + newPacer[i - 1].lapTime + ", Color: " + newPacer[i - 1].color;
+		                }
+		            }
+		            else {
+		                lights = fullset[0];
 		            }
 		        }
 
-		        newSet = fullset[pacerIndex].split(",");
+		        $("#0").text(newPacer[0].text).attr('style', newPacer[0].colorText);
+		        $("#1").text(newPacer[1].text).attr('style', newPacer[1].colorText);
+		        $("#2").text(newPacer[2].text).attr('style', newPacer[2].colorText);
+		        $("#3").text(newPacer[3].text).attr('style', newPacer[3].colorText);
+		        $("#4").text(newPacer[4].text).attr('style', newPacer[4].colorText);
+		        $("#5").text(newPacer[5].text).attr('style', newPacer[5].colorText);
+		        $("#6").text(newPacer[6].text).attr('style', newPacer[6].colorText);
+		        $("#7").text(newPacer[7].text).attr('style', newPacer[7].colorText);
+		        $("#8").text(newPacer[8].text).attr('style', newPacer[8].colorText);
+		        $("#9").text(newPacer[9].text).attr('style', newPacer[9].colorText);
+
+		        /*newSet = fullset[pacerIndex].split(",");
 		        secondsPerLap = newSet[0];
 		        color = colorArray[newSet[1]];
 		        document.getElementById("description").innerHTML = secondsPerLap + " | " + color;
-		        document.getElementById("newFeedBack2").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;
+		        document.getElementById("newFeedBack2").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;*/
 		    }
 
 		    // Create Pacer Buttons - not working yet
@@ -458,17 +482,17 @@
                 </div>
 
                 <div id="pacerButtonView" class="contentElement advancedElement" >
-                    <a id="allPacersButton" data-role="button" style="background-color:white" data-icon="arrow-l">All Pacers</a>
-                    <a href="index.html" id="0" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 0</a>
-                    <a href="index.html" id="1" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 1</a>
-                    <a href="index.html" id="2" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 2</a>
-                    <a href="index.html" id="3" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 3</a>
-                    <a href="index.html" id="4" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 4</a>
-                    <a href="index.html" id="5" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 5</a>
-                    <a href="index.html" id="6" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 6</a>
-                    <a href="index.html" id="7" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 7</a>
-                    <a href="index.html" id="8" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 8</a>
-                    <a href="index.html" id="9" data-role="button" style="background-color:white" data-icon="arrow-l">Pacer 9</a>
+                    <a id="allPacersButton" data-role="button" style="background-color:white" data-icon="star">All Pacers</a>
+                    <a href="index.html" id="0" data-role="button" style="background-color:white" data-icon="star">Pacer 0</a>
+                    <a href="index.html" id="1" data-role="button" style="background-color:white" data-icon="star">Pacer 1</a>
+                    <a href="index.html" id="2" data-role="button" style="background-color:white" data-icon="star">Pacer 2</a>
+                    <a href="index.html" id="3" data-role="button" style="background-color:white" data-icon="star">Pacer 3</a>
+                    <a href="index.html" id="4" data-role="button" style="background-color:white" data-icon="star">Pacer 4</a>
+                    <a href="index.html" id="5" data-role="button" style="background-color:white" data-icon="star">Pacer 5</a>
+                    <a href="index.html" id="6" data-role="button" style="background-color:white" data-icon="star">Pacer 6</a>
+                    <a href="index.html" id="7" data-role="button" style="background-color:white" data-icon="star">Pacer 7</a>
+                    <a href="index.html" id="8" data-role="button" style="background-color:white" data-icon="star">Pacer 8</a>
+                    <a href="index.html" id="9" data-role="button" style="background-color:white" data-icon="star">Pacer 9</a>
                 </div>
 
                 <div id="pacerListView" class="contentElement advancedElement" >

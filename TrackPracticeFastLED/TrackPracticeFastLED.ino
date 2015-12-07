@@ -416,7 +416,7 @@ void writeToOutputFile() {
 
 	// if the file is available, write to it:
 	if (dataFile) {
-		printThisString += feedbackSeparators[0];	// {
+		// printThisString += feedbackSeparators[0];	// {
 		printThisString += String(pacer[0].getTotalPacingPanels());
 		// printThisString += feedbackSeparators[2];	// }
 		for (int i=0; i < pacer[0].getNumberPacers(); i++) {

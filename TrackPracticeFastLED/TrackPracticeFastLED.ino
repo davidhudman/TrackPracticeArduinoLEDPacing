@@ -460,6 +460,7 @@ void process(YunClient client) {
 			if (pacerIndex > -1){
 				pacer[pacerIndex].setSecondsPerLap(0);
 			}
+			writeToOutputFile();
 			break;
 		case 1:	// reset
 			tempMillis = millis();
@@ -531,6 +532,7 @@ void process(YunClient client) {
 					pacer[pacerIndex].setColorInt((int)thirdCommand);
 				}
 			}
+			writeToOutputFile();
 			break;
 		case 6:	// lights
 			/*if (pacerIndex == 99) {
@@ -546,6 +548,7 @@ void process(YunClient client) {
 						assignGetTotalPacingPanels((int)thirdCommand);
 				}
 			}
+			writeToOutputFile();
 			break;
 		case 7:	// time
 			if (thirdCommand >= minimumLapTime) {
@@ -586,9 +589,10 @@ void process(YunClient client) {
 					pacer[pacerIndex].setChangedPacerNewStartTime(pacer[pacerIndex].getSecondsPerLap()+thirdCommand);
 				}
 			}
+			writeToOutputFile();
 			break;
 		case 9: // feedback...
-			if (pacerIndex != 99) {
+			/*if (pacerIndex != 99) {
 				for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 					if (i != 0) {
 						client.print("#");
@@ -600,7 +604,8 @@ void process(YunClient client) {
 			}
 			else {
 				client.print(pacer[0].getTotalPacingPanels());
-			}
+			}*/
+			writeToOutputFile();
 			break;
 		default:
 			break;

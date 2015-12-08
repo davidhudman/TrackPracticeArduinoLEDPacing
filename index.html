@@ -187,7 +187,7 @@
 		                advancedButtonPressed = true;
 		            }
 		            else {
-		                showNormalMode();
+		                showNormalView();
 		                advancedButtonPressed = false;
 		            }
 		        });
@@ -200,7 +200,7 @@
 
                 // hide everything when the allPacersButton is clicked except the group of pacerButtons and its escape button
 		        $("#allPacersButton").click(function () {
-		            showButtonView();
+		            showPacerButtonsView();
 		        });
 
 		        // Clear the contents of the new pacer time field when clicked so the user can type theirs
@@ -210,13 +210,13 @@
 
 		        // Takes you back to the normal view
 		        $("#demo").click(function () {
-		            showNormalMode();
+		            showNormalView();
 		            advancedButtonPressed = false;
 		        });
 
                 // Takes you back to the normal view
-		        $("#pacerViewEscapeButton").click(function () {
-		            showNormalMode();
+		        $("#pacerViewEscapeButton, #colorViewEscape").click(function () {
+		            showNormalView();
 		        });
 
                 // Updates the paragraph with new feedback
@@ -224,18 +224,22 @@
 		            readFeedbackFile();
 		        });
 
-		        // Updates the paragraph with new feedback
+		        // Reacts to click of pacerSelect button
 		        $("#pacerSelect").click(function () {
-		            showButtonView();
+		            showPacerButtonsView();
+		        });
+
+		        // Reacts to click of colorSelect Button
+		        $("#colorSelect").click(function () {
+		            showColorButtonsView();
 		        });
 
 		        // Goes back to normal view after a pacerButton is clicked
 		        $(".pacerButtonClass").click(function () {
-		            showNormalMode();
+		            showNormalView();
 		            masterPacerSelected = $(this).attr("otherNum");
 		            $("#pacerSelect").text($(this).text());
-		            tempString = "background-color:"+$(this).css("background-color");
-		            $("#pacerSelect").attr('style', tempString);
+		            $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color"));
 		            morestatus();
 		        });
 
@@ -244,7 +248,7 @@
 		    // Do all this stuff as soon as the page loads
 		    $(document).ready(function () {
 		        // hideAdvancedElements();
-		        showNormalMode();
+		        showNormalView();
 		        assignHelpTextToButtons();
 		        $("input[name='radio-choice-1']").change(radioValueChanged);
 		        $("#pacerTimeInput, #lightsNumberInput").attr('autocomplete', 'off');
@@ -337,15 +341,22 @@
 
 		    }
 
-		    // show the Button View "page"
-		    function showButtonView() {
+		    // show Pacer Buttons View "page"
+		    function showPacerButtonsView() {
 		        hideEverything();
 		        $("#pacerButtonView").show();
 		        $("#pacerViewEscape").show();
 		    }
 
+            // show Color Buttons View "page"
+		    function showColorButtonsView() {
+		        hideEverything();
+		        $("#colorButtonView").show();
+		        $("#colorViewEscape").show();
+		    }
+
             // The view that we want for the end-user when the app loads
-		    function showNormalMode() {
+		    function showNormalView() {
 		        showEverything();
 		        hideAdvancedElements();
 		    }
@@ -423,7 +434,7 @@
                 </div>
                 
                 <div id="pacerSelectDiv" class="contentElement">
-                    <a id="pacerSelect" href="#" data-role="button" style="background-color:white" data-icon="star">All Pacers</a>
+                    <a id="pacerSelect" href="#" data-role="button" style="background-color:#cfcfcf" data-icon="star">Select Pacer: All Pacers</a>
 				    <!--<select onchange="morestatus()" name="select-choice-a" id="pacerSelect" data-native-menu="false">
 					    <option value="99">Select Pacer: All Pacers</option>
 					    <option value="0">Pacer 0</option>
@@ -462,7 +473,9 @@
 				</div>
 				
                 <div id="colorSelectDiv" class="contentElement" >
-				    <select onchange="colorSelectFunc()" name="colorSelect" id="colorSelect" url="5" data-native-menu="false">
+                    <a id="colorSelect" href="#" data-role="button" style="background-color:#cfcfcf" data-icon="arrow-r">Select Color</a>
+                    <!--
+                    <select onchange="colorSelectFunc()" name="colorSelect" id="colorSelect" url="5" data-native-menu="false">
 					    <option>Choose Color:</option>
 					    <option value="1" url="5">White</option>
 					    <option value="2" url="5">Red</option>
@@ -473,6 +486,7 @@
 					    <option value="7" url="5">Purple</option>
 					    <option value="99" url="5">Normal</option>
 				    </select>
+                    -->
                 </div>	
 				
                 <div id="pacerActionGroup" class="contentElement" >	
@@ -499,11 +513,11 @@
 				</div>
 
                 <div id="pacerViewEscape" class="contentElement advancedElement" >
-                    <a id="pacerViewEscapeButton" data-role="button" style="background-color:white" data-icon="arrow-l">Back</a>
+                    <a id="pacerViewEscapeButton" data-role="button" style="background-color:#cfcfcf" data-icon="arrow-l">Back</a>
                 </div>
 
                 <div id="pacerButtonView" class="contentElement advancedElement" >
-                    <a id="allPacersButton" class="pacerButtonClass" otherNum="99" data-role="button" style="background-color:white" data-icon="star">All Pacers</a>
+                    <a id="allPacersButton" class="pacerButtonClass" otherNum="99" data-role="button" style="background-color:#cfcfcf" data-icon="star">Select Pacers: All Pacers</a>
                     <a href="index.html" id="0" class="pacerButtonClass" otherNum="0" data-role="button" style="background-color:white" data-icon="star">Pacer 0</a>
                     <a href="index.html" id="1" class="pacerButtonClass" otherNum="1" data-role="button" style="background-color:white" data-icon="star">Pacer 1</a>
                     <a href="index.html" id="2" class="pacerButtonClass" otherNum="2" data-role="button" style="background-color:white" data-icon="star">Pacer 2</a>
@@ -514,6 +528,22 @@
                     <a href="index.html" id="7" class="pacerButtonClass" otherNum="7" data-role="button" style="background-color:white" data-icon="star">Pacer 7</a>
                     <a href="index.html" id="8" class="pacerButtonClass" otherNum="8" data-role="button" style="background-color:white" data-icon="star">Pacer 8</a>
                     <a href="index.html" id="9" class="pacerButtonClass" otherNum="9" data-role="button" style="background-color:white" data-icon="star">Pacer 9</a>
+                </div>
+
+                <div id="colorViewEscape" class="contentElement advancedElement" >
+                    <a id="colorViewEscapeButton" data-role="button" data-icon="arrow-l" style="background-color:#cfcfcf">Back</a>
+                </div>
+                    
+                <div id="colorButtonView" class="contentElement advancedElement" >
+                    <a id="normalColorsButton" class="colorButtonClass" otherNum="99" data-role="button" data-icon="star" style="background-color:#cfcfcf">Normal Colors</a>
+                    <a id="colorButton[0]" class="colorButtonClass" otherNum="1" data-role="button" data-icon="star" style="background-color:white">White</a>
+                    <a id="colorButton[1]" class="colorButtonClass" otherNum="2" data-role="button" data-icon="star" style="background-color:red">Red</a>
+                    <a id="colorButton[2]" class="colorButtonClass" otherNum="3" data-role="button" data-icon="star" style="background-color:orange">Orange</a>
+                    <a id="colorButton[3]" class="colorButtonClass" otherNum="4" data-role="button" data-icon="star" style="background-color:yellow">Yellow</a>
+                    <a id="colorButton[4]" class="colorButtonClass" otherNum="5" data-role="button" data-icon="star" style="background-color:green">Green</a>
+                    <a id="colorButton[5]" class="colorButtonClass" otherNum="6" data-role="button" data-icon="star" style="background-color:blue">Blue</a>
+                    <a id="colorButton[6]" class="colorButtonClass" otherNum="7" data-role="button" data-icon="star" style="background-color:purple">Purple</a>
+
                 </div>
 
                 <div id="pacerListView" class="contentElement advancedElement" >

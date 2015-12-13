@@ -279,6 +279,8 @@
 		        // hideAdvancedElements();
 		        showNormalView();
 		        assignHelpTextToButtons();
+		        colorButtonTextColorFix();
+		        // createPacerButtons();
 		        $("input[name='radio-choice-1']").change(radioValueChanged);
 		        $("#pacerTimeInput, #lightsNumberInput").attr('autocomplete', 'off');
 		        $(".submitButton, .submitButton2").css('display', 'inline-block');
@@ -309,22 +311,25 @@
 
 		        fullset = txtFeedback.split("#");
 		        for (i = 0; i < fullset.length; i++) {
+		            j = i - 1;
 		            if (i != 0) {
-		                myset = fullset[i].split(",");
-		                if (myset[2] == "2" || myset[2] == "6" || myset[2] == "7" || myset[2] == "10") {        // red, blue, purple, red
-		                    newPacer[i - 1] = { index: myset[0], lapTime: myset[1], color: colorArray[myset[2] % colorArray.length], colorText: "background-color:" + colorArray[myset[2] % colorArray.length], text: "Pacer " + myset[0] + " - " + myset[1] + " secs per lap", fontColor: "white"}
+		                myset = fullset[i].split(",");  // split up the feedback
+                        // make your newPacer array instance out of what you just split up
+		                newPacer[j] = { index: myset[0], lapTime: myset[1], color: colorArray[myset[2] % colorArray.length], colorText: "background-color:" + colorArray[myset[2] % colorArray.length], text: "Pacer " + myset[0] + " - " + myset[1] + " secs per lap" };
+
+		                if (j == pacerIndex) {
+		                    $("#newFeedBack2").text("newPacer[i] text: " + newPacer[j].text);
+		                    document.getElementById("description").innerHTML = newPacer[j].lapTime + " | " + newPacer[j].color;
+		                    document.getElementById("feedbackData").innerHTML = "Lap Time: " + newPacer[j].lapTime + ", Color: " + newPacer[j].color;
 		                }
-		                else {
-		                    newPacer[i - 1] = { index: myset[0], lapTime: myset[1], color: colorArray[myset[2] % colorArray.length], colorText: "background-color:" + colorArray[myset[2] % colorArray.length], text: "Pacer " + myset[0] + " - " + myset[1] + " secs per lap", fontColor: "black"}
+
+		                $("#pacerButton" + j).text(newPacer[j].text).attr('style', newPacer[j].colorText);
+		                if (myset[2] % colorArray.length == "2" || myset[2] % colorArray.length == "6" || myset[2] % colorArray.length == "7") {
+		                    $("#pacerButton" + j).css('color', 'white');
 		                }
-		                if (i - 1 == pacerIndex) {
-		                    $("#newFeedBack2").text("newPacer[i] text: " + newPacer[i - 1].text);
-		                    document.getElementById("description").innerHTML = newPacer[i - 1].lapTime + " | " + newPacer[i - 1].color;
-		                    document.getElementById("feedbackData").innerHTML = "Lap Time: " + newPacer[i - 1].lapTime + ", Color: " + newPacer[i - 1].color;
+		                if (myset[1] == "0.00") {
+		                    $("#pacerButton" + j).text(newPacer[j].text + " - " + newPacer[j].color).attr('style', "background-color:black").css('color', 'white');
 		                }
-		                j = i-1;
-		                buttonid = "#" + j;
-		                $(buttonid).text(newPacer[j].text).attr('style', newPacer[j].colorText).css('color', newPacer[j].fontColor);
 		            }
 		            else {
 		                lights = fullset[0];
@@ -344,7 +349,7 @@
 		    }
 
 		    // Create Pacer Buttons - not working yet
-		    function createPacerButtons() {
+		    function createPacerButtonStuff() {
 		        var pacerButtonText;
 		        var pacerButtonId;
 		        // var txt2 = $("<p></p>").text("Text.");
@@ -373,6 +378,26 @@
 		        $("#helpButton").attr('help', '**Help Button**\n\nLong-press any button to find out what it is and what it does.\n\nStart by entering a number in the '
                     + 'top-most textbox to start a pacer at that lap time. Once it\'s running, you can use the clock button to reset it or the x button to stop it.');
 
+		    }
+
+		    // change colorButton text color as needed
+		    function colorButtonTextColorFix() {
+		        for (var i = 0; i < colorArray.length - 1; i++) {
+		            j = i + 1;
+		            $("#colorButton" + i).attr('otherNum', j).text(colorArray[j]).attr('style', 'background-color:' + colorArray[j]);
+		            if (i == 1 || i == 5 || i == 6) {
+		                $("#colorButton" + i).css('color', 'white');
+		            }
+		        }
+		    }
+
+            // create pacer buttons and add them to the page - not working yet
+		    function createPacerButtons() {
+		        for (var i = 0; i < 10; i++) {
+		            // elementString = "<a href='#' id='pacerButton" + i + "' class='pacerButtonClass' otherNum='" + i + "' data-role='button' data-icon='star'></a>";
+		            // .attr('id', 'pacerButton' + i).addClass('pacerButtonClass').attr('data-role', 'button').attr('href', '#')
+		            $("<a>Pacer</a>").attr('data-role', 'button').appendTo("#pacerButtonView");
+		        }
 		    }
 
 		    // show Pacer Buttons View "page"
@@ -552,16 +577,16 @@
 
                 <div id="pacerButtonView" class="contentElement advancedElement" >
                     <a id="allPacersButton" class="pacerButtonClass" otherNum="99" data-role="button" style="background-color:#E6E6E6" data-icon="star">Select Pacers: All Pacers</a>
-                    <a href="index.html" id="0" class="pacerButtonClass" otherNum="0" data-role="button" style="background-color:white" data-icon="star">Pacer 0</a>
-                    <a href="index.html" id="1" class="pacerButtonClass" otherNum="1" data-role="button" style="background-color:white" data-icon="star">Pacer 1</a>
-                    <a href="index.html" id="2" class="pacerButtonClass" otherNum="2" data-role="button" style="background-color:white" data-icon="star">Pacer 2</a>
-                    <a href="index.html" id="3" class="pacerButtonClass" otherNum="3" data-role="button" style="background-color:white" data-icon="star">Pacer 3</a>
-                    <a href="index.html" id="4" class="pacerButtonClass" otherNum="4" data-role="button" style="background-color:white" data-icon="star">Pacer 4</a>
-                    <a href="index.html" id="5" class="pacerButtonClass" otherNum="5" data-role="button" style="background-color:white" data-icon="star">Pacer 5</a>
-                    <a href="index.html" id="6" class="pacerButtonClass" otherNum="6" data-role="button" style="background-color:white" data-icon="star">Pacer 6</a>
-                    <a href="index.html" id="7" class="pacerButtonClass" otherNum="7" data-role="button" style="background-color:white" data-icon="star">Pacer 7</a>
-                    <a href="index.html" id="8" class="pacerButtonClass" otherNum="8" data-role="button" style="background-color:white" data-icon="star">Pacer 8</a>
-                    <a href="index.html" id="9" class="pacerButtonClass" otherNum="9" data-role="button" style="background-color:white" data-icon="star">Pacer 9</a>
+                    <a href="#" id="pacerButton0" class="pacerButtonClass" otherNum="0" data-role="button" data-icon="star"></a>
+                    <a href="#" id="pacerButton1" class="pacerButtonClass" otherNum="1" data-role="button" data-icon="star"></a>
+                    <a href="#" id="pacerButton2" class="pacerButtonClass" otherNum="2" data-role="button" data-icon="star"></a>
+                    <a href="#" id="pacerButton3" class="pacerButtonClass" otherNum="3" data-role="button" data-icon="star"></a>
+                    <a href="#" id="pacerButton4" class="pacerButtonClass" otherNum="4" data-role="button" data-icon="star"></a>
+                    <a href="#" id="pacerButton5" class="pacerButtonClass" otherNum="5" data-role="button" data-icon="star"></a>
+                    <a href="#" id="pacerButton6" class="pacerButtonClass" otherNum="6" data-role="button" data-icon="star"></a>
+                    <a href="#" id="pacerButton7" class="pacerButtonClass" otherNum="7" data-role="button" data-icon="star"></a>
+                    <a href="#" id="pacerButton8" class="pacerButtonClass" otherNum="8" data-role="button" data-icon="star"></a>
+                    <a href="#" id="pacerButton9" class="pacerButtonClass" otherNum="9" data-role="button" data-icon="star"></a>
                 </div>
 
                 <div id="colorViewEscape" class="contentElement advancedElement" >
@@ -570,13 +595,13 @@
                     
                 <div id="colorButtonView" class="contentElement advancedElement" >
                     <a id="normalColorsButton" class="colorButtonClass" otherNum="99" data-role="button" data-icon="star" style="background-color:#E6E6E6">Normal Colors</a>
-                    <a id="colorButton[0]" class="colorButtonClass" otherNum="1" data-role="button" data-icon="star" style="background-color:white">White</a>
-                    <a id="colorButton[1]" class="colorButtonClass" otherNum="2" data-role="button" data-icon="star" style="background-color:red">Red</a>
-                    <a id="colorButton[2]" class="colorButtonClass" otherNum="3" data-role="button" data-icon="star" style="background-color:orange">Orange</a>
-                    <a id="colorButton[3]" class="colorButtonClass" otherNum="4" data-role="button" data-icon="star" style="background-color:yellow">Yellow</a>
-                    <a id="colorButton[4]" class="colorButtonClass" otherNum="5" data-role="button" data-icon="star" style="background-color:green">Green</a>
-                    <a id="colorButton[5]" class="colorButtonClass" otherNum="6" data-role="button" data-icon="star" style="background-color:blue">Blue</a>
-                    <a id="colorButton[6]" class="colorButtonClass" otherNum="7" data-role="button" data-icon="star" style="background-color:purple">Purple</a>
+                    <a id="colorButton0" class="colorButtonClass" otherNum="1" data-role="button" data-icon="star"></a>
+                    <a id="colorButton1" class="colorButtonClass" otherNum="2" data-role="button" data-icon="star"></a>
+                    <a id="colorButton2" class="colorButtonClass" otherNum="3" data-role="button" data-icon="star"></a>
+                    <a id="colorButton3" class="colorButtonClass" otherNum="4" data-role="button" data-icon="star"></a>
+                    <a id="colorButton4" class="colorButtonClass" otherNum="5" data-role="button" data-icon="star"></a>
+                    <a id="colorButton5" class="colorButtonClass" otherNum="6" data-role="button" data-icon="star"></a>
+                    <a id="colorButton6" class="colorButtonClass" otherNum="7" data-role="button" data-icon="star"></a>
                 </div>
 
                 <div id="writeFileModeDiv" class="contentElement advancedElement" >

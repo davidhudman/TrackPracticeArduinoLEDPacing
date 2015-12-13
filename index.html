@@ -264,6 +264,14 @@
 		            $("#demo").text("/arduino/5/" + masterPacerSelected + "/" + newNum);
 		        });
 
+		        // Reacts to click of writeFileMode Button
+		        $("#writeFileMode").click(function () {
+		            var xhr = new XMLHttpRequest();
+		            xhr.open("GET", "/arduino/10/" + masterPacerSelected + "/" + 0, false);
+		            xhr.send();
+		            $("#demo").text("/arduino/10/" + masterPacerSelected + "/" + 0);
+		        });
+
 		    });
 
 		    // Do all this stuff as soon as the page loads
@@ -303,12 +311,20 @@
 		        for (i = 0; i < fullset.length; i++) {
 		            if (i != 0) {
 		                myset = fullset[i].split(",");
-		                newPacer[i - 1] = { index: myset[0], lapTime: myset[1], color: colorArray[myset[2] % colorArray.length], colorText: "background-color:"+colorArray[myset[2] % colorArray.length], text: "Pacer " + myset[0] + " - " + myset[1] + " - " + colorArray[myset[2] % colorArray.length] }
+		                if (myset[2] == "2" || myset[2] == "6" || myset[2] == "7" || myset[2] == "10") {        // red, blue, purple, red
+		                    newPacer[i - 1] = { index: myset[0], lapTime: myset[1], color: colorArray[myset[2] % colorArray.length], colorText: "background-color:" + colorArray[myset[2] % colorArray.length], text: "Pacer " + myset[0] + " - " + myset[1] + " secs per lap", fontColor: "white"}
+		                }
+		                else {
+		                    newPacer[i - 1] = { index: myset[0], lapTime: myset[1], color: colorArray[myset[2] % colorArray.length], colorText: "background-color:" + colorArray[myset[2] % colorArray.length], text: "Pacer " + myset[0] + " - " + myset[1] + " secs per lap", fontColor: "black"}
+		                }
 		                if (i - 1 == pacerIndex) {
 		                    $("#newFeedBack2").text("newPacer[i] text: " + newPacer[i - 1].text);
 		                    document.getElementById("description").innerHTML = newPacer[i - 1].lapTime + " | " + newPacer[i - 1].color;
 		                    document.getElementById("feedbackData").innerHTML = "Lap Time: " + newPacer[i - 1].lapTime + ", Color: " + newPacer[i - 1].color;
 		                }
+		                j = i-1;
+		                buttonid = "#" + j;
+		                $(buttonid).text(newPacer[j].text).attr('style', newPacer[j].colorText).css('color', newPacer[j].fontColor);
 		            }
 		            else {
 		                lights = fullset[0];
@@ -319,17 +335,6 @@
 		            document.getElementById("description").innerHTML = "Lights: " + lights;
 		            document.getElementById("feedbackData").innerHTML = "Lights: " + lights;
 		        }
-
-		        $("#0").text(newPacer[0].text).attr('style', newPacer[0].colorText);
-		        $("#1").text(newPacer[1].text).attr('style', newPacer[1].colorText);
-		        $("#2").text(newPacer[2].text).attr('style', newPacer[2].colorText);
-		        $("#3").text(newPacer[3].text).attr('style', newPacer[3].colorText);
-		        $("#4").text(newPacer[4].text).attr('style', newPacer[4].colorText);
-		        $("#5").text(newPacer[5].text).attr('style', newPacer[5].colorText);
-		        $("#6").text(newPacer[6].text).attr('style', newPacer[6].colorText);
-		        $("#7").text(newPacer[7].text).attr('style', newPacer[7].colorText);
-		        $("#8").text(newPacer[8].text).attr('style', newPacer[8].colorText);
-		        $("#9").text(newPacer[9].text).attr('style', newPacer[9].colorText);
 
 		        /*newSet = fullset[pacerIndex].split(",");
 		        secondsPerLap = newSet[0];
@@ -572,6 +577,10 @@
                     <a id="colorButton[4]" class="colorButtonClass" otherNum="5" data-role="button" data-icon="star" style="background-color:green">Green</a>
                     <a id="colorButton[5]" class="colorButtonClass" otherNum="6" data-role="button" data-icon="star" style="background-color:blue">Blue</a>
                     <a id="colorButton[6]" class="colorButtonClass" otherNum="7" data-role="button" data-icon="star" style="background-color:purple">Purple</a>
+                </div>
+
+                <div id="writeFileModeDiv" class="contentElement advancedElement" >
+                    <button id="writeFileMode" style="background-color:lightgreen">Write Mode On/Off</button>
                 </div>
 
                 <div id="pacerListView" class="contentElement advancedElement" >

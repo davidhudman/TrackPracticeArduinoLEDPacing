@@ -88,21 +88,6 @@
 		                document.getElementById("description").innerHTML = "Lights: " + result;
 		                document.getElementById("feedbackData").innerHTML = "Lights: " + result;
 		            }
-		            //var options = [
-                    //    { text: "All Pacers - Lap Time - Color", val: 99 },
-                    //    { text: pacer[0].text, val: 0 },
-                    //    { text: pacer[1].text, val: 1 },
-                    //    { text: pacer[2].text, val: 2 },
-                    //    { text: pacer[3].text, val: 3 },
-                    //    { text: pacer[4].text, val: 4 },
-                    //    { text: pacer[5].text, val: 5 },
-                    //    { text: pacer[6].text, val: 6 },
-                    //    { text: pacer[7].text, val: 7 },
-                    //    { text: pacer[8].text, val: 8 },
-                    //    { text: pacer[9].text, val: 9 }
-		            //];
-
-		            //$("#pacerSelect").replaceOptions(options);
 		        }
 		        testCommand();
 		    }
@@ -222,7 +207,7 @@
 		        });
 
                 // Takes you back to the normal view
-		        $("#pacerViewEscapeButton, #colorViewEscape").click(function () {
+		        $("#viewEscapeButton").click(function () {
 		            showNormalView();
 		        });
 
@@ -393,10 +378,10 @@
 
             // create pacer buttons and add them to the page - not working yet
 		    function createPacerButtons() {
-		        for (var i = 0; i < 10; i++) {
+		        for (var i = 0; i < numPacers; i++) {
 		            // elementString = "<a href='#' id='pacerButton" + i + "' class='pacerButtonClass' otherNum='" + i + "' data-role='button' data-icon='star'></a>";
 		            // .attr('id', 'pacerButton' + i).addClass('pacerButtonClass').attr('data-role', 'button').attr('href', '#')
-		            $("<a>Pacer</a>").attr('data-role', 'button').appendTo("#pacerButtonView");
+		            $("<a>Pacer</a>").appendTo("#pacerButtonView").button().attr('id', 'pacerButton' + i).addClass('pacerButtonClass');
 		        }
 		    }
 
@@ -404,14 +389,14 @@
 		    function showPacerButtonsView() {
 		        hideEverything();
 		        $("#pacerButtonView").show();
-		        $("#pacerViewEscape").show();
+		        $("#viewEscape").show();
 		    }
 
             // show Color Buttons View "page"
 		    function showColorButtonsView() {
 		        hideEverything();
 		        $("#colorButtonView").show();
-		        $("#colorViewEscape").show();
+		        $("#viewEscape").show();
 		    }
 
             // The view that we want for the end-user when the app loads
@@ -571,8 +556,8 @@
 					<button id="advancedButton" data-icon="gear" data-iconpos="notext" url="clear" data-mini="true" data-theme="a"></button>
 				</div>
 
-                <div id="pacerViewEscape" class="contentElement advancedElement" >
-                    <a id="pacerViewEscapeButton" data-role="button" style="background-color:#E6E6E6" data-icon="arrow-l">Back</a>
+                <div id="viewEscape" class="contentElement advancedElement" >
+                    <a id="viewEscapeButton" data-role="button" style="background-color:#E6E6E6" data-icon="arrow-l">Back</a>
                 </div>
 
                 <div id="pacerButtonView" class="contentElement advancedElement" >
@@ -589,9 +574,9 @@
                     <a href="#" id="pacerButton9" class="pacerButtonClass" otherNum="9" data-role="button" data-icon="star"></a>
                 </div>
 
-                <div id="colorViewEscape" class="contentElement advancedElement" >
+                <!--<div id="colorViewEscape" class="contentElement advancedElement" >
                     <a id="colorViewEscapeButton" data-role="button" data-icon="arrow-l" style="background-color:#E6E6E6">Back</a>
-                </div>
+                </div>-->
                     
                 <div id="colorButtonView" class="contentElement advancedElement" >
                     <a id="normalColorsButton" class="colorButtonClass" otherNum="99" data-role="button" data-icon="star" style="background-color:#E6E6E6">Normal Colors</a>

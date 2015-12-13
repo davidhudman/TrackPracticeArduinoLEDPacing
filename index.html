@@ -315,7 +315,7 @@
 		            if (i != 0) {
 		                myset = fullset[i].split(",");  // split up the feedback
                         // make your newPacer array instance out of what you just split up
-		                newPacer[j] = { index: myset[0], lapTime: myset[1], color: colorArray[myset[2] % colorArray.length], colorText: "background-color:" + colorArray[myset[2] % colorArray.length], text: "Pacer " + myset[0] + " - " + myset[1] + " secs per lap" };
+		                newPacer[j] = { index: myset[0], lapTime: myset[1], color: colorArray[myset[2] % colorArray.length], colorText: "background-color:" + colorArray[myset[2] % colorArray.length], text: "Pacer " + myset[0] + " - " + myset[1] };
 
 		                if (j == pacerIndex) {
 		                    $("#newFeedBack2").text("newPacer[i] text: " + newPacer[j].text);
@@ -323,7 +323,7 @@
 		                    document.getElementById("feedbackData").innerHTML = "Lap Time: " + newPacer[j].lapTime + ", Color: " + newPacer[j].color;
 		                }
 
-		                $("#pacerButton" + j).text(newPacer[j].text).attr('style', newPacer[j].colorText);
+		                $("#pacerButton" + j).text(newPacer[j].text + " secs per lap").attr('style', newPacer[j].colorText);
 		                if (myset[2] % colorArray.length == "2" || myset[2] % colorArray.length == "6" || myset[2] % colorArray.length == "7") {
 		                    $("#pacerButton" + j).css('color', 'white');
 		                }

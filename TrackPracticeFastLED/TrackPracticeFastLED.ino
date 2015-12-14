@@ -312,6 +312,7 @@ Pacer pacer[PACER_ARRAY_SIZE] = {Pacer(2,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_
 	Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS), 
 	Pacer(0,0,0,0,1,NUM_LEDS), Pacer(0,0,0,0,1,NUM_LEDS) };
 CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Green, CRGB::YellowGreen, CRGB::Yellow, CRGB::Red, CRGB::Blue, CRGB::Cyan};
+bool colorArrayCrappy = true;	// true means that the colorArray is associated with the strip that shows the messed up colors (the small strip in the clear box)
 // white, red, red-orange, yellow, green, dark blue, purple-pink
 // white, green, yellow, red, blue, lime green, aqua(CRGB::Purple), grey (CRGB::Pink)
 // alternate line for other WS2811: CRGB colorArray[COLOR_ARRAY_SIZE] = {CRGB::Black, CRGB::White, CRGB::Red, CRGB::Orange, CRGB::Yellow, CRGB::Green, CRGB::Blue, CRGB::Purple};
@@ -418,9 +419,8 @@ void writeToOutputFile() {
 
 		// if the file is available, write to it:
 		if (dataFile) {
-			// printThisString += feedbackSeparators[0];	// {
 			printThisString += String(pacer[0].getTotalPacingPanels());
-			// printThisString += feedbackSeparators[2];	// }
+			// need to add to the first group: writeMode, colorArrayCrappy
 			for (int i=0; i < pacer[0].getNumberPacers(); i++) {
 				printThisString += feedbackSeparators[0];	// {
 				printThisString += String(i);
@@ -428,7 +428,6 @@ void writeToOutputFile() {
 				printThisString += String(pacer[i].getSecondsPerLap());
 				printThisString += feedbackSeparators[1];	// ,
 				printThisString += String(pacer[i].getColorInt());
-				// printThisString += feedbackSeparators[2];	// }
 			}
 
 			dataFile.println(printThisString);
@@ -615,6 +614,26 @@ void process(YunClient client) {
 			break;
 		case 10: // change writeMode
 			writingMode = !writingMode;
+			break;
+		case 11:	// change to different ws2811 strip (where colors look different)
+			if (colorArrayCrappy == true) {
+				colorArrayCrappy = false;
+				colorArray[2] = CRGB::Red;
+				colorArray[3] = CRGB::Orange;
+				colorArray[4] = CRGB::Yellow;
+				colorArray[5] = CRGB::Green; 
+				colorArray[6] = CRGB::Blue; 
+				colorArray[7] = CRGB::Purple;
+			}
+			else {
+				colorArrayCrappy = true;
+				colorArray[2] = CRGB::Green;
+				colorArray[3] = CRGB::YellowGreen;
+				colorArray[4] = CRGB::Yellow;
+				colorArray[5] = CRGB::Red;
+				colorArray[6] = CRGB::Blue;
+				colorArray[7] = CRGB::Cyan;
+			}
 			break;
 		default:
 			break;

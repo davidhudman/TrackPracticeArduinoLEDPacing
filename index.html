@@ -248,6 +248,11 @@
 		            requestCommand(10, masterPacerSelected, 0);
 		        });
 
+		        // Reacts to click of lightStripMode Button
+		        $("#lightStripMode").click(function () {
+		            requestCommand(11, masterPacerSelected, 0);
+		        });
+
 		    });
 
 		    // Do all this stuff as soon as the page loads
@@ -539,6 +544,9 @@
 
                 <div id="writeFileModeDiv" class="contentElement advancedElement" >
                     <button id="writeFileMode" style="background-color:lightgreen">Write Mode On/Off</button>
+                </div>
+                <div id="lightStripModeDiv" class="contentElement advancedElement" >
+                    <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
                 </div>
 
                 <div id="pacerListView" class="contentElement advancedElement" >

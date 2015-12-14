@@ -94,9 +94,7 @@
             
             // send an extra command in case Arduino is lagging because it is still waiting for something
 		    function testCommand() {
-		        var xhr = new XMLHttpRequest();
-		        xhr.open("GET", "/arduino/-1/" + 0 + "/" + 0, false);
-		        xhr.send();
+		        requestCommand(-1, 0, 0);
 		    }
 
             // sends GET request for the commands that the Yun will accept
@@ -104,17 +102,16 @@
 		        var xhr = new XMLHttpRequest();
 		        xhr.open("GET", "/arduino/" + x + "/" + y + "/" + z, false);
 		        xhr.send();
+		        $("#demo").text("/arduino/" + x + "/" + y + "/" + z);
+		        setTimeout(readFeedbackFile, 6000);
 		    }
 
 		    // handle new pacer times
 		    function newPacerTime(val) {
 		        var newPacerTimeNum = 0;
 		        var pacerIndexforTimeSet = masterPacerSelected;
-		        var xhr = new XMLHttpRequest();
 
-		        xhr.open("GET", "/arduino/7/" + pacerIndexforTimeSet + "/" + val, false);
-		        xhr.send();
-		        $("#demo").text("/arduino/7/" + pacerIndexforTimeSet + "/" + val);
+		        requestCommand(7, pacerIndexforTimeSet, val);
 		        $("#pacerTimeInput").val("Enter pacer time in seconds");
 		    }
 
@@ -125,7 +122,6 @@
 		            var pacerIndex = parseInt(masterPacerSelected, 10);
 		            var newNum = parseFloat($(this).attr("otherNum"));
 		            var signlessNum = parseFloat($("#lightsNumberInput").val());
-		            var xhr = new XMLHttpRequest();
 
 		            switch (commandURL) {
 		                case 6:         // light change
@@ -143,9 +139,7 @@
 		                    break;
 		            }
 
-		            xhr.open("GET", "/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum, false);
-		            xhr.send();
-		            $("#demo").text("/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum);
+		            requestCommand(commandURL, pacerIndex, newNum);
 		        });
 
 		        // handles longpress of all buttons to show their help text
@@ -208,7 +202,7 @@
 		        });
 
 		        // Takes you back to the normal view
-		        $("#demo").click(function () {
+		        $("#demo, #tpHeader").click(function () {
 		            showNormalView();
 		            advancedButtonPressed = false;
 		        });
@@ -250,18 +244,12 @@
 		            // $("#colorSelect").attr('style', "background-color:" + $(this).css("background-color"));
 		            // morestatus();
 
-		            var xhr = new XMLHttpRequest();
-		            xhr.open("GET", "/arduino/5/" + masterPacerSelected + "/" + newNum, false);
-		            xhr.send();
-		            $("#demo").text("/arduino/5/" + masterPacerSelected + "/" + newNum);
+		            requestCommand(5, masterPacerSelected, newNum);
 		        });
 
 		        // Reacts to click of writeFileMode Button
 		        $("#writeFileMode").click(function () {
-		            var xhr = new XMLHttpRequest();
-		            xhr.open("GET", "/arduino/10/" + masterPacerSelected + "/" + 0, false);
-		            xhr.send();
-		            $("#demo").text("/arduino/10/" + masterPacerSelected + "/" + 0);
+		            requestCommand(10, masterPacerSelected, 0);
 		        });
 
 		    });
@@ -289,10 +277,7 @@
 
 		    // ask Yun to update the datalog.txt file - beware, will cause delays
 		    function askForFeedback() {
-		        var xhr = new XMLHttpRequest();
-		        xhr.open("GET", "/arduino/9/" + masterPacerSelected + "/0", false);
-		        xhr.send();
-		        $("#demo").text("/arduino/9/" + masterPacerSelected + "/0");
+		        requestCommand(9, masterPacerSelected, 0);
 		    }
 
             // Parse the datalog.txt file - not working yet
@@ -432,31 +417,13 @@
 		        $(".contentElement").show();
 		    }
 
-		    function colorSelectFunc() {
-		        var commandURL = $('#colorSelect').attr("url");
-		        var pacerIndex = masterPacerSelected;
-		        var newNum = $('#colorSelect').val();
-		        var xhr = new XMLHttpRequest();
-
-		        xhr.open("GET", "/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum, false);
-		        xhr.send();
-		        $("#demo").text("/arduino/" + commandURL + "/" + pacerIndex + "/" + newNum);
-		    }
-
 		    function radioValueChanged() {
 		        radioValue = $(this).value();
-		        var xhr = new XMLHttpRequest();
-
-		        xhr.open("GET", "/arduino" + radioValue, false);
-		        xhr.send();
-		        $("#demo").text(radioValue);
+		        requestCommand(radioValue, 0, 0);
 		    }
 
 		    function flipSwitchChange(thisURL) {
-		        var xhr = new XMLHttpRequest();
-		        xhr.open("GET", "/arduino" + thisURL, false);
-		        xhr.send();
-		        $("#demo").text(thisURL);
+		        requestCommand(thisURL, 0, 0);
 		    }
 
 		    // End of JavaScript
@@ -476,6 +443,9 @@
 					</ul>
 				</div>
 			</div>
+            <div id="viewEscape" class="contentElement advancedElement" >
+                    <a id="viewEscapeButton" data-role="button" style="background-color:#E6E6E6" data-icon="arrow-l">Back</a>
+            </div>
 			<div data-role="content" data-theme="a">
                 <div id="feedbackParagraphs" class="contentElement advancedElement">
 				    <p id="demo">Demo feedback</p>
@@ -486,19 +456,6 @@
                 
                 <div id="pacerSelectDiv" class="contentElement">
                     <a id="pacerSelect" class="ui-btn-icon-right" href="#" data-role="button" style="background-color:#E6E6E6" data-icon="carat-d">Select Pacer: All Pacers</a>
-				    <!--<select onchange="morestatus()" name="select-choice-a" id="pacerSelect" data-native-menu="false">
-					    <option value="99">Select Pacer: All Pacers</option>
-					    <option value="0">Pacer 0</option>
-					    <option value="1">Pacer 1</option>
-					    <option value="2">Pacer 2</option>
-					    <option value="3">Pacer 3</option>
-					    <option value="4">Pacer 4</option>
-					    <option value="5">Pacer 5</option>
-					    <option value="6">Pacer 6</option>
-					    <option value="7">Pacer 7</option>
-					    <option value="8">Pacer 8</option>
-					    <option value="9">Pacer 9</option>
-				    </select>-->
                 </div>
 				
                 <div id="feedbackParagraph2" class="contentElement">		
@@ -525,19 +482,6 @@
 				
                 <div id="colorSelectDiv" class="contentElement" >
                     <a id="colorSelect" class="ui-btn-icon-right" href="#" data-role="button" style="background-color:#E6E6E6" data-icon="carat-d">Select Color</a>
-                    <!--
-                    <select onchange="colorSelectFunc()" name="colorSelect" id="colorSelect" url="5" data-native-menu="false">
-					    <option>Choose Color:</option>
-					    <option value="1" url="5">White</option>
-					    <option value="2" url="5">Red</option>
-					    <option value="3" url="5">Orange</option>
-					    <option value="4" url="5">Yellow</option>
-					    <option value="5" url="5">Green</option>
-					    <option value="6" url="5">Blue</option>
-					    <option value="7" url="5">Purple</option>
-					    <option value="99" url="5">Normal</option>
-				    </select>
-                    -->
                 </div>	
 				
                 <div id="pacerActionGroup" class="contentElement" >	
@@ -562,10 +506,6 @@
 				<div id="advancedButtonDiv" data-role="fieldcontain" class="contentElement" >
 					<button id="advancedButton" data-icon="gear" data-iconpos="notext" url="clear" data-mini="true" data-theme="a"></button>
 				</div>
-
-                <div id="viewEscape" class="contentElement advancedElement" >
-                    <a id="viewEscapeButton" data-role="button" style="background-color:#E6E6E6" data-icon="arrow-l">Back</a>
-                </div>
 
                 <div id="pacerButtonView" class="contentElement advancedElement" >
                     <a id="allPacersButton" class="pacerButtonClass" otherNum="99" data-role="button" style="background-color:#E6E6E6" data-icon="star">Select Pacers: All Pacers</a>

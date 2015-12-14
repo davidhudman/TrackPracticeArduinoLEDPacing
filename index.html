@@ -99,6 +99,13 @@
 		        xhr.send();
 		    }
 
+            // sends GET request for the commands that the Yun will accept
+		    function requestCommand(x, y, z) {
+		        var xhr = new XMLHttpRequest();
+		        xhr.open("GET", "/arduino/" + x + "/" + y + "/" + z, false);
+		        xhr.send();
+		    }
+
 		    // handle new pacer times
 		    function newPacerTime(val) {
 		        var newPacerTimeNum = 0;

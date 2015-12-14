@@ -68,7 +68,10 @@
 		                fullset = result.split("#");
 		                for (i = 0; i < fullset.length; i++) {
 		                    myset = fullset[i].split("=");
-		                    pacer[i] = { lapTime: myset[0], color: colorArray[myset[1] % colorArray.length], text: "Pacer " + i + " - " + myset[0] + " - " + colorArray[myset[1] % colorArray.length] }
+		                    pacer[i] = {
+		                        lapTime: myset[0], color: colorArray[myset[1] % colorArray.length], text: "Pacer "
+                                    + i + " - " + myset[0] + " - " + colorArray[myset[1] % colorArray.length]
+		                    }
 		                }
 
 		                newSet = fullset[pacerIndex].split("=");
@@ -96,7 +99,7 @@
 		        xhr.open("GET", "/arduino/" + x + "/" + y + "/" + z, false);
 		        xhr.send();
 		        $("#demo").text("/arduino/" + x + "/" + y + "/" + z);
-		        setTimeout(readFeedbackFile, 6000);
+		        setTimeout(readFeedbackFile, 4000);
 		    }
 
 		    // handle new pacer times
@@ -285,7 +288,12 @@
 		            if (i != 0) {
 		                myset = fullset[i].split(",");  // split up the feedback
                         // make your newPacer array instance out of what you just split up
-		                newPacer[j] = { index: myset[0], lapTime: myset[1], color: colorArray[myset[2] % colorArray.length], colorText: "background-color:" + colorArray[myset[2] % colorArray.length], text: "Pacer " + myset[0] + " - " + myset[1] };
+		                newPacer[j] = {
+		                    index: myset[0], lapTime: myset[1],
+		                    color: colorArray[myset[2] % colorArray.length],
+		                    colorText: "background-color:" + colorArray[myset[2] % colorArray.length],
+		                    text: "Pacer " + myset[0] + " - " + myset[1]
+		                };
 
 		                if (j == pacerIndex) {
 		                    $("#newFeedBack2").text("newPacer[i] text: " + newPacer[j].text);
@@ -437,7 +445,7 @@
 				</div>
 			</div>
             <div id="viewEscape" class="contentElement advancedElement" >
-                    <a id="viewEscapeButton" data-role="button" style="background-color:#E6E6E6" data-icon="arrow-l">Back</a>
+                    <a id="viewEscapeButton" data-role="button" style="background-color:#E6E6E6" data-icon="home">Home</a>
             </div>
 			<div data-role="content" data-theme="a">
                 <div id="feedbackParagraphs" class="contentElement advancedElement">

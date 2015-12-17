@@ -169,6 +169,11 @@
 		            readFeedbackFile();
 		        });
 
+		        // handles longpress of advancedButton in order to show the massesView
+		        $("#advancedButton").on("taphold", function (event) {
+		            showMassesView();
+		        });
+
 		        // reveals the secret demo field whenever you click the advancedButton
 		        $("#advancedButton").click(function () {
 		            if (advancedButtonPressed == false) {
@@ -193,7 +198,7 @@
 		        });
 
 		        // Clear the contents of the new pacer time field when clicked so the user can type theirs
-		        $("#pacerTimeInput, #lightsNumberInput").click(function () {
+		        $("#pacerTimeInput, #lightsNumberInput, #pinInputField").click(function () {
 		            $(this).val("");
 		        });
 
@@ -205,6 +210,21 @@
 
                 // Takes you back to the normal view
 		        $("#viewEscapeButton").click(function () {
+		            showNormalView();
+		        });
+
+		        // Takes you to the create PIN view
+		        $("#newPacerButton").click(function () {
+		            showCreatePinView();
+		        });
+
+                // Takes you to a modified version of the showPacerButtonsView (or it will soon)
+		        $("#existingPacerButton").click(function () {
+		            showPacerButtonsView();
+		        });
+
+		        // Takes you a view where the user can edit their new pacer
+		        $("#createPinSubmit").click(function () {
 		            showNormalView();
 		        });
 
@@ -228,7 +248,7 @@
 		            showNormalView();
 		            masterPacerSelected = $(this).attr("otherNum");
 		            $("#pacerSelect").text($(this).text());
-		            $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color"));
+		            $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color")).css('color', $(this).css("color"));
 		            morestatus();
 		        });
 
@@ -263,7 +283,7 @@
 		        colorButtonTextColorFix();
 		        // createPacerButtons();
 		        $("input[name='radio-choice-1']").change(radioValueChanged);
-		        $("#pacerTimeInput, #lightsNumberInput").attr('autocomplete', 'off');
+		        $("#pacerTimeInput, #lightsNumberInput, #pinInputField").attr('autocomplete', 'off');
 		        $(".submitButton, .submitButton2").css('display', 'inline-block');
 		        $(".submitButton").css("padding-right", "25px");
 		        $(".speedChangeButton").css('display', 'inline-block');
@@ -383,6 +403,18 @@
 		        }
 		    }
 
+		    // show create PIN view
+		    function showCreatePinView() {
+		        hideEverything();
+		        $("#createPinView").show();
+		    }
+
+		    // show Masses View "page"
+		    function showMassesView() {
+		        hideEverything();
+		        $("#massesView").show();
+		    }
+
 		    // show Pacer Buttons View "page"
 		    function showPacerButtonsView() {
 		        hideEverything();
@@ -436,7 +468,7 @@
 		</script>
 	</head>
 	<body>
-		<div data-role="page" data-theme="a">
+		<div id="pageWrapper" data-role="page" data-theme="a">
 			<div data-role="header" data-position="inline">
 				<h1 id="tpHeader">Track Practice</h1>
 				<div id="navbar" class="contentElement advancedElement" data-role="navbar">
@@ -547,6 +579,21 @@
                 </div>
                 <div id="lightStripModeDiv" class="contentElement advancedElement" >
                     <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
+                </div>
+
+                <div id="massesView" class="contentElement advancedElement" >
+                    <br /><br /><br />
+                    <a id="newPacerButton" class="" otherNum="1" data-role="button" style="background-color:#00ff21">Let's Get Started!</a>
+                    <br /><br /><br />
+                    <a id="existingPacerButton" class="" otherNum="2" data-role="button" style="background-color:#f00">Wait, I already have a light running.</a>
+                </div>
+
+                <div id="createPinView" class="contentElement advancedElement" >
+                    <br /><br /><br />
+                    <h3 for="createPinSubmit" class="">Create your 4 digit passcode: </h3>
+                    <input type="number" name="name" id="pinInputField" value="4 Digit Passcode Input" step="1" min="0" max="9999" url="" />
+                    <br /><br /><br />
+                    <a id="createPinSubmit" class="" otherNum="2" data-role="button" style="background-color:#f00">Create!</a>
                 </div>
 
                 <div id="pacerListView" class="contentElement advancedElement" >

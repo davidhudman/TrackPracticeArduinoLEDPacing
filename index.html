@@ -138,6 +138,24 @@
 		            requestCommand(commandURL, pacerIndex, newNum);
 		        });
 
+		        // Handles the submission of the normal view lap time
+		        $("#pacerTimeSubmit").click(function () {
+		            commandURL = parseInt($(this).attr("url"), 10);
+		            pacerIndex = parseInt(masterPacerSelected, 10);
+		            newNum = $("#pacerTimeInput");
+		            requestCommand(commandURL, pacerIndex, newNum);
+		        });
+
+		        // Handles the submission of the normal view lap time
+		        $("#pacerTimeSubmitSimple").click(function () {
+		            commandURL = parseInt($(this).attr("url"), 10);
+		            pacerIndex = parseInt(masterPacerSelected, 10);
+		            newNum = $("#pacerTimeInputSimple").val();
+		            requestCommand(commandURL, pacerIndex, newNum);
+
+		            showColorButtonsView();
+		        });
+
 		        // handles longpress of all buttons to show their help text
 		        $(".submitButton3, #lightsSubmit, .speedChangeButton, #advancedButton, #helpButton").on("taphold", function (event) {
 		            var text = $(this).attr("help");
@@ -225,7 +243,7 @@
 
 		        // Takes you a view where the user can edit their new pacer
 		        $("#createPinSubmit").click(function () {
-		            showNormalView();
+		            showPacerTimeInputView();
 		        });
 
                 // Updates the paragraph with new feedback
@@ -283,7 +301,7 @@
 		        colorButtonTextColorFix();
 		        // createPacerButtons();
 		        $("input[name='radio-choice-1']").change(radioValueChanged);
-		        $("#pacerTimeInput, #lightsNumberInput, #pinInputField").attr('autocomplete', 'off');
+		        $("#pacerTimeInput, #lightsNumberInput, #pinInputField, #pacerTimeInputSimple").attr('autocomplete', 'off');
 		        $(".submitButton, .submitButton2").css('display', 'inline-block');
 		        $(".submitButton").css("padding-right", "25px");
 		        $(".speedChangeButton").css('display', 'inline-block');
@@ -403,6 +421,12 @@
 		        }
 		    }
 
+		    // show pacer time input View
+		    function showPacerTimeInputView() {
+		        hideEverything();
+		        $("#pacerTimeInputSimpleDiv").show();
+		    }
+
 		    // show create PIN view
 		    function showCreatePinView() {
 		        hideEverything();
@@ -500,9 +524,10 @@
 				    <p id="feedbackData">Lap Time: ----, Color: ----- </p>
                 </div>
 
-                <div id="pacerTimeInputDiv" class="contentElement">
+                <div id="pacerTimeInputDiv" class="contentElement timeInputView">
 				    <label for="select-choice-a" class="select">Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></label>
-				    <input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" onchange="newPacerTime(this.value)" />
+				    <input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
+                    <a id="pacerTimeSubmit" url="7" otherNum="1" data-role="button" style="background-color:#00ff21">Go!</a>
 				</div>
 
 				<div class="submitButton2 contentElement" style="width:23%">
@@ -581,11 +606,12 @@
                     <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
                 </div>
 
+                <!-- View for the masses -->
                 <div id="massesView" class="contentElement advancedElement" >
                     <br /><br /><br />
                     <a id="newPacerButton" class="" otherNum="1" data-role="button" style="background-color:#00ff21">Let's Get Started!</a>
                     <br /><br /><br />
-                    <a id="existingPacerButton" class="" otherNum="2" data-role="button" style="background-color:#f00">Wait, I already have a light running.</a>
+                    <a id="existingPacerButton" class="" otherNum="2" data-role="button" style="background-color:#f00">Wait, my light is running.</a>
                 </div>
 
                 <div id="createPinView" class="contentElement advancedElement" >
@@ -595,6 +621,12 @@
                     <br /><br /><br />
                     <a id="createPinSubmit" class="" otherNum="2" data-role="button" style="background-color:#f00">Create!</a>
                 </div>
+
+                <div id="pacerTimeInputSimpleDiv" class="contentElement advancedElement">
+				    <label for="select-choice-a" class="select">Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></label>
+				    <input type="number" name="name" id="pacerTimeInputSimple" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
+                    <a id="pacerTimeSubmitSimple" url="7" otherNum="1" data-role="button" style="background-color:#00ff21">Go!</a>
+				</div>
 
                 <div id="pacerListView" class="contentElement advancedElement" >
                     <ul data-role="listview" data-inset="true" data-divider-theme="a">

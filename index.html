@@ -16,6 +16,8 @@
 		    var onMassesViewSequence = true;
 		    var masterPacerSelected = 99;
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
+		    massesViewSequence = ["start", "pin", "timeEntry", "colorEntry", "simpleControls"];
+		    massesCurrentView = massesViewSequence[0];
 		    window.onload = Pinstatus;
 
 		    (function ($, window) {
@@ -246,9 +248,23 @@
 		            }
 		        });
 
-                // Takes you back to the normal view
+                // Takes you back to the normal view or the previous page if you're on the first time user sequence
 		        $("#viewEscapeButton").click(function () {
-		            showNormalView();
+		            if (onMassesViewSequence == true) {
+		                if (massesCurrentView == massesViewSequence[0])
+		                    return;
+		                if (massesCurrentView == massesViewSequence[1])
+		                    showMassesView();
+		                if (massesCurrentView == massesViewSequence[2])
+		                    showCreatePinView();
+		                if (massesCurrentView == massesViewSequence[3])
+		                    showPacerTimeInputView();
+		                if (massesCurrentView == massesViewSequence[4])
+		                    showColorButtonsView();
+		            }
+		            else {
+		                showNormalView();
+		            }
 		        });
 
 		        // Takes you to the create PIN view
@@ -451,21 +467,26 @@
 		    // show a slightly simpler set of options for an end user to control their pacer
 		    function showSimplePacerControlView() {
 		        hideEverything();
-                
+		        $("#viewEscape").show();
 		        $("#simpleViewActionButtonsDiv, #advancedButtonDiv").show();
 		        // $("#clearButton, #resetButton, #colorSelect, #helpButton").show();
+		        massesCurrentView = massesViewSequence[4];
 		    }
 
 		    // show pacer time input View
 		    function showPacerTimeInputView() {
 		        hideEverything();
+		        $("#viewEscape").show();
 		        $("#pacerTimeInputDiv").show();
+		        massesCurrentView = massesViewSequence[2];
 		    }
 
 		    // show create PIN view
 		    function showCreatePinView() {
 		        hideEverything();
+		        $("#viewEscape").show();
 		        $("#createPinView").show();
+		        massesCurrentView = massesViewSequence[1];
 		    }
 
 		    // show Masses View "page"
@@ -473,6 +494,7 @@
 		        hideEverything();
 		        $("#massesView").show();
 		        onMassesViewSequence = true;
+		        massesCurrentView = massesViewSequence[0];
 		    }
 
 		    // show Pacer Buttons View "page"
@@ -487,6 +509,9 @@
 		        hideEverything();
 		        $("#colorButtonView").show();
 		        $("#viewEscape").show();
+		        if (onMassesViewSequence == true) {
+		            massesCurrentView = massesViewSequence[3];
+		        }
 		    }
 
             // The view that we want for the end-user when the app loads
@@ -543,7 +568,7 @@
 				</div>
 			</div>
             <div id="viewEscape" class="contentElement advancedElement" >
-                    <a id="viewEscapeButton" data-role="button" style="background-color:#E6E6E6" data-icon="home">Home</a>
+                    <a id="viewEscapeButton" data-role="button" style="background-color:#E6E6E6" data-icon="arrow-l">Back</a>
             </div>
 			<div data-role="content" data-theme="a">
                 <div id="feedbackParagraphs" class="contentElement advancedElement">

@@ -365,6 +365,8 @@ void setup() {
 	   // (no one from the external network could connect)
 	   server.listenOnLocalhost();
 	   server.begin();
+
+	   writeToOutputFile();
 }
 
 void loop() { 

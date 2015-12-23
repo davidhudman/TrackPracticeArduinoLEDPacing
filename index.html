@@ -15,8 +15,9 @@
 		    var advancedButtonPressed = false;
 		    var onMassesViewSequence = true;
 		    var masterPacerSelected = 99;
+		    var lapTimeInputConstraints = [1, 900];
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
-		    massesViewSequence = ["start", "pin", "timeEntry", "colorEntry", "simpleControls"];
+		    massesViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls"];
 		    massesCurrentView = massesViewSequence[0];
 		    window.onload = Pinstatus;
 
@@ -146,10 +147,15 @@
 		            commandURL = parseInt($(this).attr("url"), 10);
 		            pacerIndex = parseInt(masterPacerSelected, 10);
 		            newNum = $("#pacerTimeInput").val();
-		            requestCommand(commandURL, pacerIndex, newNum);
-                    
-		            if (onMassesViewSequence == true) {     // if we got here from the simple "masses mode" view
-		                showColorButtonsView();
+		            if (newNum < lapTimeInputConstraints[0] || newNum > lapTimeInputConstraints[1]) {
+		                if (newNum < lapTimeInputConstraints[0])
+		                    $("#pacerTimeInput").val(lapTimeInputConstraints[0]);
+		                else
+		                    $("#pacerTimeInput").val(lapTimeInputConstraints[1]);
+		            }
+		            else {
+		                requestCommand(commandURL, pacerIndex, newNum);
+		                forwardOneView();
 		            }
 		        });
 
@@ -199,9 +205,9 @@
 		            readFeedbackFile();
 		        });
 
-		        // handles longpress of advancedButton in order to show the massesView
+		        // handles longpress of advancedButton in order to show the first time user start view
 		        $("#advancedButton").on("taphold", function (event) {
-		            showMassesView();
+		            showFirstTimeUserStartView();
 		        });
 
 		        // reveals the secret demo field whenever you click the advancedButton
@@ -251,16 +257,7 @@
                 // Takes you back to the normal view or the previous page if you're on the first time user sequence
 		        $("#viewEscapeButton").click(function () {
 		            if (onMassesViewSequence == true) {
-		                if (massesCurrentView == massesViewSequence[0])
-		                    return;
-		                if (massesCurrentView == massesViewSequence[1])
-		                    showMassesView();
-		                if (massesCurrentView == massesViewSequence[2])
-		                    showCreatePinView();
-		                if (massesCurrentView == massesViewSequence[3])
-		                    showPacerTimeInputView();
-		                if (massesCurrentView == massesViewSequence[4])
-		                    showColorButtonsView();
+		                backOneView();
 		            }
 		            else {
 		                showNormalView();
@@ -269,7 +266,7 @@
 
 		        // Takes you to the create PIN view
 		        $("#newPacerButton").click(function () {
-		            showCreatePinView();
+		            forwardOneView();
 		        });
 
                 // Takes you to a modified version of the showPacerButtonsView (or it will soon)
@@ -279,7 +276,7 @@
 
 		        // Takes you a view where the user can edit their new pacer
 		        $("#createPinSubmit").click(function () {
-		            showPacerTimeInputView();
+		            forwardOneView();
 		        });
 
                 // Updates the paragraph with new feedback
@@ -313,9 +310,7 @@
 
 		            requestCommand(5, masterPacerSelected, newNum);
 
-		            if (onMassesViewSequence == true) {
-		                showSimplePacerControlView();
-		            }
+		            forwardOneView();
 		        });
 
 		        // Reacts to click of writeFileMode Button
@@ -349,7 +344,7 @@
 		        $("#colorDiv").css("padding-top", "35px");
 		        $("button:even").css("background-color", "LightCoral");
 		        $("button:odd").css("background-color", "LightBlue");
-		        showMassesView();
+		        showFirstTimeUserStartView();
 		    });
 
 		    // ask Yun to update the datalog.txt file - beware, will cause delays
@@ -464,6 +459,82 @@
 		        }
 		    }
 
+		    // Go back one view in the first time user sequence
+		    function backOneView() {
+		        if (onMassesViewSequence == true) {
+		            var i = 0;
+		            while (i < massesViewSequence.length) {
+		                if (massesCurrentView == massesViewSequence[i]) {
+		                    if (i == 0)
+		                        break;
+		                    if (i != 0) {
+		                        massesCurrentView = massesViewSequence[i - 1];
+		                        break;
+		                    }
+		                }
+		                i++;
+		                if (i == massesViewSequence.length) {
+		                    i = 0;
+		                }
+		            }
+
+		            if (onMassesViewSequence == true && i != 0) {
+		                switch (i) {
+		                    case 1:
+		                        showFirstTimeUserStartView();
+		                        break;
+		                    case 2:
+		                        showCreatePinView();
+		                        break;
+		                    case 3:
+		                        showColorButtonsView();
+		                        break;
+		                    case 4:
+		                        showPacerTimeInputView();
+		                        break;
+		                    default:
+		                        break;
+		                }
+		            }
+		        }
+		    }
+
+		    // Go forward one view in the first time user sequence
+		    function forwardOneView() {
+		        if (onMassesViewSequence == true) {
+		            var i = 0;
+		            while (i < massesViewSequence.length - 1) {
+		                if (massesCurrentView == massesViewSequence[i]) {
+		                    massesCurrentView = massesViewSequence[i + 1];
+		                    break;
+		                }
+		                i++;
+		                //if (i == massesViewSequence.length - 1) {
+		                //    i = massesViewSequence.length - 1;
+		                //}
+		            }
+
+		            if (onMassesViewSequence == true && i != massesViewSequence.length - 1) {
+		                switch (i) {
+		                    case 0:
+		                        showCreatePinView();
+		                        break;
+		                    case 1:
+		                        showColorButtonsView();
+		                        break;
+		                    case 2:
+		                        showPacerTimeInputView();
+		                        break;
+		                    case 3:
+		                        showSimplePacerControlView();
+		                        break;
+		                    default:
+		                        break;
+		                }
+		            }
+		        }
+		    }
+
 		    // show a slightly simpler set of options for an end user to control their pacer
 		    function showSimplePacerControlView() {
 		        hideEverything();
@@ -478,7 +549,7 @@
 		        hideEverything();
 		        $("#viewEscape").show();
 		        $("#pacerTimeInputDiv").show();
-		        massesCurrentView = massesViewSequence[2];
+		        massesCurrentView = massesViewSequence[3];
 		    }
 
 		    // show create PIN view
@@ -489,10 +560,10 @@
 		        massesCurrentView = massesViewSequence[1];
 		    }
 
-		    // show Masses View "page"
-		    function showMassesView() {
+		    // show First Time User Start View "page"
+		    function showFirstTimeUserStartView() {
 		        hideEverything();
-		        $("#massesView").show();
+		        $("#firstTimeUserStartDiv").show();
 		        onMassesViewSequence = true;
 		        massesCurrentView = massesViewSequence[0];
 		    }
@@ -510,7 +581,7 @@
 		        $("#colorButtonView").show();
 		        $("#viewEscape").show();
 		        if (onMassesViewSequence == true) {
-		            massesCurrentView = massesViewSequence[3];
+		            massesCurrentView = massesViewSequence[2];
 		        }
 		    }
 
@@ -588,7 +659,7 @@
 
                 <div id="pacerTimeInputDiv" class="contentElement timeInputView">
 				    <label for="select-choice-a" class="select"><h3>Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></h3></label>
-				    <input type="number" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
+				    <input type="number" pattern="[0-9]*" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
                     <a id="pacerTimeSubmit" url="7" otherNum="1" data-role="button" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21"><h2>Go!</h2></a>
 				</div>
 
@@ -675,8 +746,8 @@
                     <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
                 </div>
 
-                <!-- View for the masses -->
-                <div id="massesView" class="contentElement advancedElement" >
+                <!-- Start View for the first time users -->
+                <div id="firstTimeUserStartDiv" class="contentElement advancedElement" >
                     <br /><br /><br />
                     <a id="newPacerButton" class="" otherNum="1" data-role="button" style="background-color:#00ff21"><h2>Let's Get Started!</h2></a>
                     <br /><br /><br />
@@ -686,14 +757,14 @@
                 <div id="createPinView" class="contentElement advancedElement" >
                     <br /><br /><br />
                     <h3 for="createPinSubmit" class="">Create your 4 digit passcode: </h3>
-                    <input type="number" name="name" id="pinInputField" value="4 Digit Passcode Input" step="1" min="0" max="9999" url="" />
+                    <input type="number" pattern="[0-9]*" name="name" id="pinInputField" value="4 Digit Passcode Input" step="1" min="0" max="9999" url="" />
                     <br /><br /><br />
                     <a id="createPinSubmit" class="" otherNum="2" data-role="button" style="background-color:#f00"><h2>Create!</h2></a>
                 </div>
 
                 <div id="pacerTimeInputSimpleDiv" class="contentElement advancedElement">
 				    <label for="select-choice-a" class="select">Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></label>
-				    <input type="number" name="name" id="pacerTimeInputSimple" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
+				    <input type="number" pattern="[0-9]*" name="name" id="pacerTimeInputSimple" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
                     <a id="pacerTimeSubmitSimple" url="7" otherNum="1" data-role="button" style="background-color:#00ff21">Go!</a>
 				</div>
 

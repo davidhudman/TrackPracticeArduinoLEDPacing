@@ -9,7 +9,17 @@
 		<link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
 		<script src="jquery-1.8.2.min.js"></script>
 		<script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <link rel="stylesheet" href="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.css">
+		<script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
 		<script>
+            // Numpad global variable stuff
+		    $.fn.numpad.defaults.gridTpl = '<table class="ui-bar-a"></table>';
+		    $.fn.numpad.defaults.backgroundTpl = '<div class="ui-popup-screen ui-overlay-a"></div>';
+		    $.fn.numpad.defaults.displayTpl = '<input data-theme="b" type="text" />';
+		    $.fn.numpad.defaults.buttonNumberTpl = '<a data-role="button" data-theme="b"></a>';
+		    $.fn.numpad.defaults.buttonFunctionTpl = '<a data-role="button" data-theme="a"></a>';
+		    $.fn.numpad.defaults.onKeypadCreate = function () { $(this).enhanceWithin(); };
+
 		    var numPacers = 10;
 		    var pacerButton = [];
 		    var advancedButtonPressed = false;
@@ -17,7 +27,7 @@
 		    var masterPacerSelected = 99;
 		    var lapTimeInputConstraints = [1, 900];
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
-		    massesViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls"];
+		    massesViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
 		    massesCurrentView = massesViewSequence[0];
 		    window.onload = Pinstatus;
 
@@ -39,6 +49,21 @@
 
 		    function Pinstatus() {
 		        morestatus();
+		    }
+
+		    // request a designated pacer
+		    function requestPacer() {
+		        var xhttp = new XMLHttpRequest();
+		        var feedbackText;   // holds text from Arduino - this will be your pacer index
+		        xhttp.onreadystatechange = function () {
+		            if (xhttp.readyState == 4 && xhttp.status == 200) {
+		                feedbackText = xhttp.responseText;
+		                document.getElementById("newFeedBack").innerHTML = feedbackText;
+		                masterPacerSelected = feedbackText;
+		            }
+		        };
+		        xhttp.open("GET", "/arduino/9/0/0", true);
+		        xhttp.send();
 		    }
 
 		    // reads DataLogger.txt file that is updated with by Yun feedback
@@ -275,8 +300,9 @@
 		        });
 
 		        // Takes you a view where the user can edit their new pacer
-		        $("#createPinSubmit").click(function () {
+		        $("#createPinSubmit").click(function pinCreated () {
 		            forwardOneView();
+		            requestPacer();
 		        });
 
                 // Updates the paragraph with new feedback
@@ -296,11 +322,16 @@
 
 		        // Goes back to normal view after a pacerButton is clicked
 		        $(".pacerButtonClass").click(function () {
-		            showNormalView();
-		            masterPacerSelected = $(this).attr("otherNum");
-		            $("#pacerSelect").text($(this).text());
-		            $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color")).css('color', $(this).css("color"));
-		            morestatus();
+		            if (onMassesViewSequence == true) {
+		                showCreatePinView();
+		            }
+		            else {
+		                showNormalView();
+		                masterPacerSelected = $(this).attr("otherNum");
+		                $("#pacerSelect").text($(this).text());
+		                $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color")).css('color', $(this).css("color"));
+		                morestatus();
+		            }
 		        });
 
 		        // Goes back to normal view after a colorButton is clicked
@@ -332,6 +363,17 @@
 		        assignHelpTextToButtons();
 		        colorButtonTextColorFix();
 		        // createPacerButtons();
+		        $("#pinInputField").numpad({
+		            // displayTpl: '<input data-theme="b" type="password" />',
+		            hidePlusMinusButton: true,
+		            hideDecimalButton: true
+		        });
+		        $("#pacerTimeInput").numpad({
+		            // displayTpl: '<input data-theme="b" type="password" />',
+		            hidePlusMinusButton: true,
+		            hideDecimalButton: false,
+		            decimalSeparator: '.'
+		        });
 		        $("input[name='radio-choice-1']").change(radioValueChanged);
 		        $("#pacerTimeInput, #lightsNumberInput, #pinInputField, #pacerTimeInputSimple").attr('autocomplete', 'off');
 		        $(".submitButton, .submitButton2").css('display', 'inline-block');
@@ -342,8 +384,8 @@
 		        $("#advancedButton").css("padding-right", "10px");
 		        $("#pacerActionDiv").css("padding-top", "35px");
 		        $("#colorDiv").css("padding-top", "35px");
-		        $("button:even").css("background-color", "LightCoral");
-		        $("button:odd").css("background-color", "LightBlue");
+		        //$("button:even").css("background-color", "LightCoral");
+		        //$("button:odd").css("background-color", "LightBlue");
 		        showFirstTimeUserStartView();
 		    });
 
@@ -493,6 +535,7 @@
 		                        showPacerTimeInputView();
 		                        break;
 		                    default:
+		                        showFirstTimeUserStartView();
 		                        break;
 		                }
 		            }
@@ -573,6 +616,9 @@
 		        hideEverything();
 		        $("#pacerButtonView").show();
 		        $("#viewEscape").show();
+		        if (onMassesViewSequence == true) {
+		            massesCurrentView = massesViewSequence[5];
+		        }
 		    }
 
             // show Color Buttons View "page"
@@ -639,7 +685,7 @@
 				</div>
 			</div>
             <div id="viewEscape" class="contentElement advancedElement" >
-                    <input id="viewEscapeButton" type="button" class="btn" data-role="button" style="background-color:#E6E6E6" data-icon="arrow-l" value="Back" />
+                    <input id="viewEscapeButton" type="button" style="background-color:#E6E6E6" data-icon="arrow-l" value="Back" />
             </div>
 			<div data-role="content" data-theme="a">
                 <div id="feedbackParagraphs" class="contentElement advancedElement">
@@ -650,7 +696,7 @@
                 </div>
                 
                 <div id="pacerSelectDiv" class="contentElement">
-                    <a id="pacerSelect" class="btn ui-btn-icon-right" href="#" data-role="button" style="background-color:#E6E6E6" data-icon="carat-d">Select Pacer: All Pacers</a>
+                    <input id="pacerSelect" type="button" class="btn ui-btn-icon-right" href="#" data-role="button" style="background-color:#E6E6E6" data-icon="carat-d" value="Select Pacer: All Pacers" />
                 </div>
 				
                 <div id="feedbackParagraph2" class="contentElement">		
@@ -660,55 +706,55 @@
                 <div id="pacerTimeInputDiv" class="contentElement timeInputView">
 				    <label for="select-choice-a" class="select"><h3>Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></h3></label>
 				    <input type="number" pattern="[0-9]*" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
-                    <a id="pacerTimeSubmit" class="btn" url="7" otherNum="1" data-role="button" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21"><h2>Go!</h2></a>
+                    <input id="pacerTimeSubmit" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
 				</div>
 
                 <!-- Simple Pacer control buttons for first time end user -->
                 <div id="simpleViewActionButtonsDiv" class="contentElement advancedElement">
-                    <a id="clearButtonMasses" class="btn submitButton3" url="0" otherNum="0" data-mini="true" data-role="button" data-icon="delete" style="background-color:#f53434" data-iconpos="right"><h2>Quit</h2></a>
-                    <a id="resetButtonMasses" class="btn submitButton3" url="2" otherNum="0" data-mini="true" data-role="button" data-icon="clock" style="background-color:yellow" data-iconpos="right"><h2>Reset Countdown</h2></a>
-                    <a id="helpButtonMasses" class="btn" data-mini="true" data-role="button" data-icon="info" style="background-color:lightblue" data-iconpos="right"><h2>Help</h2></a>
+                    <input id="clearButtonMasses" type="button" class="submitButton3" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
+                    <input id="resetButtonMasses" type="button"  class="submitButton3" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
+                    <input id="helpButtonMasses" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" />
                 </div>
 
 				<div class="submitButton2 contentElement" style="width:23%">
-                    <button id="clearButton" class="submitButton3" url="0" otherNum="0" data-mini="true" data-icon="delete" data-iconpos="top"></button>
+                    <input id="clearButton" type="button" class="submitButton3" url="0" otherNum="0" data-mini="true" data-icon="delete" data-iconpos="top" />
 				</div>
 				<div class="submitButton2 contentElement" style="width:23%">
-                    <button id="resetButton" class="submitButton3" url="2" otherNum="0" data-mini="true" data-icon="clock" data-iconpos="top"></button>
+                    <input id="resetButton" type="button" class="submitButton3" url="2" otherNum="0" data-mini="true" data-icon="clock" data-iconpos="top" />
 				</div>
 				<div class="submitButton2 contentElement" style="width:23%">
-                    <button id="visibleButton" class="submitButton3" url="3" otherNum="0" data-mini="true" data-icon="eye" data-iconpos="top"></button>
+                    <input id="visibleButton" type="button" class="submitButton3" url="3" otherNum="0" data-mini="true" data-icon="eye" data-iconpos="top" />
 				</div>
 				<div class="submitButton2 contentElement" style="width:23%">
-                    <button id="backwardsButton" class="submitButton3" url="4" otherNum="0" data-mini="true" data-icon="back" data-iconpos="top"></button>
+                    <input id="backwardsButton" type="button" class="submitButton3" url="4" otherNum="0" data-mini="true" data-icon="back" data-iconpos="top" />
 				</div>
 				
                 <div id="colorSelectDiv" class="contentElement" >
-                    <a id="colorSelect" class="btn ui-btn-icon-right" href="#" data-role="button" style="background-color:#E6E6E6" data-icon="carat-d">Select Color</a>
+                    <input id="colorSelect" type="button" class="btn ui-btn-icon-right" href="#" data-role="button" style="background-color:#E6E6E6" data-icon="carat-d" value="Select Color" />
                 </div>	
 				
                 <div id="pacerActionGroup" class="contentElement" >	
 				    <div class="submitButton2" style="width:23%">
-                        <button id="lightsSubmit" url="6" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="grid" data-iconpos="top"></button>
+                        <input id="lightsSubmit" type="button" url="6" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="grid" data-iconpos="top" />
 				    </div>
 				    <div class="submitButton2" style="width:23%">
-                        <button id="accelerate" url="8" otherNum="-1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-u" data-iconpos="top"></button>
+                        <input id="accelerate" type="button" url="8" otherNum="-1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-u" data-iconpos="top" />
 				    </div>
 				    <div class="submitButton2" style="width:23%">
-                        <button id="slow" url="8" otherNum="1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-d" data-iconpos="top"></button>
+                        <input id="slow" type="button" url="8" otherNum="1.0" class="speedChangeButton" type="submit" data-mini="true" data-theme="a" data-icon="arrow-d" data-iconpos="top" />
 				    </div>
                     <div class="submitButton2" style="width:23%">
-                        <button id="helpButton" url="-1" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="info" data-iconpos="top"></button>
+                        <input id="helpButton" type="button" url="-1" otherNum="99" type="submit" data-mini="true" data-theme="a" data-icon="info" data-iconpos="top" />
 				    </div>
 				
 				    <div>
 					    <input class="lightChange" data-mini="true" type="number" name="name" id="lightsNumberInput" oldurl="lights" url="6" value="2" min="0.1" max="100.0" step="0.1" />
 				    </div>
                 </div>
-					
-				<div id="advancedButtonDiv" data-role="fieldcontain" class="contentElement" >
-					<button id="advancedButton" data-icon="gear" data-iconpos="notext" url="clear" data-mini="true" data-theme="a"></button>
-				</div>
+				
+                <div id="advancedButtonDiv" data-role="fieldcontain" class="contentElement">
+					<input id="advancedButton" type="button" data-icon="gear" data-iconpos="notext" url="clear" data-theme="a" />
+				</div>	
 
                 <div id="pacerButtonView" class="contentElement advancedElement" >
                     <a id="allPacersButton" class="pacerButtonClass" otherNum="99" data-role="button" style="background-color:#E6E6E6" data-icon="star">Select Pacers: All Pacers</a>
@@ -749,17 +795,17 @@
                 <!-- Start View for the first time users -->
                 <div id="firstTimeUserStartDiv" class="contentElement advancedElement" >
                     <br /><br /><br />
-                    <a id="newPacerButton" class="btn" otherNum="1" data-role="button" style="background-color:#00ff21"><h2>Let's Get Started!</h2></a>
+                    <input id="newPacerButton" type="button" class="btn btn-success" otherNum="1" style="background-color:#00ff21" value="<h2>Let's Get Started!</h2>" />
                     <br /><br /><br />
-                    <a id="existingPacerButton" class="btn" otherNum="2" data-role="button" style="background-color:#f00"><h2>Wait, my light is running.</h2></a>
+                    <input id="existingPacerButton" type="button" class="btn btn-danger" otherNum="2" style="background-color:#f00" value="<h2>Wait, my light is running.</h2>" />
                 </div>
 
                 <div id="createPinView" class="contentElement advancedElement" >
                     <br /><br /><br />
-                    <h3 for="createPinSubmit" class="">Create your 4 digit passcode: </h3>
+                    <h3 for="createPinSubmit" class="">Create your 3 digit passcode: </h3>
                     <input type="number" pattern="[0-9]*" name="name" id="pinInputField" value="4 Digit Passcode Input" step="1" min="0" max="9999" url="" />
                     <br /><br /><br />
-                    <a id="createPinSubmit" class="btn" otherNum="2" data-role="button" style="background-color:#f00"><h2>Create!</h2></a>
+                    <input id="createPinSubmit" type="button" class="btn" otherNum="2" data-role="button" style="background-color:#f00" value="<h2>Create!</h2>" />
                 </div>
 
                 <div id="pacerTimeInputSimpleDiv" class="contentElement advancedElement">

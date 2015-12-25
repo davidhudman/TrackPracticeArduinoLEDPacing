@@ -331,7 +331,7 @@ long resetDelayDefaultDelayTimeMillis = 10000,		// the default delay time when r
 		tempMillis;		// holds the milliseconds time that a pacer's speed will change
 int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIterator = 0, trafficLightIterator = 0,
 	serialCountTo = 50, trafficLightCountTo = 100, partySerialCountTo = 5, 
-	tempLowestDelayedPacerIndex = -1, totalPacingPanels = 26,
+	tempLowestDelayedPacerIndex = -1, totalPacingPanels = 26, intHolder,
 	minimumLapTime = 0.5;	// user cannot change to a pace faster than 0.5 second lap
 
 bool isChangePacerSpeedNeeded = false, // trigger to determine whether we need to figure out which pacer is going to change its speed
@@ -562,10 +562,12 @@ void process(YunClient client) {
 				if (pacerIndex == 99) {
 					pacer[getLowestUnusedPacerIndex()].setStartTime(millis()+7000);
 					pacer[getLowestUnusedPacerIndex()].setSecondsPerLap (thirdCommand);
+					pacer[getLowestUnusedPacerIndex()].setIsVisible(true);
 				}
 				else {
 					pacer[pacerIndex].setStartTime(millis()+7000);
 					pacer[pacerIndex].setSecondsPerLap (thirdCommand);
+					pacer[pacerIndex].setIsVisible(true);
 				}
 				writeToOutputFile();
 			}
@@ -612,6 +614,10 @@ void process(YunClient client) {
 			else {
 				client.print(pacer[0].getTotalPacingPanels());
 			}*/
+			intHolder = getLowestUnusedPacerIndex();
+			pacer[intHolder].setIsVisible(false);
+			pacer[intHolder].setSecondsPerLap(100);
+			client.print(intHolder);
 			writeToOutputFile();
 			break;
 		case 10: // change writeMode

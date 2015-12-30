@@ -601,24 +601,16 @@ void process(YunClient client) {
 			writeToOutputFile();
 			break;
 		case 9: // feedback...
-			/*if (pacerIndex != 99) {
-				for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-					if (i != 0) {
-						client.print("#");
-					}
-					client.print(pacer[i].getSecondsPerLap());
-					client.print("=");
-					client.print(pacer[i].getColorInt());
-				}
+			intHolder = getLowestUnusedPacerIndex();
+			if (intHolder == pacer[0].getNumberPacers()-1 && pacer[pacer[0].getNumberPacers()-1].getSecondsPerLap() > 0) {
+				client.print(-1);
 			}
 			else {
-				client.print(pacer[0].getTotalPacingPanels());
-			}*/
-			intHolder = getLowestUnusedPacerIndex();
-			pacer[intHolder].setIsVisible(false);
-			pacer[intHolder].setSecondsPerLap(100);
-			client.print(intHolder);
-			writeToOutputFile();
+				pacer[intHolder].setIsVisible(false);
+				pacer[intHolder].setSecondsPerLap(100);
+				client.print(intHolder);
+				writeToOutputFile();
+			}
 			break;
 		case 10: // change writeMode
 			writingMode = !writingMode;

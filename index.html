@@ -59,7 +59,13 @@
 		            if (xhttp.readyState == 4 && xhttp.status == 200) {
 		                feedbackText = xhttp.responseText;
 		                document.getElementById("newFeedBack").innerHTML = feedbackText;
-		                masterPacerSelected = feedbackText;
+		                if (feedbackText == "-1") {
+		                    showPacersOccupiedView();
+		                    setTimeout(showFirstTimeUserStartView, 4000);
+		                }
+		                else {
+		                    masterPacerSelected = feedbackText;
+		                }
 		            }
 		        };
 		        xhttp.open("GET", "/arduino/9/0/0", true);
@@ -631,6 +637,12 @@
 		        }
 		    }
 
+		    // View for when the user requests a pacer and there isn't one available
+		    function showPacersOccupiedView() {
+		        hideEverything();
+		        $('#pacerOccupiedDiv').show();
+		    }
+
             // The view that we want for the end-user when the app loads
 		    function showNormalView() {
 		        showEverything();
@@ -797,7 +809,7 @@
                     <br /><br /><br />
                     <input id="newPacerButton" type="button" class="btn btn-success" otherNum="1" style="background-color:#00ff21" value="<h2>Let's Get Started!</h2>" />
                     <br /><br /><br />
-                    <input id="existingPacerButton" type="button" class="btn btn-danger" otherNum="2" style="background-color:#f00" value="<h2>Wait, my light is running.</h2>" />
+                    <input id="existingPacerButton" type="button" class="btn btn-danger" otherNum="2" style="background-color:#f00" value="<h3>Wait, my light is running.</h3>" />
                 </div>
 
                 <div id="createPinView" class="contentElement advancedElement" >
@@ -813,6 +825,10 @@
 				    <input type="number" pattern="[0-9]*" name="name" id="pacerTimeInputSimple" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
                     <a id="pacerTimeSubmitSimple" class="btn" url="7" otherNum="1" data-role="button" style="background-color:#00ff21">Go!</a>
 				</div>
+
+                <div id="pacerOccupiedDiv" class="contentElement advancedElement">
+                    <h3>No Light Pacers Available: All are currently in use.</h3>
+                </div>
 
                 <div id="pacerListView" class="contentElement advancedElement" >
                     <ul data-role="listview" data-inset="true" data-divider-theme="a">

@@ -26,6 +26,7 @@
 		    var onMassesViewSequence = true;
 		    var masterPacerSelected = 99;
 		    var lapTimeInputConstraints = [1, 900];
+		    var pinVar = 111;
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 		    massesViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
 		    massesCurrentView = massesViewSequence[0];
@@ -308,14 +309,24 @@
 		        // Takes you a view where the user can edit their new pacer
 		        $("#createPinSubmit").click(function pinCreated () {
 		            if (isPinFormatValid() == true) {
-		                forwardOneView();
-		                requestPacer();
+		                pinVar = $("#pinInputField").val();
+
+		                var xhttp = new XMLHttpRequest();
+		                xhttp.onreadystatechange = function () {
+		                    if (xhttp.readyState == 4 && xhttp.status == 200) {
+		                        if (xhttp.responseText != "incorrect") {
+		                            forwardOneView();
+		                            requestPacer();
+		                        }
+		                        else {
+		                            alert("Incorrect PIN");
+		                        }
+		                    }
+		                };
+		                xhttp.open("GET", "verifyPIN.php?q=" + pinVar, true);
+		                xhttp.send();
 		            }
 		            else {
-		                var xhttp = new XMLHttpRequest();
-		                xhttp.open("GET", "verifyPIN.php", true);
-		                xhttp.send();
-
 		                alert("Please enter 3 digits");
 		            }
 		        });

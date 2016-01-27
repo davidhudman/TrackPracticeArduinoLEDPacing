@@ -69,6 +69,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="..\index.html" />
+    <None Include="..\verifyPIN.php">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="TrackPracticeFastLED.ino">
       <FileType>CppCode</FileType>
     </None>

@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TrackPracticeFastLED.ino" />
+    <None Include="..\verifyPIN.php" />
     <None Include="..\index.html" />
   </ItemGroup>
   <ItemGroup>

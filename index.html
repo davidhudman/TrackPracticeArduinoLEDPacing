@@ -317,9 +317,10 @@
 		                        if (xhttp.responseText != "incorrect") {
 		                            forwardOneView();
 		                            requestPacer();
+		                            alert(xhttp.responseText);
 		                        }
 		                        else {
-		                            alert("Incorrect PIN");
+		                            alert(xhttp.responseText);  // incorrect PIN
 		                        }
 		                    }
 		                };

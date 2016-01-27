@@ -366,6 +366,9 @@ void setup() {
 	   server.listenOnLocalhost();
 	   server.begin();
 
+	   // Reset each Pacer's PIN access number - edit DB rows in sqlite - keep any existing workouts the same
+	   // resetPacerPins();
+
 	   writeToOutputFile();
 }
 
@@ -378,14 +381,6 @@ void loop() {
 		process(client);	// Process request
 		client.stop();		// Close connection and free resources.
 	}
-	// getSerialFeedback(); // This overwhelms the program if too many pacers are added
-	/*if (serialCountTo > 0) {
-		writeToOutputFile();
-		serialCountTo = 50;
-	}
-	else {
-		serialCountTo--;
-	}*/
 }
 
 // Use an integer parameter to determine what RGB color value it is associated with
@@ -449,7 +444,7 @@ void writeToOutputFile() {
 // Process the cURL command
 void process(YunClient client) {
 	int command = client.readStringUntil('/').toInt(),		// read the command
-		pacerIndex = client.readStringUntil('/').toInt();	// read pin number
+		pacerIndex = client.readStringUntil('/').toInt();	// read pacer index number
 	double thirdCommand = client.parseFloat();
 
 	// If the next character is a '/' it means we have an URL

@@ -355,21 +355,38 @@ void setup() {
 	  // FastLED.addLeds<firstParameter, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS); // firstParameter can be: WS2801, SM16716, LPD8806, P9813, APA102, DOTSTAR
 	  // Documentation on constructors can be found in FastLED examples
 
-	   assignPacerColors();
-	   assignGetTotalPacingPanels(totalPacingPanels);
-	   Bridge.begin();
+	assignPacerColors();
+	assignGetTotalPacingPanels(totalPacingPanels);
+	Bridge.begin();
 
-	   FileSystem.begin();
+	FileSystem.begin();
 
-	   // Listen for incoming connection only from localhost
-	   // (no one from the external network could connect)
-	   server.listenOnLocalhost();
-	   server.begin();
+	// This section will need to initiate a SQLite database write
+	// Process p;
+	// String initalPhpCall = "/mnt/sda1/arduino/www/TrackPractice/updatePacers.php";
+	/*for (int i=0; i <= pacer[0].getNumberPacers(); i++) {
+		if (pacer[i].getSecondsPerLap() > 0) {
+			initalPhpCall.concat("pacer=");
+			initalPhpCall.concat(i);
+			initalPhpCall.concat("&secondsPerLap=");
+			initalPhpCall.concat(pacer[i].getSecondsPerLap());
+		}
+	}*/
+	// p.begin(initalPhpCall); // p.addParameter(); 
+	// p.run();
+	
+	delay(5000);
 
-	   // Reset each Pacer's PIN access number - edit DB rows in sqlite - keep any existing workouts the same
-	   // resetPacerPins();
+	// Reset each Pacer's PIN access number - edit DB rows in SQLite - keep any existing workouts the same
+	// resetPacerPins();
+	
+	
+	// Listen for incoming connection only from localhost
+	// (no one from the external network could connect)
+	server.listenOnLocalhost();
+	server.begin();
 
-	   writeToOutputFile();
+	writeToOutputFile();
 }
 
 void loop() { 

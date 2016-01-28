@@ -18,6 +18,7 @@
     <None Include="TrackPracticeFastLED.ino" />
     <None Include="..\verifyPIN.php" />
     <None Include="..\index.html" />
+    <None Include="..\updatePacers.php" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FastLED.cpp">

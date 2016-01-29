@@ -317,7 +317,9 @@
 		                        if (xhttp.responseText != "incorrect") {
 		                            forwardOneView();
 		                            requestPacer();
-		                            alert(xhttp.responseText);
+		                            pinSubmitText = xhttp.responseText
+		                            alert(pinSubmitText);
+		                            masterPacerSelected = pinSubmitText;
 		                        }
 		                        else {
 		                            alert(xhttp.responseText);  // incorrect PIN
@@ -365,9 +367,7 @@
 		        $(".colorButtonClass").click(function () {
 		            // showNormalView();
 		            var newNum = $(this).attr("otherNum");
-
 		            requestCommand(5, masterPacerSelected, newNum);
-
 		            forwardOneView();
 		        });
 

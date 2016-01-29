@@ -3,6 +3,7 @@
 #include <YunServer.h>
 #include <YunClient.h>
 #include <FileIO.h>
+#include <HttpClient.h>
 
 /**
 *	Pacer Class - public in java program
@@ -361,25 +362,7 @@ void setup() {
 
 	FileSystem.begin();
 
-	// This section will need to initiate a SQLite database write
-	// Process p;
-	// String initalPhpCall = "/mnt/sda1/arduino/www/TrackPractice/updatePacers.php";
-	/*for (int i=0; i <= pacer[0].getNumberPacers(); i++) {
-		if (pacer[i].getSecondsPerLap() > 0) {
-			initalPhpCall.concat("pacer=");
-			initalPhpCall.concat(i);
-			initalPhpCall.concat("&secondsPerLap=");
-			initalPhpCall.concat(pacer[i].getSecondsPerLap());
-		}
-	}*/
-	// p.begin(initalPhpCall); // p.addParameter(); 
-	// p.run();
-	
-	delay(5000);
-
-	// Reset each Pacer's PIN access number - edit DB rows in SQLite - keep any existing workouts the same
-	// resetPacerPins();
-	
+	updatePacerDB();	// Reset each Pacer's PIN access number - edit DB rows in SQLite - keep any existing workouts the same
 	
 	// Listen for incoming connection only from localhost
 	// (no one from the external network could connect)
@@ -397,6 +380,30 @@ void loop() {
 	if (client) {
 		process(client);	// Process request
 		client.stop();		// Close connection and free resources.
+	}
+}
+
+// Reset each Pacer's PIN access number - edit DB rows in SQLite - keep any existing workouts the same
+void updatePacerDB() {
+	// This section will need to initiate a SQLite database write
+	HttpClient c;
+	String initalPhpCall = "http://192.168.1.153/sd/TrackPractice/updatePacers.php?";
+	for (int i=0; i <= pacer[0].getNumberPacers(); i++) {
+		if (pacer[i].getSecondsPerLap() > 0) {
+			initalPhpCall.concat("pacer=");
+			initalPhpCall.concat(i);
+			initalPhpCall.concat("&secondsPerLap=");
+			initalPhpCall.concat(pacer[i].getSecondsPerLap());
+		}
+	}
+	c.get(initalPhpCall);
+	// p.begin(initalPhpCall); // p.addParameter(); 
+	// p.run();
+	
+	delay(5000);
+
+	while (c.available()) {
+		String command = c.readStringUntil('/');
 	}
 }
 

@@ -387,7 +387,7 @@ void loop() {
 void updatePacerDB() {
 	// This section will need to initiate a SQLite database write
 	HttpClient c;
-	String initalPhpCall = "http://192.168.1.153/sd/TrackPractice/updatePacers.php?";
+	String initalPhpCall = "http://172.20.10.7/sd/TrackPractice/updatePacers.php?";
 	for (int i=0; i <= pacer[0].getNumberPacers(); i++) {
 		if (pacer[i].getSecondsPerLap() > 0) {
 			initalPhpCall.concat("pacer=");

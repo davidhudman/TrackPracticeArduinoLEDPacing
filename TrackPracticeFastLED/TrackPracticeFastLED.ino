@@ -362,13 +362,11 @@ void setup() {
 
 	FileSystem.begin();
 
-	updatePacerDB();	// Reset each Pacer's PIN access number - edit DB rows in SQLite - keep any existing workouts the same
-	
 	// Listen for incoming connection only from localhost
 	// (no one from the external network could connect)
 	server.listenOnLocalhost();
 	server.begin();
-
+	
 	writeToOutputFile();
 }
 
@@ -383,8 +381,36 @@ void loop() {
 	}
 }
 
+// Retrieves Pacer Data that was already in the database and adds it to the INO program with PHP GET requests
+void updateYunFromDB() {
+	// This section will need to initiate a SQLite database write
+	HttpClient c;
+	String initalPhpCall = "http://172.20.10.7/sd/TrackPractice/updatePacers.php?needYunSyncWithDB=1";
+	c.get(initalPhpCall);
+
+	delay(5000);
+
+	while (c.available()) {
+		String command = c.readStringUntil('/');
+	}
+	/* YunClient tempClient = server.accept();		// Get clients coming from server
+
+	delay(5000);
+
+	// There is a new client?
+	while (tempClient) {
+		process(tempClient);	// Process request
+		tempClient.stop();		// Close connection and free resources.
+		delay(5000);
+	} */
+	// p.begin(initalPhpCall); // p.addParameter(); 
+	// p.run();
+	
+	// delay(5000);
+}
+
 // Reset each Pacer's PIN access number - edit DB rows in SQLite - keep any existing workouts the same
-void updatePacerDB() {
+/*void updatePacerDB() {
 	// This section will need to initiate a SQLite database write
 	HttpClient c;
 	String initalPhpCall = "http://172.20.10.7/sd/TrackPractice/updatePacers.php?";
@@ -394,6 +420,7 @@ void updatePacerDB() {
 			initalPhpCall.concat(i);
 			initalPhpCall.concat("&secondsPerLap=");
 			initalPhpCall.concat(pacer[i].getSecondsPerLap());
+			initalPhpCall.concat("&needNewPacer=1");
 		}
 	}
 	c.get(initalPhpCall);
@@ -405,7 +432,7 @@ void updatePacerDB() {
 	while (c.available()) {
 		String command = c.readStringUntil('/');
 	}
-}
+}*/
 
 // Use an integer parameter to determine what RGB color value it is associated with
 CRGB getColorFromInt(int i) {
@@ -653,6 +680,9 @@ void process(YunClient client) {
 				colorArray[6] = CRGB::Blue;
 				colorArray[7] = CRGB::Cyan;
 			}
+			break;
+		case 12:
+			updateYunFromDB();
 			break;
 		default:
 			break;

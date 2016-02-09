@@ -12,7 +12,7 @@
         <link rel="stylesheet" href="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.css">
 		<script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
 		<script>
-            // Numpad global variable stuff
+		    // Numpad global variable stuff
 		    $.fn.numpad.defaults.gridTpl = '<table class="ui-bar-a"></table>';
 		    $.fn.numpad.defaults.backgroundTpl = '<div class="ui-popup-screen ui-overlay-a"></div>';
 		    $.fn.numpad.defaults.displayTpl = '<input data-theme="b" type="text" />';
@@ -24,6 +24,7 @@
 		    var pacerButton = [];
 		    var advancedButtonPressed = false;
 		    var onMassesViewSequence = true;
+		    var onExistingPacerSequence = false;
 		    var masterPacerSelected = 99;
 		    var lapTimeInputConstraints = [1, 900];
 		    var pinVar = 111;
@@ -52,7 +53,7 @@
 		        morestatus();
 		    }
 
-		    // request a designated pacer
+		    // PLEASE REMOVE THIS: NO LONGER IN USE - request a designated pacer
 		    function requestPacer() {
 		        var xhttp = new XMLHttpRequest();
 		        var feedbackText;   // holds text from Arduino - this will be your pacer index
@@ -123,22 +124,36 @@
 		        }
 		        testCommand();
 		    }
-            
-            // send an extra command in case Arduino is lagging because it is still waiting for something
+
+		    // send an extra command in case Arduino is lagging because it is still waiting for something
 		    function testCommand() {
 		        requestCommand(-1, 0, 0);
 		    }
 
-            // sends GET request for the commands that the Yun will accept
+		    // sends GET request for the commands that the Yun will accept; parameters: x - command, y - pacerIndex, z - value
 		    function requestCommand(x, y, z) {
-		        var xhr = new XMLHttpRequest();
-		        xhr.open("GET", "/arduino/" + x + "/" + y + "/" + z, false);
-		        xhr.send();
-		        $("#demo").text("/arduino/" + x + "/" + y + "/" + z);
-		        setTimeout(readFeedbackFile, 4000);
+		        if (masterPacerSelected == 99) {		// If you're in "Coach Mode" where you can control all pacers at once, as well as update the database just like below.
+		            y = masterPacerSelected;
+		            /*
+					// old Arduino command request
+					var xhr = new XMLHttpRequest();
+					xhr.open("GET", "/arduino/" + x + "/" + y + "/" + z, false);
+					xhr.send();
+					$("#demo").text("/arduino/" + x + "/" + y + "/" + z);
+					setTimeout(readFeedbackFile, 4000);*/
+		        }
+		        var request = new XMLHttpRequest();
+		        request.onreadystatechange = function () {
+		            if (request.readyState == 4 && request.status == 200) {
+		                // if (request.responseText != "incorrect") {
+		            }
+		        };
+
+		        request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
+		        request.send();
 		    }
 
-		    // handle new pacer times
+		    // PLEASE REMOVE THIS - NO LONGER IN USE: handle new pacer times
 		    function newPacerTime(val) {
 		        var newPacerTimeNum = 0;
 		        var pacerIndexforTimeSet = masterPacerSelected;
@@ -172,6 +187,18 @@
 		            }
 
 		            requestCommand(commandURL, pacerIndex, newNum);
+		        });
+
+		        $("#resetYunFromDbButton").click(function () {
+		            var request = new XMLHttpRequest();
+		            request.onreadystatechange = function () {
+		                if (request.readyState == 4 && request.status == 200) {
+		                    // if (request.responseText != "incorrect") {
+		                }
+		            };
+
+		            request.open("GET", "updatePacers.php?needYunSyncWithDB=1", true);
+		            request.send();
 		        });
 
 		        // Handles the submission of the normal view lap time
@@ -265,7 +292,7 @@
 		            alert(text);
 		        });
 
-                // hide everything when the allPacersButton is clicked except the group of pacerButtons and its escape button
+		        // hide everything when the allPacersButton is clicked except the group of pacerButtons and its escape button
 		        $("#allPacersButton").click(function () {
 		            showPacerButtonsView();
 		        });
@@ -286,7 +313,7 @@
 		            }
 		        });
 
-                // Takes you back to the normal view or the previous page if you're on the first time user sequence
+		        // Takes you back to the normal view or the previous page if you're on the first time user sequence
 		        $("#viewEscapeButton").click(function () {
 		            if (onMassesViewSequence == true) {
 		                backOneView();
@@ -301,40 +328,71 @@
 		            forwardOneView();
 		        });
 
-                // Takes you to a modified version of the showPacerButtonsView (or it will soon)
+		        // Takes you to a modified version of the showPacerButtonsView (or it will soon)
 		        $("#existingPacerButton").click(function () {
-		            showPacerButtonsView();
+		            // showPacerButtonsView();
+		            onExistingPacerSequence = true;
+		            chooseExistingPacerView();
+
 		        });
 
-		        // Takes you a view where the user can edit their new pacer
-		        $("#createPinSubmit").click(function pinCreated () {
-		            if (isPinFormatValid() == true) {
-		                pinVar = $("#pinInputField").val();
+		        function chooseExistingPacerView() {
+		            hideEverything();
+		            $("#existingPacerSelectHeader").show();
+		            $("#pacerButtonView").show();
+		            $("#allPacersButton").hide();
+		        }
 
-		                var xhttp = new XMLHttpRequest();
-		                xhttp.onreadystatechange = function () {
-		                    if (xhttp.readyState == 4 && xhttp.status == 200) {
-		                        if (xhttp.responseText != "incorrect") {
-		                            forwardOneView();
-		                            requestPacer();
-		                            pinSubmitText = xhttp.responseText
-		                            alert(pinSubmitText);
-		                            masterPacerSelected = pinSubmitText;
+		        // Takes you a view where the user can edit their new pacer
+		        $("#createPinSubmit").click(function pinCreated() {
+		            if (isPinFormatValid() == true) {
+		                if (onExistingPacerSequence == true) {
+
+		                    pinVar = $("#pinInputField").val();
+		                    var xhttp = new XMLHttpRequest();
+		                    xhttp.onreadystatechange = function () {
+		                        if (xhttp.readyState == 4 && xhttp.status == 200) {
+		                            if (xhttp.responseText != "incorrect") {
+		                                pinSubmitText = xhttp.responseText;
+		                                masterPacerSelected = pinSubmitText;
+		                                alert(masterPacerSelected);
+		                                showPacerTimeInputView();
+		                                // requestPacer();
+		                            }
+		                            else {
+		                                alert(xhttp.responseText);  // incorrect PIN
+		                            }
 		                        }
-		                        else {
-		                            alert(xhttp.responseText);  // incorrect PIN
+		                    };
+		                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected, true);
+		                    xhttp.send();
+		                }
+		                else { 	// if the person is just creating a brand new pacer
+		                    pinVar = $("#pinInputField").val();
+		                    var xhttp = new XMLHttpRequest();
+		                    xhttp.onreadystatechange = function () {
+		                        if (xhttp.readyState == 4 && xhttp.status == 200) {
+		                            if (xhttp.responseText != "incorrect") {
+		                                masterPacerSelected = xhttp.responseText;
+		                                alert(masterPacerSelected);
+		                                showPacerTimeInputView();
+		                            }
+		                            else {
+		                                alert(xhttp.responseText);  // incorrect PIN
+		                            }
 		                        }
-		                    }
-		                };
-		                xhttp.open("GET", "verifyPIN.php?q=" + pinVar, true);
-		                xhttp.send();
+		                    };
+		                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
+		                    xhttp.send();
+		                    // forwardOneView();
+		                }
 		            }
 		            else {
 		                alert("Please enter 3 digits");
 		            }
 		        });
 
-                // Updates the paragraph with new feedback
+		        // Updates the paragraph with new feedback
 		        $("#newFeedBack").click(function () {
 		            readFeedbackFile();
 		        });
@@ -349,17 +407,23 @@
 		            showColorButtonsView();
 		        });
 
-		        // Goes back to normal view after a pacerButton is clicked
+		        // Determines view after a pacerButton is clicked
 		        $(".pacerButtonClass").click(function () {
-		            if (onMassesViewSequence == true) {
+		            if (onExistingPacerSequence == true) {
+		                masterPacerSelected = $(this).attr("otherNum");
 		                showCreatePinView();
 		            }
 		            else {
-		                showNormalView();
-		                masterPacerSelected = $(this).attr("otherNum");
-		                $("#pacerSelect").text($(this).text());
-		                $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color")).css('color', $(this).css("color"));
-		                morestatus();
+		                if (onMassesViewSequence == true) {
+		                    showCreatePinView();
+		                }
+		                else {
+		                    showNormalView();
+		                    masterPacerSelected = $(this).attr("otherNum");
+		                    $("#pacerSelect").text($(this).text());
+		                    $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color")).css('color', $(this).css("color"));
+		                    morestatus();
+		                }
 		            }
 		        });
 
@@ -432,7 +496,7 @@
 		        requestCommand(9, masterPacerSelected, 0);
 		    }
 
-            // Parse the datalog.txt file - not working yet
+		    // Parse the datalog.txt file - not working yet
 		    function parseFeedbackFile(txtFeedback) {
 		        var lights;
 		        var pacerIndex = masterPacerSelected;
@@ -443,7 +507,7 @@
 		            j = i - 1;
 		            if (i != 0) {
 		                myset = fullset[i].split(",");  // split up the feedback
-                        // make your newPacer array instance out of what you just split up
+		                // make your newPacer array instance out of what you just split up
 		                newPacer[j] = {
 		                    index: myset[0], lapTime: myset[1],
 		                    color: colorArray[myset[2] % colorArray.length],
@@ -482,7 +546,7 @@
 		        document.getElementById("newFeedBack2").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;*/
 		    }
 
-		    // Create Pacer Buttons - not working yet
+		    // PLEASE REMOVE THIS - NO LONGER IN USE: Create Pacer Buttons - not working yet
 		    function createPacerButtonStuff() {
 		        var pacerButtonText;
 		        var pacerButtonId;
@@ -495,7 +559,7 @@
 		        }
 		    }
 
-            // Define a help attribute for all buttons and dropdowns that can be used when the user requests help
+		    // Define a help attribute for all buttons and dropdowns that can be used when the user requests help
 		    function assignHelpTextToButtons() {
 		        $("#pacerSelect").attr('help', '**Pacer Selector**\n\nUse this dropdown to select the pacer that you want to use or select "all pacers" to deal with them all at the same time.');
 		        $("#clearButton").attr('help', '**Clear Button**\n\nStop the selected pacer(s) from running.');
@@ -530,7 +594,7 @@
 		        }
 		    }
 
-            // create pacer buttons and add them to the page - not working yet
+		    // create pacer buttons and add them to the page - not working yet
 		    function createPacerButtons() {
 		        for (var i = 0; i < numPacers; i++) {
 		            // elementString = "<a href='#' id='pacerButton" + i + "' class='pacerButtonClass' otherNum='" + i + "' data-role='button' data-icon='star'></a>";
@@ -659,7 +723,7 @@
 		        }
 		    }
 
-            // show Color Buttons View "page"
+		    // show Color Buttons View "page"
 		    function showColorButtonsView() {
 		        hideEverything();
 		        $("#colorButtonView").show();
@@ -675,7 +739,7 @@
 		        $('#pacerOccupiedDiv').show();
 		    }
 
-            // The view that we want for the end-user when the app loads
+		    // The view that we want for the end-user when the app loads
 		    function showNormalView() {
 		        showEverything();
 		        hideAdvancedElements();
@@ -697,7 +761,7 @@
 		        $(".contentElement").hide();
 		    }
 
-            // show everything - all contentElement class
+		    // show everything - all contentElement class
 		    function showEverything() {
 		        $(".contentElement").show();
 		    }
@@ -795,11 +859,19 @@
 					    <input class="lightChange" data-mini="true" type="number" name="name" id="lightsNumberInput" oldurl="lights" url="6" value="2" min="0.1" max="100.0" step="0.1" />
 				    </div>
                 </div>
+
+                <div id="resetYunFromDb" class="contentElement advancedElement" >
+                    <a id="resetYunFromDbButton" class="btn" url="-1" otherNum="1" data-role="button">Reset Yun DB</a>
+				</div>
 				
                 <div id="advancedButtonDiv" data-role="fieldcontain" class="contentElement">
 					<input id="advancedButton" type="button" data-icon="gear" data-iconpos="notext" url="clear" data-theme="a" />
 				</div>	
-
+				
+				<div id="existingPacerSelectHeader" class="contentElement advancedElement" >
+					<h3>Select your pacer</h3>
+				</div>
+				
                 <div id="pacerButtonView" class="contentElement advancedElement" >
                     <a id="allPacersButton" class="pacerButtonClass" otherNum="99" data-role="button" style="background-color:#E6E6E6" data-icon="star">Select Pacers: All Pacers</a>
                     <a href="#" id="pacerButton0" class="btn pacerButtonClass" otherNum="0" data-role="button" data-icon="star"></a>
@@ -855,7 +927,7 @@
                 </div>
 
                 <div id="pacerTimeInputSimpleDiv" class="contentElement advancedElement">
-				    <label for="select-choice-a" class="select">Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></label>
+				    <label for="select-choice-a" class="select">Enter Lap Time in Seconds: <a href="#" id="A1">Help?</a></label>
 				    <input type="number" pattern="[0-9]*" name="name" id="pacerTimeInputSimple" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
                     <a id="pacerTimeSubmitSimple" class="btn" url="7" otherNum="1" data-role="button" style="background-color:#00ff21">Go!</a>
 				</div>

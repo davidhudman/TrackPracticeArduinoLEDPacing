@@ -54,27 +54,57 @@ $db->close();
 echo "select executed";
 */
 
-/* Functional code providing some limited validation. */
+/* Functional code providing some limited validation */
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 
-$pIndex = "-1";
-$q = -1;
+$pIndex = "-1";					// the pacerIndex from the request that needs to be verified PIN
+$pin = "-1";							// the PIN from the request that needs to be verified with the pIndex
+$DbPin = "-1";						// the correct PIN
+$needNewPacer = "-1";		// the flag that indicates whether a new pacer is needed
 
-if (empty($_REQUEST["q"])) {
-// do nothing
+// Pull all your values out of the GET request
+if (empty($_REQUEST["pin"])) {
+	// do nothing
 }
 else {
-$q = $_REQUEST["q"];
+	// do nothing - for some reason it may get recognized as "empty" even though there are clearly parameters
+	$pin = $_REQUEST["pin"];
+	$pIndex = $_REQUEST["pacerIndex"];
+	$needNewPacer = $_REQUEST["needNewPacer"];
 }
 
-$results = $db->query('Select * from Pin WHERE passcode=' . $q);
-while ($row = $results->fetchArray()) {
-// echo var_dump($row);
-$pIndex = $row['pacerIndex'];
+// If the flag for requesting a new Pacer is true - MAY BE UNNECESSARY AS WELL AS ITS VARIABLE ABOVE
+if ($needNewPacer != "1") {
+	$results = $db->query('Select * from Pin WHERE passcode=' . $pin . ' AND pacerIndex=' . $pIndex);
+	while ($row = $results->fetchArray()) {
+	// echo var_dump($row);
+	$DbPin = $row['passcode'];
+	}
+	$db->exec($query);
+	$db->close();
+	
+	if ($DbPin == $pin && $DbPin != "-1") {
+		echo $pIndex;
+		// echo "\nStatement Excuted Successfully";
+	}
+	else {
+		echo "incorrect";
+	}
 }
-$db->exec($query);
-$db->close();
-echo $pIndex != "-1" ? $pIndex : "incorrect";
-// echo "\nStatement Excuted Successfully";
+else {		// the user is requesting a new pacer
+	$results = $db->query('SELECT * FROM Pin WHERE active = 0 ORDER BY pacerIndex ASC LIMIT 1');
+
+	while ($row = $results->fetchArray()) {
+			$pacerIndex = $row['pacerIndex'];
+			echo $pacerIndex;
+	}
+
+	$db->exec($query);
+
+	$results = $db->query('UPDATE Pin SET active = 1, passcode=' . $pin . ' WHERE pacerIndex=' . $pacerIndex);
+
+	$db->exec($query);
+	$db->close();
+}
 
 ?>

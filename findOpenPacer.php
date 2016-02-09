@@ -1,7 +1,7 @@
 <?php
 // findOpenPacer.php
 
-/* Functional code providing some limited validation */
+/* Functional code providing some limited validation. */
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 
 // select * from pin where active = 0 order by pacerindex asc;

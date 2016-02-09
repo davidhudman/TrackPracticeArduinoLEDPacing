@@ -19,6 +19,7 @@
     <None Include="..\verifyPIN.php" />
     <None Include="..\index.html" />
     <None Include="..\updatePacers.php" />
+    <None Include="..\findOpenPacer.php" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FastLED.cpp">

@@ -54,7 +54,7 @@ $db->close();
 echo "select executed";
 */
 
-/* Functional code providing some limited validation */
+/* Functional code providing some limited validation. */
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 
 $pIndex = "-1";

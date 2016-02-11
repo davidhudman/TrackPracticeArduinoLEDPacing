@@ -23,14 +23,15 @@
 		    var numPacers = 10;
 		    var pacerButton = [];
 		    var advancedButtonPressed = false;
-		    var onMassesViewSequence = true;
+		    var onCreateNewPacerViewSequence = false;
 		    var onExistingPacerSequence = false;
 		    var masterPacerSelected = 99;
 		    var lapTimeInputConstraints = [1, 900];
 		    var pinVar = 111;
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
-		    massesViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
-		    massesCurrentView = massesViewSequence[0];
+		    createNewPacerViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
+		    existingPacerViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
+		    massesCurrentView = createNewPacerViewSequence[0];
 		    window.onload = Pinstatus;
 
 		    (function ($, window) {
@@ -234,10 +235,10 @@
 
 		        // handles longpress for of description button to make it into a reset delay button and vice versa
 		        $("#tpHeader").on("taphold", function (event) {
-		            if (onMassesViewSequence == true) {
+		            if (onCreateNewPacerViewSequence == true) {
 		                showNormalView();
 		                advancedButtonPressed = false;
-		                onMassesViewSequence = false;
+		                onCreateNewPacerViewSequence = false;
 		            }
 		            else {
 		                var rstBtnUrl = $("#resetButton").attr("url");
@@ -271,7 +272,7 @@
 
 		        // reveals the secret demo field whenever you click the advancedButton
 		        $("#advancedButton").click(function () {
-		            if (onMassesViewSequence == true) {
+		            if (onCreateNewPacerViewSequence == true) {
 		                // put something here if you want the advanced button to do something special when the first time user clicks it
 		            }
 		            else {
@@ -304,7 +305,7 @@
 
 		        // Takes you back to the normal view
 		        $("#demo, #tpHeader").click(function () {
-		            if (onMassesViewSequence == true) {
+		            if (onCreateNewPacerViewSequence == true) {
 		                // do nothing
 		            }
 		            else {
@@ -315,7 +316,7 @@
 
 		        // Takes you back to the normal view or the previous page if you're on the first time user sequence
 		        $("#viewEscapeButton").click(function () {
-		            if (onMassesViewSequence == true) {
+		            if (onCreateNewPacerViewSequence == true) {
 		                backOneView();
 		            }
 		            else {
@@ -326,11 +327,14 @@
 		        // Takes you to the create PIN view
 		        $("#newPacerButton").click(function () {
 		            forwardOneView();
+		            onCreateNewPacerViewSequence = true;
+		            onExistingPacerSequence = false;
 		        });
 
 		        // Takes you to a modified version of the showPacerButtonsView (or it will soon)
 		        $("#existingPacerButton").click(function () {
 		            // showPacerButtonsView();
+		            onCreateNewPacerViewSequence = false;
 		            onExistingPacerSequence = true;
 		            chooseExistingPacerView();
 
@@ -356,7 +360,8 @@
 		                                pinSubmitText = xhttp.responseText;
 		                                masterPacerSelected = pinSubmitText;
 		                                alert(masterPacerSelected);
-		                                showPacerTimeInputView();
+		                                forwardOneView();
+		                                //showPacerTimeInputView();
 		                                // requestPacer();
 		                            }
 		                            else {
@@ -375,7 +380,8 @@
 		                            if (xhttp.responseText != "incorrect") {
 		                                masterPacerSelected = xhttp.responseText;
 		                                alert(masterPacerSelected);
-		                                showPacerTimeInputView();
+		                                forwardOneView();
+		                                // showPacerTimeInputView();
 		                            }
 		                            else {
 		                                alert(xhttp.responseText);  // incorrect PIN
@@ -414,7 +420,7 @@
 		                showCreatePinView();
 		            }
 		            else {
-		                if (onMassesViewSequence == true) {
+		                if (onCreateNewPacerViewSequence == true) {
 		                    showCreatePinView();
 		                }
 		                else {
@@ -605,24 +611,62 @@
 
 		    // Go back one view in the first time user sequence
 		    function backOneView() {
-		        if (onMassesViewSequence == true) {
+		        if (onCreateNewPacerViewSequence == true) {
 		            var i = 0;
-		            while (i < massesViewSequence.length) {
-		                if (massesCurrentView == massesViewSequence[i]) {
+		            while (i < createNewPacerViewSequence.length) {
+		                if (massesCurrentView == createNewPacerViewSequence[i]) {
 		                    if (i == 0)
 		                        break;
 		                    if (i != 0) {
-		                        massesCurrentView = massesViewSequence[i - 1];
+		                        massesCurrentView = createNewPacerViewSequence[i - 1];
 		                        break;
 		                    }
 		                }
 		                i++;
-		                if (i == massesViewSequence.length) {
+		                if (i == createNewPacerViewSequence.length) {
 		                    i = 0;
 		                }
 		            }
 
-		            if (onMassesViewSequence == true && i != 0) {
+		            if (onCreateNewPacerViewSequence == true && i != 0) {
+		                switch (i) {
+		                    case 1:
+		                        showFirstTimeUserStartView();
+		                        break;
+		                    case 2:
+		                        showCreatePinView();
+		                        break;
+		                    case 3:
+		                        showColorButtonsView();
+		                        break;
+		                    case 4:
+		                        showPacerTimeInputView();
+		                        break;
+		                    default:
+		                        showFirstTimeUserStartView();
+		                        break;
+		                }
+		            }
+		        }
+		        // existingPacerViewSequence
+		        if (onExistingPacerSequence == true) {
+		            var i = 0;
+		            while (i < existingPacerViewSequence.length) {
+		                if (massesCurrentView == existingPacerViewSequence[i]) {
+		                    if (i == 0)
+		                        break;
+		                    if (i != 0) {
+		                        massesCurrentView = existingPacerViewSequence[i - 1];
+		                        break;
+		                    }
+		                }
+		                i++;
+		                if (i == existingPacerViewSequence.length) {
+		                    i = 0;
+		                }
+		            }
+
+		            if (onExistingPacerSequence == true && i != 0) {
 		                switch (i) {
 		                    case 1:
 		                        showFirstTimeUserStartView();
@@ -646,20 +690,53 @@
 
 		    // Go forward one view in the first time user sequence
 		    function forwardOneView() {
-		        if (onMassesViewSequence == true) {
+		        if (onCreateNewPacerViewSequence == true) {
 		            var i = 0;
-		            while (i < massesViewSequence.length - 1) {
-		                if (massesCurrentView == massesViewSequence[i]) {
-		                    massesCurrentView = massesViewSequence[i + 1];
+		            while (i < createNewPacerViewSequence.length - 1) {
+		                if (massesCurrentView == createNewPacerViewSequence[i]) {
+		                    massesCurrentView = createNewPacerViewSequence[i + 1];
 		                    break;
 		                }
 		                i++;
-		                //if (i == massesViewSequence.length - 1) {
-		                //    i = massesViewSequence.length - 1;
+		                //if (i == createNewPacerViewSequence.length - 1) {
+		                //    i = createNewPacerViewSequence.length - 1;
 		                //}
 		            }
 
-		            if (onMassesViewSequence == true && i != massesViewSequence.length - 1) {
+		            if (onCreateNewPacerViewSequence == true && i != createNewPacerViewSequence.length - 1) {
+		                switch (i) {
+		                    case 0:
+		                        showCreatePinView();
+		                        break;
+		                    case 1:
+		                        showColorButtonsView();
+		                        break;
+		                    case 2:
+		                        showPacerTimeInputView();
+		                        break;
+		                    case 3:
+		                        showSimplePacerControlView();
+		                        break;
+		                    default:
+		                        break;
+		                }
+		            }
+		        }
+		        // existingPacerViewSequence
+		        if (onExistingPacerSequence == true) {
+		            var i = 0;
+		            while (i < existingPacerViewSequence.length - 1) {
+		                if (massesCurrentView == existingPacerViewSequence[i]) {
+		                    massesCurrentView = existingPacerViewSequence[i + 1];
+		                    break;
+		                }
+		                i++;
+		                //if (i == createNewPacerViewSequence.length - 1) {
+		                //    i = createNewPacerViewSequence.length - 1;
+		                //}
+		            }
+
+		            if (onExistingPacerSequence == true && i != existingPacerViewSequence.length - 1) {
 		                switch (i) {
 		                    case 0:
 		                        showCreatePinView();
@@ -686,7 +763,7 @@
 		        $("#viewEscape").show();
 		        $("#simpleViewActionButtonsDiv, #advancedButtonDiv").show();
 		        // $("#clearButton, #resetButton, #colorSelect, #helpButton").show();
-		        massesCurrentView = massesViewSequence[4];
+		        massesCurrentView = createNewPacerViewSequence[4];
 		    }
 
 		    // show pacer time input View
@@ -694,7 +771,7 @@
 		        hideEverything();
 		        $("#viewEscape").show();
 		        $("#pacerTimeInputDiv").show();
-		        massesCurrentView = massesViewSequence[3];
+		        massesCurrentView = createNewPacerViewSequence[3];
 		    }
 
 		    // show create PIN view
@@ -702,15 +779,15 @@
 		        hideEverything();
 		        $("#viewEscape").show();
 		        $("#createPinView").show();
-		        massesCurrentView = massesViewSequence[1];
+		        massesCurrentView = createNewPacerViewSequence[1];
 		    }
 
 		    // show First Time User Start View "page"
 		    function showFirstTimeUserStartView() {
 		        hideEverything();
 		        $("#firstTimeUserStartDiv").show();
-		        onMassesViewSequence = true;
-		        massesCurrentView = massesViewSequence[0];
+		        onCreateNewPacerViewSequence = true;
+		        massesCurrentView = createNewPacerViewSequence[0];
 		    }
 
 		    // show Pacer Buttons View "page"
@@ -718,8 +795,8 @@
 		        hideEverything();
 		        $("#pacerButtonView").show();
 		        $("#viewEscape").show();
-		        if (onMassesViewSequence == true) {
-		            massesCurrentView = massesViewSequence[5];
+		        if (onCreateNewPacerViewSequence == true) {
+		            massesCurrentView = createNewPacerViewSequence[5];
 		        }
 		    }
 
@@ -728,8 +805,8 @@
 		        hideEverything();
 		        $("#colorButtonView").show();
 		        $("#viewEscape").show();
-		        if (onMassesViewSequence == true) {
-		            massesCurrentView = massesViewSequence[2];
+		        if (onCreateNewPacerViewSequence == true) {
+		            massesCurrentView = createNewPacerViewSequence[2];
 		        }
 		    }
 
@@ -743,7 +820,7 @@
 		    function showNormalView() {
 		        showEverything();
 		        hideAdvancedElements();
-		        onMassesViewSequence = false;
+		        onCreateNewPacerViewSequence = false;
 		    }
 
 		    // show all the advanced elements and hide the advanced button

@@ -46,6 +46,7 @@ if ($rqNeedYunSyncWithDB == 1) {
 			echo "Command made it through to Arduino. pacerIndex = " . $dbPacerIndex . " dbSecondsPerLap=" . $dbSecondsPerLap;
 			// sleep(5);	// sleep x seconds
 	}
+	file_get_contents($ipAddress . "/arduino/2/99/0");
 	$db->exec($query);
 	$db->close();
 }

@@ -36,24 +36,24 @@ else {
 
 // If the flag for retrieving the pacer names, colors, and times from the database is true
 if ($updatePacerButtonsNeeded == 1) {
-	$results = $db->query('SELECT * FROM Pin WHERE active = 1');
-	stringHolder = " ";
+	$results = $db->query('SELECT * FROM Pin' );
+	$stringHolder = "";
 
 	while ($row = $results->fetchArray()) {
-			stringHolder += $row['pacerIndex'];
-			stringHolder += ",";
-			stringHolder += $row['lapTime'];
-			stringHolder += ",";
-			stringHolder += $row['color'];
-			stringHolder += ",";
-			stringHolder += $row['name'];
-			stringHolder += "#";
+			$stringHolder = $stringHolder . $row['pacerIndex'];
+			$stringHolder = $stringHolder . ",";
+			$stringHolder = $stringHolder . $row['lapTime'];
+			$stringHolder = $stringHolder . ",";
+			$stringHolder = $stringHolder . $row['color'];
+			$stringHolder = $stringHolder . ",";
+			$stringHolder = $stringHolder . $row['name'];
+			$stringHolder = $stringHolder . "#";
 			// send requests to the Yun to update the Pacers with their data
 			// *** add this: if (dbPacerData != yunPacerData)
 			
 			// sleep(5);	// sleep x seconds
 	}
-	echo stringHolder;
+	echo $stringHolder;
 	$db->exec($query);
 	$db->close();
 }
@@ -100,6 +100,6 @@ if ($rqNeedNewPacer == 1) {
 $db->exec($query);
 $db->close();*/
 // echo $rqPacerIndex != -1 ? $rqPacerIndex : "incorrect";
-echo "\nStatement Excuted Successfully". " rqPacerIndex = " . $rqPacerIndex . " rqSecondsPerLap = " . $rqSscondsPerLap;
+// echo "\nStatement Excuted Successfully". " rqPacerIndex = " . $rqPacerIndex . " rqSecondsPerLap = " . $rqSscondsPerLap;
 
 ?>

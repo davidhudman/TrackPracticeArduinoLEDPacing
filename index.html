@@ -502,9 +502,9 @@
 		        requestCommand(9, masterPacerSelected, 0);
 		    }
 
-            // Refreshes the pacerButtons with what is currently in the database
+		    // Refreshes the pacerButtons with what is currently in the database
 		    function refreshPacerButtonData() {
-                // get lapTime, name, and color from PHP
+		        // get lapTime, name, and color from PHP
 		        var request = new XMLHttpRequest();
 		        request.onreadystatechange = function () {
 		            if (request.readyState == 4 && request.status == 200) {
@@ -521,21 +521,23 @@
 		                            color: colorArray[myset[2] % colorArray.length],
 		                            colorText: "background-color:" + colorArray[myset[2] % colorArray.length],
 		                            // text: "Pacer " + myset[0] + " - " + myset[1]
-                                    text: myset[3]
+		                            text: myset[3]
 		                        };
+		                    }
+		                };
+
+		                request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
+		                request.send();
+
+
+		                $("#pacerButton" + j).text(newPacer[j].text + " sec lap").attr('style', newPacer[j].colorText);
+		                if (myset[2] % colorArray.length == "2" || myset[2] % colorArray.length == "6" || myset[2] % colorArray.length == "7") {
+		                    $("#pacerButton" + j).css('color', 'white');
+		                }
+		                if (myset[1] == "0.0") {
+		                    $("#pacerButton" + j).text(newPacer[j].text + " - " + newPacer[j].color).attr('style', "background-color:black").css('color', 'white');
+		                }
 		            }
-		        };
-
-		        request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
-		        request.send();
-
-
-		        $("#pacerButton" + j).text(newPacer[j].text + " sec lap").attr('style', newPacer[j].colorText);
-		        if (myset[2] % colorArray.length == "2" || myset[2] % colorArray.length == "6" || myset[2] % colorArray.length == "7") {
-		            $("#pacerButton" + j).css('color', 'white');
-		        }
-		        if (myset[1] == "0.0") {
-		            $("#pacerButton" + j).text(newPacer[j].text + " - " + newPacer[j].color).attr('style', "background-color:black").css('color', 'white');
 		        }
 		    }
 

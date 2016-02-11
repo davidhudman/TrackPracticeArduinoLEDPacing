@@ -502,6 +502,43 @@
 		        requestCommand(9, masterPacerSelected, 0);
 		    }
 
+            // Refreshes the pacerButtons with what is currently in the database
+		    function refreshPacerButtonData() {
+                // get lapTime, name, and color from PHP
+		        var request = new XMLHttpRequest();
+		        request.onreadystatechange = function () {
+		            if (request.readyState == 4 && request.status == 200) {
+		                // if (request.responseText != "incorrect") {
+		                txtFeedback = request.responseText;
+		                fullset = txtFeedback.split("#");
+		                for (i = 0; i < fullset.length; i++) {
+		                    j = i; // j = i - 1;
+		                    if (i != 0) {
+		                        myset = fullset[i].split(",");  // split up the feedback
+		                        // make your newPacer array instance out of what you just split up
+		                        newPacer[j] = {
+		                            index: myset[0], lapTime: myset[1],
+		                            color: colorArray[myset[2] % colorArray.length],
+		                            colorText: "background-color:" + colorArray[myset[2] % colorArray.length],
+		                            // text: "Pacer " + myset[0] + " - " + myset[1]
+                                    text: myset[3]
+		                        };
+		            }
+		        };
+
+		        request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
+		        request.send();
+
+
+		        $("#pacerButton" + j).text(newPacer[j].text + " sec lap").attr('style', newPacer[j].colorText);
+		        if (myset[2] % colorArray.length == "2" || myset[2] % colorArray.length == "6" || myset[2] % colorArray.length == "7") {
+		            $("#pacerButton" + j).css('color', 'white');
+		        }
+		        if (myset[1] == "0.0") {
+		            $("#pacerButton" + j).text(newPacer[j].text + " - " + newPacer[j].color).attr('style', "background-color:black").css('color', 'white');
+		        }
+		    }
+
 		    // Parse the datalog.txt file - not working yet
 		    function parseFeedbackFile(txtFeedback) {
 		        var lights;
@@ -793,6 +830,7 @@
 		    // show Pacer Buttons View "page"
 		    function showPacerButtonsView() {
 		        hideEverything();
+		        // refreshPacerButtonData();
 		        $("#pacerButtonView").show();
 		        $("#viewEscape").show();
 		        if (onCreateNewPacerViewSequence == true) {

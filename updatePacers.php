@@ -12,6 +12,7 @@ $rqPacerIndex = "-1";						// holds the rqPacerIndex value from the request
 $rqSscondsPerLap = 0;					// holds the rqSscondsPerLap value from the request
 $rqNeedNewPacer = -1;					// holds the rqNeedNewPacer value from the request
 $rqNeedYunSyncWithDB = -1;		// holds the rqNeedYunSyncWithDB value from the request
+$updatePacerButtonsNeeded = -1;	// holds the updatePacerButtonsNeeded from the request
 
 //$rqPacerIndex = "0";
 //$rqSscondsPerLap = 2.0;
@@ -22,6 +23,7 @@ if (empty($_REQUEST["pacer"])) {
 	$rqSscondsPerLap = $_REQUEST["secondsPerLap"];
 	$rqNeedNewPacer = $_REQUEST["needNewPacer"];
 	$rqNeedYunSyncWithDB = $_REQUEST["needYunSyncWithDB"];
+	$updatePacerButtonsNeeded = $_REQUEST["updatePacerButtonsNeeded"];
 }
 else {
 	// do nothing - for some reason it may get recognized as "empty" even though there are clearly parameters
@@ -29,6 +31,31 @@ else {
 	$rqSscondsPerLap = $_REQUEST["secondsPerLap"];
 	$rqNeedNewPacer = $_REQUEST["needNewPacer"];
 	$rqNeedYunSyncWithDB = $_REQUEST["needYunSyncWithDB"];
+	$updatePacerButtonsNeeded = $_REQUEST["updatePacerButtonsNeeded"];
+}
+
+// If the flag for retrieving the pacer names, colors, and times from the database is true
+if ($updatePacerButtonsNeeded == 1) {
+	$results = $db->query('SELECT * FROM Pin WHERE active = 1');
+	stringHolder = " ";
+
+	while ($row = $results->fetchArray()) {
+			stringHolder += $row['pacerIndex'];
+			stringHolder += ",";
+			stringHolder += $row['lapTime'];
+			stringHolder += ",";
+			stringHolder += $row['color'];
+			stringHolder += ",";
+			stringHolder += $row['name'];
+			stringHolder += "#";
+			// send requests to the Yun to update the Pacers with their data
+			// *** add this: if (dbPacerData != yunPacerData)
+			
+			// sleep(5);	// sleep x seconds
+	}
+	echo stringHolder;
+	$db->exec($query);
+	$db->close();
 }
 
 // If the flag for syncing the Yun with what is already in the database is true

@@ -323,6 +323,8 @@ bool colorArrayCrappy = true;	// true means that the colorArray is associated wi
 //***********************************************
 // String serialStringInput, printThis, stringHolder;		// Holds the raw, unformatted serial input from user.
 String printThisString = " ";
+String phpCall;				// used to hold the IP address and directory of the PHP file that needs to be executed to sync with the database.
+String ipAddress = "172.20.10.7";	// holds the IP of the PHP file
 char feedbackSeparators[] = "#,#";
 
 //***********************************************
@@ -358,6 +360,7 @@ void setup() {
 
 	assignPacerColors();
 	assignGetTotalPacingPanels(totalPacingPanels);
+	setCorrectIpAndDirectory(ipAddress);
 	Bridge.begin();
 
 	FileSystem.begin();
@@ -381,12 +384,18 @@ void loop() {
 	}
 }
 
+// Sets the correct IP and directory of the PHP file that needs to be called
+void setCorrectIpAndDirectory(String ip_Address) {
+	phpCall = "http://";
+	phpCall.concat(ip_Address);
+	phpCall.concat("/sd/TrackPractice/updatePacers.php?needYunSyncWithDB=1");
+}
+
 // Retrieves Pacer Data that was already in the database and adds it to the INO program with PHP GET requests
 void updateYunFromDB() {
 	// This section will need to initiate a SQLite database write
 	HttpClient c;
-	String initalPhpCall = "http://172.20.10.7/sd/TrackPractice/updatePacers.php?needYunSyncWithDB=1";
-	c.get(initalPhpCall);
+	c.get(phpCall);
 
 	delay(5000);
 
@@ -403,7 +412,7 @@ void updateYunFromDB() {
 		tempClient.stop();		// Close connection and free resources.
 		delay(5000);
 	} */
-	// p.begin(initalPhpCall); // p.addParameter(); 
+	// p.begin(phpCall); // p.addParameter(); 
 	// p.run();
 	
 	// delay(5000);
@@ -413,18 +422,18 @@ void updateYunFromDB() {
 /*void updatePacerDB() {
 	// This section will need to initiate a SQLite database write
 	HttpClient c;
-	String initalPhpCall = "http://172.20.10.7/sd/TrackPractice/updatePacers.php?";
+	String phpCall = "http://172.20.10.7/sd/TrackPractice/updatePacers.php?";
 	for (int i=0; i <= pacer[0].getNumberPacers(); i++) {
 		if (pacer[i].getSecondsPerLap() > 0) {
-			initalPhpCall.concat("pacer=");
-			initalPhpCall.concat(i);
-			initalPhpCall.concat("&secondsPerLap=");
-			initalPhpCall.concat(pacer[i].getSecondsPerLap());
-			initalPhpCall.concat("&needNewPacer=1");
+			phpCall.concat("pacer=");
+			phpCall.concat(i);
+			phpCall.concat("&secondsPerLap=");
+			phpCall.concat(pacer[i].getSecondsPerLap());
+			phpCall.concat("&needNewPacer=1");
 		}
 	}
-	c.get(initalPhpCall);
-	// p.begin(initalPhpCall); // p.addParameter(); 
+	c.get(phpCall);
+	// p.begin(phpCall); // p.addParameter(); 
 	// p.run();
 	
 	delay(5000);

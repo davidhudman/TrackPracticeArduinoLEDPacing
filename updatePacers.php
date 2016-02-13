@@ -4,9 +4,9 @@
 
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 
-$ipAddress = "http://172.20.10.7";			// holds the ipAddress that needs to be used on the network that Yun is connected to
-// $ipAddress = "http://192.168.1.153";
-// $ipAddress = "http://192.168.240.1";
+$ipAddress = "http://172.20.10.7";			// holds the ipAddress that needs to be used on the network that Yun is connected to: IP address for Yun on my iPhone hotspot network
+// $ipAddress = "http://192.168.1.153";	// IP address for Yun on my home network
+// $ipAddress = "http://192.168.240.1";	// IP address for Yun on its own network
 
 $rqPacerIndex = "-1";						// holds the rqPacerIndex value from the request
 $rqSscondsPerLap = 0;					// holds the rqSscondsPerLap value from the request

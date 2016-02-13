@@ -48,6 +48,7 @@ $db->query('UPDATE Pin SET passcode="777", active=0, color=1, lapTime=0 WHERE pa
 $db->query('UPDATE Pin SET passcode="888", active=0, color=2, lapTime=0 WHERE pacerIndex=8');
 $db->query('UPDATE Pin SET passcode="999", active=0, color=3, lapTime=0 WHERE pacerIndex=9');
 
+echo "Executed successfully";
 
 $db->close();
 

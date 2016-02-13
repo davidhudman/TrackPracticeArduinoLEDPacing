@@ -338,7 +338,7 @@ int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIte
 	minimumLapTime = 0.5;	// user cannot change to a pace faster than 0.5 second lap
 
 bool isChangePacerSpeedNeeded = false, // trigger to determine whether we need to figure out which pacer is going to change its speed
-		writingMode = true,				// determines whether datalog.txt file should be written to
+		writingMode = false,				// determines whether datalog.txt file should be written to
 		partyMode = false;				// This mode (now partyMode) String (now bool) has two possible values: "track" and "party" (now true and false). Each value will result in different function calls
 
 //***********************************************
@@ -571,7 +571,7 @@ void process(YunClient client) {
 			}
 			break;
 		case 5:	// color
-			// if "all pacers" is selected
+			// if "all pacers" is selected - you are in "Coach Mode"
 			if (pacerIndex == 99) {
 				// if "normal colors" is selected
 				if ((int)thirdCommand == 99) {
@@ -587,7 +587,7 @@ void process(YunClient client) {
 			// if a specific pacer is selected
 			else {
 				if ((int)thirdCommand == 99){
-					assignPacerColors();
+					// keep the pre-existing color
 				}
 				else {
 					pacer[pacerIndex].setOriginalColorInt((int)thirdCommand);

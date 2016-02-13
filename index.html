@@ -90,8 +90,58 @@
 		                document.getElementById("newFeedBack").innerHTML = feedbackText;
 		            }
 		        };
-		        xhttp.open("GET", "datalog.txt", true);
+		        xhttp.open("GET", "selectPin.php", true);
 		        xhttp.send();
+		    }
+
+		    // Parse the datalog.txt file - not working yet
+		    function parseFeedbackFile(txtFeedback) {
+		        var lights;
+		        var pacerIndex = masterPacerSelected;
+		        var newPacer = [];
+
+		        fullset = txtFeedback.split("<br />");
+		        for (i = 0; i < fullset.length; i++) {
+		            j = i; // - 1;
+		            if (i < 100) { // (i != 0) {
+		                myset = fullset[i].split(" | ");  // split up the feedback
+		                // make your newPacer array instance out of what you just split up
+		                newPacer[j] = {
+		                    index: myset[0], lapTime: myset[4],
+		                    color: colorArray[myset[3] % colorArray.length],
+		                    colorText: "background-color:" + colorArray[myset[3] % colorArray.length],
+		                    text: "Pacer " + myset[0] + " - " + myset[4]
+		                };
+
+		                if (j == pacerIndex) {
+		                    $("#newFeedBack2").text("newPacer[i] text: " + newPacer[j].text);
+		                    document.getElementById("description").innerHTML = newPacer[j].lapTime + " | " + newPacer[j].color;
+		                    document.getElementById("feedbackData").innerHTML = "Lap Time: " + newPacer[j].lapTime + ", Color: " + newPacer[j].color;
+		                }
+
+		                $("#pacerButton" + j).text(newPacer[j].text + " secs per lap").attr('style', newPacer[j].colorText);
+		                if (myset[3] % colorArray.length == "2" || myset[3] % colorArray.length == "6" || myset[3] % colorArray.length == "7") {
+		                    $("#pacerButton" + j).css('color', 'white');
+		                }
+		                if (myset[4] == "0") { // .00") {
+		                    $("#pacerButton" + j).text(newPacer[j].text + " - " + newPacer[j].color).attr('style', "background-color:black").css('color', 'white');
+		                }
+		            }
+		            else {
+		                lights = fullset[0];
+		            }
+		        }
+
+		        if (pacerIndex == 99) {
+		            document.getElementById("description").innerHTML = "Lights: " + lights;
+		            document.getElementById("feedbackData").innerHTML = "Lights: " + lights;
+		        }
+
+		        /*newSet = fullset[pacerIndex].split(",");
+		        secondsPerLap = newSet[0];
+		        color = colorArray[newSet[1]];
+		        document.getElementById("description").innerHTML = secondsPerLap + " | " + color;
+		        document.getElementById("newFeedBack2").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;*/
 		    }
 
 		    // Makes a request to Arduino for feedback
@@ -139,18 +189,11 @@
 		    function requestCommand(x, y, z) {
 		        if (masterPacerSelected == 99) {		// If you're in "Coach Mode" where you can control all pacers at once, as well as update the database just like below.
 		            y = masterPacerSelected;
-		            /*
-					// old Arduino command request
-					var xhr = new XMLHttpRequest();
-					xhr.open("GET", "/arduino/" + x + "/" + y + "/" + z, false);
-					xhr.send();
-					$("#demo").text("/arduino/" + x + "/" + y + "/" + z);
-					setTimeout(readFeedbackFile, 4000);*/
 		        }
 		        var request = new XMLHttpRequest();
 		        request.onreadystatechange = function () {
 		            if (request.readyState == 4 && request.status == 200) {
-		                // if (request.responseText != "incorrect") {
+
 		            }
 		        };
 
@@ -220,6 +263,7 @@
 		            else {
 		                requestCommand(commandURL, pacerIndex, newNum);
 		                forwardOneView();
+		                alert("Starting Traffic Light Countdown\n\nRED will appear on the third light\n\nfollowed by YELLOW on the second light.");
 		            }
 		        });
 
@@ -243,6 +287,7 @@
 		                showNormalView();
 		                advancedButtonPressed = false;
 		                onCreateNewPacerViewSequence = false;
+		                onExistingPacerSequence = false;
 		            }
 		            else {
 		                var rstBtnUrl = $("#resetButton").attr("url");
@@ -320,7 +365,7 @@
 
 		        // Takes you back to the normal view or the previous page if you're on the first time user sequence
 		        $("#viewEscapeButton").click(function () {
-		            if (onCreateNewPacerViewSequence == true) {
+		            if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true) {
 		                backOneView();
 		            }
 		            else {
@@ -557,56 +602,6 @@
 		                }
 		            }
 		        }
-		    }
-
-		    // Parse the datalog.txt file - not working yet
-		    function parseFeedbackFile(txtFeedback) {
-		        var lights;
-		        var pacerIndex = masterPacerSelected;
-		        var newPacer = [];
-
-		        fullset = txtFeedback.split("#");
-		        for (i = 0; i < fullset.length; i++) {
-		            j = i - 1;
-		            if (i != 0) {
-		                myset = fullset[i].split(",");  // split up the feedback
-		                // make your newPacer array instance out of what you just split up
-		                newPacer[j] = {
-		                    index: myset[0], lapTime: myset[1],
-		                    color: colorArray[myset[2] % colorArray.length],
-		                    colorText: "background-color:" + colorArray[myset[2] % colorArray.length],
-		                    text: "Pacer " + myset[0] + " - " + myset[1]
-		                };
-
-		                if (j == pacerIndex) {
-		                    $("#newFeedBack2").text("newPacer[i] text: " + newPacer[j].text);
-		                    document.getElementById("description").innerHTML = newPacer[j].lapTime + " | " + newPacer[j].color;
-		                    document.getElementById("feedbackData").innerHTML = "Lap Time: " + newPacer[j].lapTime + ", Color: " + newPacer[j].color;
-		                }
-
-		                $("#pacerButton" + j).text(newPacer[j].text + " secs per lap").attr('style', newPacer[j].colorText);
-		                if (myset[2] % colorArray.length == "2" || myset[2] % colorArray.length == "6" || myset[2] % colorArray.length == "7") {
-		                    $("#pacerButton" + j).css('color', 'white');
-		                }
-		                if (myset[1] == "0.00") {
-		                    $("#pacerButton" + j).text(newPacer[j].text + " - " + newPacer[j].color).attr('style', "background-color:black").css('color', 'white');
-		                }
-		            }
-		            else {
-		                lights = fullset[0];
-		            }
-		        }
-
-		        if (pacerIndex == 99) {
-		            document.getElementById("description").innerHTML = "Lights: " + lights;
-		            document.getElementById("feedbackData").innerHTML = "Lights: " + lights;
-		        }
-
-		        /*newSet = fullset[pacerIndex].split(",");
-		        secondsPerLap = newSet[0];
-		        color = colorArray[newSet[1]];
-		        document.getElementById("description").innerHTML = secondsPerLap + " | " + color;
-		        document.getElementById("newFeedBack2").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;*/
 		    }
 
 		    // PLEASE REMOVE THIS - NO LONGER IN USE: Create Pacer Buttons - not working yet
@@ -850,6 +845,7 @@
 		    // show Pacer Buttons View "page"
 		    function showPacerButtonsView() {
 		        hideEverything();
+		        readFeedbackFile();
 		        // refreshPacerButtonData();
 		        $("#pacerButtonView").show();
 		        $("#viewEscape").show();
@@ -1026,7 +1022,7 @@
                 </div>-->
                     
                 <div id="colorButtonView" class="contentElement advancedElement" >
-                    <a id="normalColorsButton" class="colorButtonClass" otherNum="99" data-role="button" data-icon="star" style="background-color:#E6E6E6">Normal Colors</a>
+                    <!--<a id="normalColorsButton" class="colorButtonClass" otherNum="99" data-role="button" data-icon="star" style="background-color:#E6E6E6">Normal Colors</a>-->
                     <a id="colorButton0" class="btn colorButtonClass" otherNum="1" data-role="button" data-icon="star"></a>
                     <a id="colorButton1" class="btn colorButtonClass" otherNum="2" data-role="button" data-icon="star"></a>
                     <a id="colorButton2" class="btn colorButtonClass" otherNum="3" data-role="button" data-icon="star"></a>

@@ -62,6 +62,8 @@ if ($updatePacerButtonsNeeded == 1) {
 if ($rqNeedYunSyncWithDB == 1) {
 	// Retrieve the Pacer data that was already in the Database
 	// $results = $db->query('SELECT * FROM Pin WHERE active = 0 ORDER BY pacerIndex ASC LIMIT 1');
+	file_get_contents($ipAddress . "/arduino/0/99/0");
+	
 	$results = $db->query('SELECT * FROM Pin WHERE active = 1 ORDER BY pacerIndex ASC');
 
 	while ($row = $results->fetchArray()) {

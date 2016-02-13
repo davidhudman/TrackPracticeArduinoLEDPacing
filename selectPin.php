@@ -1,5 +1,5 @@
 <?php
-// updateDBandYun.php
+// selectPin.php
 
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 

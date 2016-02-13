@@ -455,6 +455,20 @@
 		            requestCommand(11, masterPacerSelected, 0);
 		        });
 
+		        // Reacts to click of selectAllPinButton Button
+		        $("#selectAllPinButton").click(function () {
+		            // GET request for selectPin.php
+		            var xhttp = new XMLHttpRequest();
+		            xhttp.onreadystatechange = function () {
+		                if (xhttp.readyState == 4 && xhttp.status == 200) {
+		                    alert(xhttp.responseText);
+		                }
+		            };
+		            xhttp.open("GET", "selectPin.php", true);
+		            xhttp.send();
+
+		        });
+
 		    });
 
 		    // Do all this stuff as soon as the page loads
@@ -1027,6 +1041,9 @@
                 </div>
                 <div id="lightStripModeDiv" class="contentElement advancedElement" >
                     <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
+                </div>
+                <div id="selectAllPinDiv" class="contentElement advancedElement" >
+                    <button id="selectAllPinButton" style="background-color:#E6E6E6">Select * From Pin</button>
                 </div>
 
                 <!-- Start View for the first time users -->

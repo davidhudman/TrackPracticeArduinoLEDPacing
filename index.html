@@ -36,10 +36,10 @@
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 		    createNewPacerViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
 		    existingPacerViewSequence = ["start", "pacerSelect", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
-		    coachSequence = ["normalMode", "advancedCoachFeatures", "showEverything"];
+		    coachSequence = ["start", "normalMode", "advancedCoachFeatures", "showEverything"];
 		    showViewArray = [showFirstTimeUserStartView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView];
 		    showExistingViewArray = [showFirstTimeUserStartView, showPacerButtonsView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView];
-		    showCoachViewArray = [showNormalView, showAdvancedCoachFeatures, showEverything];
+		    showCoachViewArray = [showFirstTimeUserStartView, showNormalView, showAdvancedCoachFeatures, showEverything];
 
 		    massesCurrentView = createNewPacerViewSequence[0];
 		    window.onload = Pinstatus;
@@ -592,6 +592,10 @@
 		                i++;
 		            }
 		        }
+		        else if (onCoachSequence == true) {
+		            massesCurrentView = coachSequence[1];         // set the currentview to the normalView
+		            showCoachViewArray[1]();                                     // call the function associated with that view
+		        }
 		    }
 
 		    // Go forward one view in the first time user sequence
@@ -705,13 +709,13 @@
 		        onCreateNewPacerViewSequence = false;
 		        onExistingPacerSequence = false;
 		        onCoachSequence = true;
-		        massesCurrentView = coachSequence[0];
+		        massesCurrentView = coachSequence[1];
 		        pinVar = 7777;
 		    }
 
 		    // show the several advanced Coach features
 		    function showAdvancedCoachFeatures() {
-		        massesCurrentView = coachSequence[1];
+		        massesCurrentView = coachSequence[2];
 		        hideEverything();
 		        $("#viewEscape").show();
 		        $("#advancedCoachDiv").show();
@@ -737,7 +741,7 @@
 		    // show everything - all contentElement class
 		    function showEverything() {
 		        onCoachSequence = true;
-		        massesCurrentView = coachSequence[2];
+		        massesCurrentView = coachSequence[3];
 		        $(".contentElement").show();
 		    }
 

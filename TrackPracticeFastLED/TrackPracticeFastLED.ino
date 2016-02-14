@@ -322,10 +322,8 @@ bool colorArrayCrappy = true;	// true means that the colorArray is associated wi
 // Declarations: Related to strings
 //***********************************************
 // String serialStringInput, printThis, stringHolder;		// Holds the raw, unformatted serial input from user.
-String printThisString = " ";
 String phpCall;				// used to hold the IP address and directory of the PHP file that needs to be executed to sync with the database.
 String ipAddress = "172.20.10.7";	// holds the IP of the PHP file
-char feedbackSeparators[] = "#,#";
 
 //***********************************************
 // Declarations: All variables predefined
@@ -338,7 +336,6 @@ int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIte
 	minimumLapTime = 0.5;	// user cannot change to a pace faster than 0.5 second lap
 
 bool isChangePacerSpeedNeeded = false, // trigger to determine whether we need to figure out which pacer is going to change its speed
-		writingMode = false,				// determines whether datalog.txt file should be written to
 		partyMode = false;				// This mode (now partyMode) String (now bool) has two possible values: "track" and "party" (now true and false). Each value will result in different function calls
 
 //***********************************************
@@ -369,8 +366,6 @@ void setup() {
 	// (no one from the external network could connect)
 	server.listenOnLocalhost();
 	server.begin();
-	
-	writeToOutputFile();
 }
 
 void loop() { 
@@ -468,39 +463,6 @@ void assignPacerColors() {
 	}
 }
 
-// writes output to a TXT file
-void writeToOutputFile() {
-	if (writingMode == true) {
-		File dataFile = FileSystem.open("/mnt/sda1/arduino/www/TrackPractice/datalog.txt", FILE_WRITE);
-		printThisString = "";
-
-		// if the file is available, write to it:
-		if (dataFile) {
-			printThisString += String(pacer[0].getTotalPacingPanels());
-			// need to add to the first group: writeMode, colorArrayCrappy
-			for (int i=0; i < pacer[0].getNumberPacers(); i++) {
-				printThisString += feedbackSeparators[0];	// {
-				printThisString += String(i);
-				printThisString += feedbackSeparators[1];	// ,
-				printThisString += String(pacer[i].getSecondsPerLap());
-				printThisString += feedbackSeparators[1];	// ,
-				printThisString += String(pacer[i].getColorInt());
-			}
-
-			dataFile.println(printThisString);
-			dataFile.close();
-			// print to the serial port too:
-		}
-		// if the file isn't open, pop up an error:
-		else {
-			Serial.println("error opening datalog.txt");
-		}
-	}
-	else {
-		// do nothing
-	}
-}
-
 // Process the cURL command
 void process(YunClient client) {
 	int command = client.readStringUntil('/').toInt(),		// read the command
@@ -525,7 +487,6 @@ void process(YunClient client) {
 				pacer[pacerIndex].setColorInt((pacerIndex%(COLOR_ARRAY_SIZE-1))+1);				// set the original color
 				pacer[pacerIndex].setOriginalColorInt((pacerIndex%(COLOR_ARRAY_SIZE-1))+1);		// set the original color
 			}
-			writeToOutputFile();
 			break;
 		case 1:	// reset
 			tempMillis = millis();
@@ -597,7 +558,6 @@ void process(YunClient client) {
 					pacer[pacerIndex].setColorInt((int)thirdCommand);
 				}
 			}
-			writeToOutputFile();
 			break;
 		case 6:	// lights
 			/*if (pacerIndex == 99) {
@@ -613,7 +573,6 @@ void process(YunClient client) {
 						assignGetTotalPacingPanels((int)thirdCommand);
 				}
 			}
-			writeToOutputFile();
 			break;
 		case 7:	// time
 			if (thirdCommand >= minimumLapTime) {
@@ -627,7 +586,6 @@ void process(YunClient client) {
 					pacer[pacerIndex].setSecondsPerLap (thirdCommand);
 					pacer[pacerIndex].setIsVisible(true);
 				}
-				writeToOutputFile();
 			}
 
 			/*// Send feedback to client
@@ -656,7 +614,6 @@ void process(YunClient client) {
 					pacer[pacerIndex].setChangedPacerNewStartTime(pacer[pacerIndex].getSecondsPerLap()+thirdCommand);
 				}
 			}
-			writeToOutputFile();
 			break;
 		case 9: // feedback...
 			intHolder = getLowestUnusedPacerIndex();
@@ -667,11 +624,9 @@ void process(YunClient client) {
 				pacer[intHolder].setIsVisible(false);
 				pacer[intHolder].setSecondsPerLap(100);
 				client.print(intHolder);
-				writeToOutputFile();
 			}
 			break;
 		case 10: // change writeMode
-			writingMode = !writingMode;
 			break;
 		case 11:	// change to different ws2811 strip (where colors look different)
 			if (colorArrayCrappy == true) {

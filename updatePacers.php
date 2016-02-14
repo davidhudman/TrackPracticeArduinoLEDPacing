@@ -69,8 +69,10 @@ if ($rqNeedYunSyncWithDB == 1) {
 	while ($row = $results->fetchArray()) {
 			$dbPacerIndex = $row['pacerIndex'];
 			$dbSecondsPerLap = $row['lapTime'];
+			$dbColor = $row['color'];
 			// send requests to the Yun to update the Pacers with their data
 			// *** add this: if (dbPacerData != yunPacerData)
+			file_get_contents($ipAddress . "/arduino/" . "5" . "/" . $dbPacerIndex . "/" . $dbColor);
 			file_get_contents($ipAddress . "/arduino/" . "7" . "/" . $dbPacerIndex . "/" . $dbSecondsPerLap);
 			echo "Command made it through to Arduino. pacerIndex = " . $dbPacerIndex . " dbSecondsPerLap=" . $dbSecondsPerLap;
 			// sleep(5);	// sleep x seconds

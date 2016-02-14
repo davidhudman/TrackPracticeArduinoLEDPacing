@@ -20,6 +20,8 @@ $queryResultPin = -1;
 $queryPacerIndex = -1;
 $backwards = -1;
 
+$coachPin = 7777; 		// This PIN lets you access any pacer;
+
 //$pIndex = "0";
 //$secondsPerLap = 2.0;
 
@@ -47,7 +49,7 @@ if ($pacerIndex == 99) {
 			case 0:	// clear
 				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value);
 				echo "Command made it through to Arduino.";
-				$db->query('UPDATE Pin SET active=0, lapTime=0');
+				file_get_contents($ipAddress . "/sd/TrackPractice/refreshDb.php");
 				break;
 			case 4:	// backwards
 				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value);
@@ -117,7 +119,7 @@ else {
 		$db->exec($query);
 
 		// make sure the $pacerIndex matches $pin
-		if ($queryResultPin == $pin) {
+		if ($queryResultPin == $pin || $coachPin == $pin)  {
 			
 			if (command != -1) {
 				// then do the arduino requests

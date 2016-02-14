@@ -516,11 +516,14 @@ void process(YunClient client) {
 			if (pacerIndex == 99){
 				for (int i=0; i <= getHighestActivePacerIndex(); i++){
 					pacer[i].setSecondsPerLap(0);
+					assignPacerColors();
 				}
 				return;
 			}
 			if (pacerIndex > -1){
 				pacer[pacerIndex].setSecondsPerLap(0);
+				pacer[pacerIndex].setColorInt((pacerIndex%(COLOR_ARRAY_SIZE-1))+1);				// set the original color
+				pacer[pacerIndex].setOriginalColorInt((pacerIndex%(COLOR_ARRAY_SIZE-1))+1);		// set the original color
 			}
 			writeToOutputFile();
 			break;

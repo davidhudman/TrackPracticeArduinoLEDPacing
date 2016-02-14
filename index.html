@@ -34,7 +34,10 @@
 
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 		    createNewPacerViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
-		    existingPacerViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
+		    existingPacerViewSequence = ["start", "pacerSelect", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
+		    showViewArray = [showFirstTimeUserStartView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView];
+		    showExistingViewArray = [showFirstTimeUserStartView, showPacerButtonsView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView];
+
 		    massesCurrentView = createNewPacerViewSequence[0];
 		    window.onload = Pinstatus;
 
@@ -299,9 +302,10 @@
 
 		        // Takes you to the create PIN view
 		        $("#newPacerButton").click(function () {
-		            forwardOneView();
 		            onCreateNewPacerViewSequence = true;
 		            onExistingPacerSequence = false;
+		            massesCurrentView = createNewPacerViewSequence[0];          // the view we're on before the button is pressed
+		            forwardOneView();
 		        });
 
 		        // Takes you to a modified version of the showPacerButtonsView (or it will soon)
@@ -309,7 +313,8 @@
 		            // showPacerButtonsView();
 		            onCreateNewPacerViewSequence = false;
 		            onExistingPacerSequence = true;
-		            chooseExistingPacerView();
+		            massesCurrentView = existingPacerViewSequence[0];           // the view we're on before the button is pressed
+		            forwardOneView();
 
 		        });
 
@@ -389,9 +394,15 @@
 		        // Goes back to normal view after a colorButton is clicked
 		        $(".colorButtonClass").click(function () {
 		            // showNormalView();
+
 		            var newNum = $(this).attr("otherNum");
 		            requestCommand(5, masterPacerSelected, newNum);
-		            forwardOneView();
+		            if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true) {
+		                forwardOneView();
+		            }
+		            else {
+		                showNormalView();
+		            }
 		        });
 
 		        // Reacts to click of writeFileMode Button
@@ -554,76 +565,50 @@
 
 		    // Go back one view in the first time user sequence
 		    function backOneView() {
-		        if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true) {
-		            // existingPacerViewSequence or createNewPacerViewSequence
-		            var i = 0;
+		        var i = 1;                                                                      // ensures that we're on a view that allows us to go backwards
+		        if (onCreateNewPacerViewSequence == true) {
 		            while (i < createNewPacerViewSequence.length) {
-		                if (massesCurrentView == createNewPacerViewSequence[i]) {
-		                    if (i == 0)
-		                        break;
-		                    if (i != 0) {
-		                        massesCurrentView = createNewPacerViewSequence[i - 1];
-		                        break;
-		                    }
+		                if (massesCurrentView == createNewPacerViewSequence[i]) {           // look for the array element that matches the current view
+		                    massesCurrentView = createNewPacerViewSequence[i - 1];          // set the currentview to 1 less than it was
+		                    showViewArray[i - 1]();                                         // call the function associated with that view
+		                    break;
 		                }
 		                i++;
-		                if (i == createNewPacerViewSequence.length) {
-		                    i = 0;
-		                }
 		            }
-
-		            if (i != 0) {
-		                switch (i) {
-		                    case 1:
-		                        showFirstTimeUserStartView();
-		                        break;
-		                    case 2:
-		                        showCreatePinView();
-		                        break;
-		                    case 3:
-		                        showColorButtonsView();
-		                        break;
-		                    case 4:
-		                        showPacerTimeInputView();
-		                        break;
-		                    default:
-		                        showFirstTimeUserStartView();
-		                        break;
+		        }
+		        else if (onExistingPacerSequence == true) {
+		            while (i < existingPacerViewSequence.length) {
+		                if (massesCurrentView == existingPacerViewSequence[i]) {              // look for the array element that matches the current view
+		                    massesCurrentView = existingPacerViewSequence[i - 1];         // set the currentview to 1 less than it was
+		                    showExistingViewArray[i - 1]();                                     // call the function associated with that view
+		                    break;
 		                }
+		                i++;
 		            }
 		        }
 		    }
 
 		    // Go forward one view in the first time user sequence
 		    function forwardOneView() {
-		        if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true) {
-		            // existingPacerViewSequence or createNewPacerViewSequence
-		            var i = 0;
-		            while (i < createNewPacerViewSequence.length - 1) {
-		                if (massesCurrentView == createNewPacerViewSequence[i]) {
-		                    massesCurrentView = createNewPacerViewSequence[i + 1];
+		        var i = 0;
+		        if (onCreateNewPacerViewSequence == true) {
+		            while (i < createNewPacerViewSequence.length - 1) {                         // Could have used "<=" but we aren't going to do anything if "i = createNewPacerViewSequence.length" anyway
+		                if (massesCurrentView == createNewPacerViewSequence[i]) {               // look for the array element that matches the current view
+		                    massesCurrentView = createNewPacerViewSequence[i + 1];              // set the currentview to 1 more than it was
+		                    showViewArray[i + 1]();                                             // call the function associated with that view
 		                    break;
 		                }
 		                i++;
 		            }
-
-		            if (i != createNewPacerViewSequence.length - 1) {
-		                switch (i) {
-		                    case 0:
-		                        showCreatePinView();
-		                        break;
-		                    case 1:
-		                        showColorButtonsView();
-		                        break;
-		                    case 2:
-		                        showPacerTimeInputView();
-		                        break;
-		                    case 3:
-		                        showSimplePacerControlView();
-		                        break;
-		                    default:
-		                        break;
+		        }
+		        else if (onExistingPacerSequence == true) {                                     // Could have used "<=" but we aren't going to do anything if "i = createNewPacerViewSequence.length" anyway
+		            while (i < existingPacerViewSequence.length - 1) {                            // This will ensure that we're on a view that actually allows us to go forwards
+		                if (massesCurrentView == existingPacerViewSequence[i]) {                  // look for the array element that matches the current view
+		                    massesCurrentView = existingPacerViewSequence[i + 1];                 // set the currentview to 1 more than it was
+		                    showExistingViewArray[i + 1]();                                             // call the function associated with that view
+		                    break;
 		                }
+		                i++;
 		            }
 		        }
 		    }
@@ -671,6 +656,9 @@
 		        if (onCreateNewPacerViewSequence == true) {
 		            massesCurrentView = createNewPacerViewSequence[5];
 		        }
+		        if (onExistingPacerSequence == true) {
+		            massesCurrentView = existingPacerViewSequence[1];
+		        }
 		    }
 
 		    // show Color Buttons View "page"
@@ -680,6 +668,9 @@
 		        $("#viewEscape").show();
 		        if (onCreateNewPacerViewSequence == true) {
 		            massesCurrentView = createNewPacerViewSequence[2];
+		        }
+		        if (onExistingPacerSequence == true) {
+		            massesCurrentView = existingPacerViewSequence[3];
 		        }
 		    }
 
@@ -694,6 +685,8 @@
 		        showEverything();
 		        hideAdvancedElements();
 		        onCreateNewPacerViewSequence = false;
+		        onExistingPacerSequence = false;
+		        pinVar = 7777;
 		    }
 
 		    // show all the advanced elements and hide the advanced button
@@ -863,8 +856,6 @@
 
                 <!-- Start View for the first time users -->
                 <div id="firstTimeUserStartDiv" class="contentElement advancedElement" >
-                    <br /><br /><br />
-                    <?php echo 'David is awesome with PHP';?>
                     <br /><br /><br />
                     <input id="newPacerButton" type="button" class="btn btn-success" otherNum="1" style="background-color:#00ff21" value="<h2>Let's Get Started!</h2>" />
                     <br /><br /><br />

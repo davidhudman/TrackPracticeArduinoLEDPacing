@@ -25,6 +25,7 @@
 		    var advancedButtonPressed = false;
 		    var onCreateNewPacerViewSequence = false;
 		    var onExistingPacerSequence = false;
+		    var onCoachSequence = false;
 		    var masterPacerSelected = 99;
 		    var lapTimeInputConstraints = [1, 900];
 		    var pinVar = 111;
@@ -35,8 +36,10 @@
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 		    createNewPacerViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
 		    existingPacerViewSequence = ["start", "pacerSelect", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
+		    coachSequence = ["normalMode", "advancedCoachFeatures", "showEverything"];
 		    showViewArray = [showFirstTimeUserStartView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView];
 		    showExistingViewArray = [showFirstTimeUserStartView, showPacerButtonsView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView];
+		    showCoachViewArray = [showNormalView, showAdvancedCoachFeatures, showEverything];
 
 		    massesCurrentView = createNewPacerViewSequence[0];
 		    window.onload = Pinstatus;
@@ -210,13 +213,7 @@
 
 		        // handles longpress for of description button to make it into a reset delay button and vice versa
 		        $("#tpHeader").on("taphold", function (event) {
-		            if (onCreateNewPacerViewSequence == true) {
-		                showNormalView();
-		                advancedButtonPressed = false;
-		                onCreateNewPacerViewSequence = false;
-		                onExistingPacerSequence = false;
-		            }
-		            else {
+		            if (massesCurrentView != createNewPacerViewSequence[0]) {
 		                var rstBtnUrl = $("#resetButton").attr("url");
 		                $("#demo").text("button might be doing something");
 		                if (rstBtnUrl == "1") {
@@ -231,6 +228,12 @@
 		                    $("#demo").text("button is now reset");
 		                    alert("Reset button will now reset pacers immediately when pressed.");
 		                }
+		            }
+		            else {
+		                showNormalView();
+		                advancedButtonPressed = false;
+		                onCreateNewPacerViewSequence = false;
+		                onExistingPacerSequence = false;
 		            }
 		        });
 
@@ -248,18 +251,21 @@
 
 		        // reveals the secret demo field whenever you click the advancedButton
 		        $("#advancedButton").click(function () {
-		            if (onCreateNewPacerViewSequence == true) {
+		            if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true) {
 		                // put something here if you want the advanced button to do something special when the first time user clicks it
 		            }
 		            else {
-		                if (advancedButtonPressed == false) {
+		                if (onCoachSequence == true) {
+		                    forwardOneView();
+		                }
+		                /*if (advancedButtonPressed == false) {
 		                    showEverything();
 		                    advancedButtonPressed = true;
 		                }
 		                else {
 		                    showNormalView();
 		                    advancedButtonPressed = false;
-		                }
+		                }*/
 		            }
 		        });
 
@@ -285,14 +291,14 @@
 		                // do nothing
 		            }
 		            else {
-		                showNormalView();
-		                advancedButtonPressed = false;
+		                //showNormalView();
+		                //advancedButtonPressed = false;
 		            }
 		        });
 
 		        // Takes you back to the normal view or the previous page if you're on the first time user sequence
 		        $("#viewEscapeButton").click(function () {
-		            if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true) {
+		            if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true || onCoachSequence == true) {
 		                backOneView();
 		            }
 		            else {
@@ -304,6 +310,7 @@
 		        $("#newPacerButton").click(function () {
 		            onCreateNewPacerViewSequence = true;
 		            onExistingPacerSequence = false;
+		            onCoachSequence = false;
 		            massesCurrentView = createNewPacerViewSequence[0];          // the view we're on before the button is pressed
 		            forwardOneView();
 		        });
@@ -312,6 +319,7 @@
 		        $("#existingPacerButton").click(function () {
 		            // showPacerButtonsView();
 		            onCreateNewPacerViewSequence = false;
+		            onCoachSequence = false;
 		            onExistingPacerSequence = true;
 		            massesCurrentView = existingPacerViewSequence[0];           // the view we're on before the button is pressed
 		            forwardOneView();
@@ -393,8 +401,6 @@
 
 		        // Goes back to normal view after a colorButton is clicked
 		        $(".colorButtonClass").click(function () {
-		            // showNormalView();
-
 		            var newNum = $(this).attr("otherNum");
 		            requestCommand(5, masterPacerSelected, newNum);
 		            if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true) {
@@ -611,6 +617,16 @@
 		                i++;
 		            }
 		        }
+		        else if (onCoachSequence == true) {
+		            while (i < coachSequence.length - 1) {                                          // This will ensure that we're on a view that actually allows us to go forwards
+		                if (massesCurrentView == coachSequence[i]) {                  // look for the array element that matches the current view
+		                    massesCurrentView = coachSequence[i + 1];                 // set the currentview to 1 more than it was
+		                    showCoachViewArray[i + 1]();                                             // call the function associated with that view
+		                    break;
+		                }
+		                i++;
+		            }
+		        }
 		    }
 
 		    // show a slightly simpler set of options for an end user to control their pacer
@@ -642,7 +658,9 @@
 		    function showFirstTimeUserStartView() {
 		        hideEverything();
 		        $("#firstTimeUserStartDiv").show();
-		        onCreateNewPacerViewSequence = true;
+		        onCreateNewPacerViewSequence = false;
+		        onExistingPacerSequence = false;
+		        onCoachSequence = false;
 		        massesCurrentView = createNewPacerViewSequence[0];
 		    }
 
@@ -686,7 +704,19 @@
 		        hideAdvancedElements();
 		        onCreateNewPacerViewSequence = false;
 		        onExistingPacerSequence = false;
+		        onCoachSequence = true;
+		        massesCurrentView = coachSequence[0];
 		        pinVar = 7777;
+		    }
+
+		    // show the several advanced Coach features
+		    function showAdvancedCoachFeatures() {
+		        massesCurrentView = coachSequence[1];
+		        hideEverything();
+		        $("#viewEscape").show();
+		        $("#advancedCoachDiv").show();
+		        $("#advancedButtonDiv").show();
+
 		    }
 
 		    // show all the advanced elements and hide the advanced button
@@ -706,6 +736,8 @@
 
 		    // show everything - all contentElement class
 		    function showEverything() {
+		        onCoachSequence = true;
+		        massesCurrentView = coachSequence[2];
 		        $(".contentElement").show();
 		    }
 
@@ -802,10 +834,6 @@
 					    <input class="lightChange" data-mini="true" type="number" name="name" id="lightsNumberInput" oldurl="lights" url="6" value="2" min="0.1" max="100.0" step="0.1" />
 				    </div>
                 </div>
-
-                <div id="resetYunFromDb" class="contentElement advancedElement" >
-                    <a id="resetYunFromDbButton" class="btn" url="-1" otherNum="1" data-role="button">Reset Yun DB</a>
-				</div>
 				
                 <div id="advancedButtonDiv" data-role="fieldcontain" class="contentElement">
 					<input id="advancedButton" type="button" data-icon="gear" data-iconpos="notext" url="clear" data-theme="a" />
@@ -816,7 +844,7 @@
 				</div>
 				
                 <div id="pacerButtonView" class="contentElement advancedElement" >
-                    <a id="allPacersButton" class="pacerButtonClass" otherNum="99" data-role="button" style="background-color:#E6E6E6" data-icon="star">Select Pacers: All Pacers</a>
+                    <!--<a id="allPacersButton" class="pacerButtonClass" otherNum="99" data-role="button" style="background-color:#E6E6E6" data-icon="star">Select Pacers: All Pacers</a>-->
                     <a href="#" id="pacerButton0" class="btn pacerButtonClass" otherNum="0" data-role="button" data-icon="star"></a>
                     <a href="#" id="pacerButton1" class="btn pacerButtonClass" otherNum="1" data-role="button" data-icon="star"></a>
                     <a href="#" id="pacerButton2" class="btn pacerButtonClass" otherNum="2" data-role="button" data-icon="star"></a>
@@ -844,15 +872,12 @@
                     <a id="colorButton6" class="btn colorButtonClass" otherNum="7" data-role="button" data-icon="star"></a>
                 </div>
 
-                <div id="writeFileModeDiv" class="contentElement advancedElement" >
+                <div id="advancedCoachDiv" class="contentElement advancedElement" >
                     <button id="writeFileMode" style="background-color:lightgreen">Write Mode On/Off</button>
-                </div>
-                <div id="lightStripModeDiv" class="contentElement advancedElement" >
                     <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
-                </div>
-                <div id="selectAllPinDiv" class="contentElement advancedElement" >
                     <button id="selectAllPinButton" style="background-color:#E6E6E6">Select * From Pin</button>
-                </div>
+                    <a id="resetYunFromDbButton" class="btn" url="-1" otherNum="1" data-role="button">Reset Yun DB</a>
+				</div>
 
                 <!-- Start View for the first time users -->
                 <div id="firstTimeUserStartDiv" class="contentElement advancedElement" >

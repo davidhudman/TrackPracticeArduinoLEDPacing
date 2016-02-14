@@ -58,27 +58,6 @@
 		        morestatus();
 		    }
 
-		    // PLEASE REMOVE THIS: NO LONGER IN USE - request a designated pacer
-		    function requestPacer() {
-		        var xhttp = new XMLHttpRequest();
-		        var feedbackText;   // holds text from Arduino - this will be your pacer index
-		        xhttp.onreadystatechange = function () {
-		            if (xhttp.readyState == 4 && xhttp.status == 200) {
-		                feedbackText = xhttp.responseText;
-		                document.getElementById("newFeedBack").innerHTML = feedbackText;
-		                if (feedbackText == "-1") {
-		                    showPacersOccupiedView();
-		                    setTimeout(showFirstTimeUserStartView, 4000);
-		                }
-		                else {
-		                    masterPacerSelected = feedbackText;
-		                }
-		            }
-		        };
-		        xhttp.open("GET", "/arduino/9/0/0", true);
-		        xhttp.send();
-		    }
-
 		    // reads DataLogger.txt file that is updated with by Yun feedback
 		    function readFeedbackFile() {
 		        var xhttp = new XMLHttpRequest();
@@ -102,29 +81,28 @@
 
 		        fullset = txtFeedback.split("<br />");
 		        for (i = 0; i < fullset.length; i++) {
-		            j = i; // - 1;
-		            if (i < 100) { // (i != 0) {
+		            if (i < 100) {
 		                myset = fullset[i].split(" | ");  // split up the feedback
 		                // make your newPacer array instance out of what you just split up
-		                newPacer[j] = {
+		                newPacer[i] = {
 		                    index: myset[0], lapTime: myset[4],
 		                    color: colorArray[myset[3] % colorArray.length],
 		                    colorText: "background-color:" + colorArray[myset[3] % colorArray.length],
 		                    text: "Pacer " + myset[0] + " - " + myset[4]
 		                };
 
-		                if (j == pacerIndex) {
-		                    $("#newFeedBack2").text("newPacer[i] text: " + newPacer[j].text);
-		                    document.getElementById("description").innerHTML = newPacer[j].lapTime + " | " + newPacer[j].color;
-		                    document.getElementById("feedbackData").innerHTML = "Lap Time: " + newPacer[j].lapTime + ", Color: " + newPacer[j].color;
+		                if (i == pacerIndex) {
+		                    $("#newFeedBack2").text("newPacer[i] text: " + newPacer[i].text);
+		                    document.getElementById("description").innerHTML = newPacer[i].lapTime + " | " + newPacer[i].color;
+		                    document.getElementById("feedbackData").innerHTML = "Lap Time: " + newPacer[i].lapTime + ", Color: " + newPacer[i].color;
 		                }
 
-		                $("#pacerButton" + j).text(newPacer[j].text + " secs per lap").attr('style', newPacer[j].colorText);
+		                $("#pacerButton" + i).text(newPacer[i].text + " secs per lap").attr('style', newPacer[i].colorText);
 		                if (myset[3] % colorArray.length == "2" || myset[3] % colorArray.length == "6" || myset[3] % colorArray.length == "7") {
-		                    $("#pacerButton" + j).css('color', 'white');
+		                    $("#pacerButton" + i).css('color', 'white');
 		                }
-		                if (myset[4] == "0") { // .00") {
-		                    $("#pacerButton" + j).text(newPacer[j].text + " - " + newPacer[j].color).attr('style', "background-color:black").css('color', 'white');
+		                if (myset[4] == "0") {
+		                    $("#pacerButton" + i).text(newPacer[i].text + " - " + newPacer[i].color).attr('style', "background-color:black").css('color', 'white');
 		                }
 		            }
 		            else {
@@ -136,48 +114,11 @@
 		            document.getElementById("description").innerHTML = "Lights: " + lights;
 		            document.getElementById("feedbackData").innerHTML = "Lights: " + lights;
 		        }
-
-		        /*newSet = fullset[pacerIndex].split(",");
-		        secondsPerLap = newSet[0];
-		        color = colorArray[newSet[1]];
-		        document.getElementById("description").innerHTML = secondsPerLap + " | " + color;
-		        document.getElementById("newFeedBack2").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;*/
 		    }
 
 		    // Makes a request to Arduino for feedback
 		    function morestatus() {
 		        readFeedbackFile();
-		    }
-
-		    // Show feedback from the Arduino
-		    function updateasyncstatus() {
-		        var pacer = [];
-		        if ((request.readyState == 4) && (request.status == 200)) {
-		            result = request.responseText;
-		            var pacerIndex = masterPacerSelected;
-
-		            if (pacerIndex != 99) {
-		                fullset = result.split("#");
-		                for (i = 0; i < fullset.length; i++) {
-		                    myset = fullset[i].split("=");
-		                    pacer[i] = {
-		                        lapTime: myset[0], color: colorArray[myset[1] % colorArray.length], text: "Pacer "
-                                    + i + " - " + myset[0] + " - " + colorArray[myset[1] % colorArray.length]
-		                    }
-		                }
-
-		                newSet = fullset[pacerIndex].split("=");
-		                secondsPerLap = newSet[0];
-		                color = colorArray[newSet[1]];
-		                document.getElementById("description").innerHTML = secondsPerLap + " | " + color;
-		                document.getElementById("feedbackData").innerHTML = "Lap Time: " + secondsPerLap + ", Color: " + color;
-		            }
-		            else {
-		                document.getElementById("description").innerHTML = "Lights: " + result;
-		                document.getElementById("feedbackData").innerHTML = "Lights: " + result;
-		            }
-		        }
-		        testCommand();
 		    }
 
 		    // send an extra command in case Arduino is lagging because it is still waiting for something
@@ -199,15 +140,6 @@
 
 		        request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
 		        request.send();
-		    }
-
-		    // PLEASE REMOVE THIS - NO LONGER IN USE: handle new pacer times
-		    function newPacerTime(val) {
-		        var newPacerTimeNum = 0;
-		        var pacerIndexforTimeSet = masterPacerSelected;
-
-		        requestCommand(7, pacerIndexforTimeSet, val);
-		        $("#pacerTimeInput").val("Enter pacer time in seconds");
 		    }
 
 		    $(document).ready(function () {
@@ -265,14 +197,6 @@
 		                forwardOneView();
 		                alert("Starting Traffic Light Countdown\n\nRED will appear on the third light\n\nfollowed by YELLOW on the second light.");
 		            }
-		        });
-
-		        // GET RID of this function! - Handles the submission of the normal view lap time
-		        $("#pacerTimeSubmitSimple").click(function () {
-		            commandURL = parseInt($(this).attr("url"), 10);
-		            pacerIndex = parseInt(masterPacerSelected, 10);
-		            newNum = $("#pacerTimeInputSimple").val();
-		            requestCommand(commandURL, pacerIndex, newNum);
 		        });
 
 		        // handles longpress of all buttons to show their help text
@@ -399,48 +323,28 @@
 		        // Takes you a view where the user can edit their new pacer
 		        $("#createPinSubmit").click(function pinCreated() {
 		            if (isPinFormatValid() == true) {
+		                pinVar = $("#pinInputField").val();
+		                var xhttp = new XMLHttpRequest();
+		                xhttp.onreadystatechange = function () {
+		                    if (xhttp.readyState == 4 && xhttp.status == 200) {
+		                        if (xhttp.responseText != "incorrect") {
+		                            pinSubmitText = xhttp.responseText;
+		                            masterPacerSelected = pinSubmitText;
+		                            alert(masterPacerSelected);
+		                            forwardOneView();
+		                        }
+		                        else {
+		                            alert(xhttp.responseText);  // incorrect PIN
+		                        }
+		                    }
+		                };
 		                if (onExistingPacerSequence == true) {
-
-		                    pinVar = $("#pinInputField").val();
-		                    var xhttp = new XMLHttpRequest();
-		                    xhttp.onreadystatechange = function () {
-		                        if (xhttp.readyState == 4 && xhttp.status == 200) {
-		                            if (xhttp.responseText != "incorrect") {
-		                                pinSubmitText = xhttp.responseText;
-		                                masterPacerSelected = pinSubmitText;
-		                                alert(masterPacerSelected);
-		                                forwardOneView();
-		                                //showPacerTimeInputView();
-		                                // requestPacer();
-		                            }
-		                            else {
-		                                alert(xhttp.responseText);  // incorrect PIN
-		                            }
-		                        }
-		                    };
 		                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected, true);
-		                    xhttp.send();
 		                }
-		                else { 	// if the person is just creating a brand new pacer
-		                    pinVar = $("#pinInputField").val();
-		                    var xhttp = new XMLHttpRequest();
-		                    xhttp.onreadystatechange = function () {
-		                        if (xhttp.readyState == 4 && xhttp.status == 200) {
-		                            if (xhttp.responseText != "incorrect") {
-		                                masterPacerSelected = xhttp.responseText;
-		                                alert(masterPacerSelected);
-		                                forwardOneView();
-		                                // showPacerTimeInputView();
-		                            }
-		                            else {
-		                                alert(xhttp.responseText);  // incorrect PIN
-		                            }
-		                        }
-		                    };
+		                else {
 		                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
-		                    xhttp.send();
-		                    // forwardOneView();
 		                }
+		                xhttp.send();
 		            }
 		            else {
 		                alert("Please enter 3 digits");
@@ -604,19 +508,6 @@
 		        }
 		    }
 
-		    // PLEASE REMOVE THIS - NO LONGER IN USE: Create Pacer Buttons - not working yet
-		    function createPacerButtonStuff() {
-		        var pacerButtonText;
-		        var pacerButtonId;
-		        // var txt2 = $("<p></p>").text("Text.");
-		        // <a href="index.html" id="allPacersButton" data-role="button" style="background-color:white" data-icon="arrow-l">
-		        for (var i = 0; i < 10; i++) {    // later, "10" should be changed to the highest index from the parse of the datalogger.txt file
-		            pacerButtonText = "Pacer " + i;
-		            pacerButton[i] = $("<button style=\"background-color:white\" data-icon=\"arrow-l\"></button>").text(pacerButtonText);
-		            $("#pacerButtonView").append(pacerButton[i]);
-		        }
-		    }
-
 		    // Define a help attribute for all buttons and dropdowns that can be used when the user requests help
 		    function assignHelpTextToButtons() {
 		        $("#pacerSelect").attr('help', '**Pacer Selector**\n\nUse this dropdown to select the pacer that you want to use or select "all pacers" to deal with them all at the same time.');
@@ -663,7 +554,8 @@
 
 		    // Go back one view in the first time user sequence
 		    function backOneView() {
-		        if (onCreateNewPacerViewSequence == true) {
+		        if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true) {
+		            // existingPacerViewSequence or createNewPacerViewSequence
 		            var i = 0;
 		            while (i < createNewPacerViewSequence.length) {
 		                if (massesCurrentView == createNewPacerViewSequence[i]) {
@@ -680,45 +572,7 @@
 		                }
 		            }
 
-		            if (onCreateNewPacerViewSequence == true && i != 0) {
-		                switch (i) {
-		                    case 1:
-		                        showFirstTimeUserStartView();
-		                        break;
-		                    case 2:
-		                        showCreatePinView();
-		                        break;
-		                    case 3:
-		                        showColorButtonsView();
-		                        break;
-		                    case 4:
-		                        showPacerTimeInputView();
-		                        break;
-		                    default:
-		                        showFirstTimeUserStartView();
-		                        break;
-		                }
-		            }
-		        }
-		        // existingPacerViewSequence
-		        if (onExistingPacerSequence == true) {
-		            var i = 0;
-		            while (i < existingPacerViewSequence.length) {
-		                if (massesCurrentView == existingPacerViewSequence[i]) {
-		                    if (i == 0)
-		                        break;
-		                    if (i != 0) {
-		                        massesCurrentView = existingPacerViewSequence[i - 1];
-		                        break;
-		                    }
-		                }
-		                i++;
-		                if (i == existingPacerViewSequence.length) {
-		                    i = 0;
-		                }
-		            }
-
-		            if (onExistingPacerSequence == true && i != 0) {
+		            if (i != 0) {
 		                switch (i) {
 		                    case 1:
 		                        showFirstTimeUserStartView();
@@ -742,7 +596,8 @@
 
 		    // Go forward one view in the first time user sequence
 		    function forwardOneView() {
-		        if (onCreateNewPacerViewSequence == true) {
+		        if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true) {
+		            // existingPacerViewSequence or createNewPacerViewSequence
 		            var i = 0;
 		            while (i < createNewPacerViewSequence.length - 1) {
 		                if (massesCurrentView == createNewPacerViewSequence[i]) {
@@ -750,45 +605,9 @@
 		                    break;
 		                }
 		                i++;
-		                //if (i == createNewPacerViewSequence.length - 1) {
-		                //    i = createNewPacerViewSequence.length - 1;
-		                //}
 		            }
 
-		            if (onCreateNewPacerViewSequence == true && i != createNewPacerViewSequence.length - 1) {
-		                switch (i) {
-		                    case 0:
-		                        showCreatePinView();
-		                        break;
-		                    case 1:
-		                        showColorButtonsView();
-		                        break;
-		                    case 2:
-		                        showPacerTimeInputView();
-		                        break;
-		                    case 3:
-		                        showSimplePacerControlView();
-		                        break;
-		                    default:
-		                        break;
-		                }
-		            }
-		        }
-		        // existingPacerViewSequence
-		        if (onExistingPacerSequence == true) {
-		            var i = 0;
-		            while (i < existingPacerViewSequence.length - 1) {
-		                if (massesCurrentView == existingPacerViewSequence[i]) {
-		                    massesCurrentView = existingPacerViewSequence[i + 1];
-		                    break;
-		                }
-		                i++;
-		                //if (i == createNewPacerViewSequence.length - 1) {
-		                //    i = createNewPacerViewSequence.length - 1;
-		                //}
-		            }
-
-		            if (onExistingPacerSequence == true && i != existingPacerViewSequence.length - 1) {
+		            if (i != createNewPacerViewSequence.length - 1) {
 		                switch (i) {
 		                    case 0:
 		                        showCreatePinView();
@@ -1059,12 +878,6 @@
                     <br /><br /><br />
                     <input id="createPinSubmit" type="button" class="btn" otherNum="2" data-role="button" style="background-color:#f00" value="<h2>Create!</h2>" />
                 </div>
-
-                <div id="pacerTimeInputSimpleDiv" class="contentElement advancedElement">
-				    <label for="select-choice-a" class="select">Enter Lap Time in Seconds: <a href="#" id="A1">Help?</a></label>
-				    <input type="number" pattern="[0-9]*" name="name" id="pacerTimeInputSimple" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
-                    <a id="pacerTimeSubmitSimple" class="btn" url="7" otherNum="1" data-role="button" style="background-color:#00ff21">Go!</a>
-				</div>
 
                 <div id="pacerOccupiedDiv" class="contentElement advancedElement">
                     <h3>No Light Pacers Available: All are currently in use.</h3>

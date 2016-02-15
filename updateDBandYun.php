@@ -74,6 +74,7 @@ if ($pacerIndex == 99) {
 				echo "Command made it through to Arduino.";
 				$db->query('UPDATE Pin SET color=' . $value);
 				// $db->exec($query);
+				break;
 			case 6:	// lights
 				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value);
 				echo "Command made it through to Arduino.";
@@ -100,6 +101,16 @@ if ($pacerIndex == 99) {
 				}
 				break;
 			case 8:	// change speed
+				$results = $db->query('SELECT * FROM Pin WHERE active=1');
+					while ($row = $results->fetchArray()) {
+						$myVar = $row['lapTime'];
+						$pacerIndex = $row['pacerIndex'];
+						$myVar = $myVar + $value;
+						file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $myVar);
+						$results = $db->query('UPDATE Pin SET lapTime=' . $myVar . ' WHERE pacerIndex=' . $pacerIndex);
+						$db->exec($query);
+					}
+					break;
 			case 11:	// color array crappy
 			default:	// clear, reset, reset delay, etc.
 				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value);
@@ -152,13 +163,20 @@ else {
 					break;
 				case 5:	// color
 					$db->query('UPDATE Pin SET color=' . $value . ' WHERE pacerIndex=' . $pacerIndex);
-					// $db->exec($query);
+					$db->exec($query);
+					break;
 				case 7:	// time
-				case 8:	// change speed
 					$results = $db->query('UPDATE Pin SET active=1, lapTime=' . $value . ' WHERE pacerIndex=' . $pacerIndex);
+					$db->exec($query);
+					break;
+				case 8:	// change speed
+					$results = $db->query('SELECT * FROM Pin WHERE pacerIndex=' . $pacerIndex);
 					while ($row = $results->fetchArray()) {
-						$queryResultPin = $row['passcode'];
+						$myVar = $row['lapTime'];
 					}
+					$db->exec($query);
+					$value = $myVar + $value;
+					$results = $db->query('UPDATE Pin SET active=1, lapTime=' . $value . ' WHERE pacerIndex=' . $pacerIndex);
 					$db->exec($query);
 					break;
 				case 6:	// lights

@@ -134,7 +134,7 @@
 
 		    // sends GET request for the commands that the Yun will accept; parameters: x - command, y - pacerIndex, z - value
 		    function requestCommand(x, y, z) {
-		        if (masterPacerSelected == 99) {		// If you're in "Coach Mode" where you can control all pacers at once, as well as update the database just like below.
+		        if (masterPacerSelected == 99) {		// If you're in "Coach Mode" where you can control all pacers at once, as well as update the database just like below
 		            y = masterPacerSelected;
 		        }
 		        var request = new XMLHttpRequest();

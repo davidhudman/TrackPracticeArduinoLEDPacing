@@ -143,6 +143,9 @@ else {
 			// update the database, if necessary
 			switch ($command) {
 				case 0:	// clear
+					/*
+					** ADD CODE HERE TO PULL THE DESIRED ROW FROM AN ORIGNAL COPY OF THIS TABLE
+					*/
 					$db->query('UPDATE Pin SET active=0, lapTime=0 WHERE pacerIndex=' . $pacerIndex);
 					break;
 				case 4:	// backwards

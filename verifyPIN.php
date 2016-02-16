@@ -61,7 +61,6 @@ $pIndex = "-1";					// the pacerIndex from the request that needs to be verified
 $pin = "-1";							// the PIN from the request that needs to be verified with the pIndex
 $DbPin = "-1";						// the correct PIN
 $needNewPacer = "-1";		// the flag that indicates whether a new pacer is needed
-$lapTime = -1;					// the pace sent from a coach requesting a new pacer at a specific lap time
 
 // Pull all your values out of the GET request
 if (empty($_REQUEST["pin"])) {
@@ -72,7 +71,6 @@ else {
 	$pin = $_REQUEST["pin"];
 	$pIndex = $_REQUEST["pacerIndex"];
 	$needNewPacer = $_REQUEST["needNewPacer"];
-	$lapTime = $_REQUEST["lapTime"];
 }
 
 // If the flag for requesting a new Pacer is true - MAY BE UNNECESSARY AS WELL AS ITS VARIABLE ABOVE
@@ -94,33 +92,18 @@ if ($needNewPacer != "1") {
 	}
 }
 else {		// the user is requesting a new pacer
-	$pacerIndex = -1;
 	$results = $db->query('SELECT * FROM Pin WHERE active = 0 ORDER BY pacerIndex ASC LIMIT 1');
 
 	while ($row = $results->fetchArray()) {
 			$pacerIndex = $row['pacerIndex'];
+			echo $pacerIndex;
 	}
 
 	$db->exec($query);
 
-	if ($pacerIndex != -1) {		// There is a pacer available
-		if ($lapTime == -1) {		// We're in the createNewPacerSequence
-			$results = $db->query('UPDATE Pin SET active = 1, passcode=' . $pin . ' WHERE pacerIndex=' . $pacerIndex);
-			$db->exec($query);
-			echo $pacerIndex;
-			// echo "pacerIndex did not equal -1";
-		}
-		else {							// This is when we're in the "Coach Mode" and the coach is creating a pacer with its new time simultaneously.
-			$results = $db->query('UPDATE Pin SET active = 1, passcode=' . $pin . ', lapTime=' . $lapTime . ' WHERE pacerIndex=' . $pacerIndex);
-			$db->exec($query);
-			echo $pacerIndex;
-		}
-	}
-	else {	// There is no pacer available
-		// Do nothing (you already sent the "-1" flag)
-		echo $pacerIndex;
-	}
-	
+	$results = $db->query('UPDATE Pin SET active = 1, passcode=' . $pin . ' WHERE pacerIndex=' . $pacerIndex);
+
+	$db->exec($query);
 	$db->close();
 }
 

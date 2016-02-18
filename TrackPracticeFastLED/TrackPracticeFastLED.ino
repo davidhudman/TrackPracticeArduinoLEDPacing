@@ -22,6 +22,8 @@ private:
 			colorInt,						// Determines which color index in the color array that the pacer should be
 			originalColorInt;				// Holds the original colorInt during countdown
 	bool isStopwatchStarted,
+			isWaitingOnWorkout,				// Indicates whether the pacer is waiting on workout instructions
+			isActiveWorkout,				// Indicates whether the pacer is in an active workout, which may include rest
 			isBackwards,
 			isGoingToChangeSpeed,			// indicates whether the pacer is about to change its speed
 			isVisible;						// indicates whether the pacer should be visible or not (the color black / it logically keeps running)
@@ -48,10 +50,78 @@ public:
 		isGoingToChangeSpeed = false;
 		isVisible = true;
 		totalPacingPanels = total_Pacing_Panels;
+		isActiveWorkout = false;
+		isWaitingOnWorkout = false;
+		endTime = 0;
 		numberPacers++;
 		startTime = millis() + (long)initialDelay;
-		double lapTimesArray[20] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+		double lapTimesArray[20] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};		// FIFO: meaning, the first time that the user enters is used first
 	};
+
+	bool getIsWaitingOnWorkout() {
+		return isWaitingOnWorkout;
+	}
+
+	void setIsWaitingOnWorkout(bool is_WaitingOnWorkout) {
+		isWaitingOnWorkout = is_WaitingOnWorkout;
+	}
+
+
+	bool getIsActiveWorkout() {
+		return isActiveWorkout;
+	}
+
+	void setIsActiveWorkout(bool is_Active_Workout) {
+		isActiveWorkout = is_Active_Workout;
+	}
+
+	// Get whatever lapTime of the workout needs to start next, deletes it, and shifts them all to the left (unless there isn't one available, in which case it will do nothing)
+	/*double getLapTimesInstanceAndDeleteItAndShiftThem() {
+		double returnVal;
+		for (int i=0; i < LAP_TIMES_ARRAY_LENGTH; i++) {
+			if (lapTimesArray[i] == -1) {       // There's nothing in that index
+				if (i=0) {
+					return -1;					// return an invalid laptime because there are no valid lapTimes
+				}
+				else {
+					returnVal = lapTimesArray[i];					// save the return value into another variable
+					while (i < LAP_TIMES_ARRAY_LENGTH - 1) {        // iterate through the array, starting from the one that you're going to use
+						lapTimesArray[i] = lapTimesArray[i+1];		// shift everything down by copying the index above the current one into the current one
+						i++;										// increment "i" to continue iterating through
+					}
+					lapTimesArray[LAP_TIMES_ARRAY_LENGTH-1] = -1;	// always set the highest instance of the array to -1 after doing this.
+					return returnVal;								// return your saved return value
+				}
+			}
+		}
+	};
+	// returns the lowest empty lapTimes Instance
+	int getLowestEmptyLapTimesInstance() {
+		for (int i=0; i < LAP_TIMES_ARRAY_LENGTH; i++) {
+			if (lapTimesArray[i] == -1) {
+				return i;
+			}
+		}
+		return - 1;		// There were no empty instances
+	}
+
+	// Set the lapTime of the workout that will run after all the others that are currently running.
+	void setLapTimesInstance(double newLapTime) {
+		for (int i=0; i < LAP_TIMES_ARRAY_LENGTH; i++) {
+			if (lapTimesArray[i] == -1) {
+				lapTimesArray[i] = newLapTime;
+			}
+			else {
+				// there needs to be some feedback to let the user know this wasn't saved. Maybe this needs to happen through another file.
+			}
+		}
+	}
+	// This will reset all indexes to -1 which basically just clears the existing workout
+	void clearLapTimes(){
+		for (int i=0; i < LAP_TIMES_ARRAY_LENGTH; i++) {
+			lapTimesArray[i] = -1;
+		}
+	}*/
 	int getOriginalColorInt() {
 		return originalColorInt;
 	}
@@ -322,7 +392,8 @@ bool colorArrayCrappy = true;	// true means that the colorArray is associated wi
 // Declarations: Related to strings
 //***********************************************
 // String serialStringInput, printThis, stringHolder;		// Holds the raw, unformatted serial input from user.
-String phpCall;				// used to hold the IP address and directory of the PHP file that needs to be executed to sync with the database.
+String phpCall2,				// used for call to PHP to update the Yun during a intermittent workout (or continuous with changing speeds)
+		phpCall;				// used to hold the IP address and directory of the PHP file that needs to be executed to sync with the database.
 String ipAddress = "172.20.10.7";	// holds the IP of the PHP file
 
 //***********************************************
@@ -387,16 +458,18 @@ void setCorrectIpAndDirectory(String ip_Address) {
 }
 
 // Retrieves Pacer Data that was already in the database and adds it to the INO program with PHP GET requests
-void updateYunFromDB() {
+void updateYunFromDB(String php_Call) {
 	// This section will need to initiate a SQLite database write
 	HttpClient c;
-	c.get(phpCall);
+	c.get(php_Call);
+
 
 	delay(5000);
 
 	while (c.available()) {
 		String command = c.readStringUntil('/');
 	}
+
 	/* YunClient tempClient = server.accept();		// Get clients coming from server
 
 	delay(5000);
@@ -649,7 +722,32 @@ void process(YunClient client) {
 			}
 			break;
 		case 12:
-			updateYunFromDB();
+			updateYunFromDB(phpCall);
+		case 13: // begin or continue workout
+			tempMillis = millis();
+			pacer[pacerIndex].setIsActiveWorkout(true);
+
+			if (thirdCommand < 0) {							// A negative number indicates that rest will be taken
+				pacer[pacerIndex].setSecondsPerLap(0);
+				pacer[pacerIndex].setEndTime(tempMillis-(thirdCommand*1000));		// set endTime to now plus whatever the absolute value of the negative number is (or just subtract the negative number)
+				pacer[pacerIndex].setIsWaitingOnWorkout(true);
+			}
+			if (thirdCommand > 0) {							// A positive number indicates that a rep will begin
+				pacer[pacerIndex].setSecondsPerLap(thirdCommand);
+				pacer[pacerIndex].setEndTime(tempMillis+resetDelayDefaultDelayTimeMillis+(thirdCommand*1000));
+				pacer[pacerIndex].setIsWaitingOnWorkout(true);
+				pacer[pacerIndex].setIsVisible(true);
+				pacer[pacerIndex].setStartTime(tempMillis+resetDelayDefaultDelayTimeMillis);
+			}
+			if (thirdCommand == 0) {						// A zero indicates that the workout is over
+				pacer[pacerIndex].setSecondsPerLap(0);
+				pacer[pacerIndex].setEndTime(tempMillis);
+				pacer[pacerIndex].setIsWaitingOnWorkout(false);
+				pacer[pacerIndex].setIsActiveWorkout(false);
+			}
+
+			break;
+		case 14: // end workout
 			break;
 		default:
 			break;
@@ -663,10 +761,26 @@ void setPixelColorBasedOnTime() {
 		leds[i] = colorArray[0]; // CHSV( 0, 0, 0);
 	}
 
+	tempMillis = millis();
 	// Place the pacers where they are supposed to be with the correct color
 	for (int j=0; j < getHighestActivePacerIndex()+1; j++) {		// This can be changed to j < inputPacer (test with actual lights to be sure)
 		if (pacer[j].getSecondsPerLap() > 0 && pacer[j].getIsVisible()) {
-			leds[pacer[j].getCurrentHighlightedPacingPanel()] = getColorFromInt(pacer[j].getColorInt());
+			if (pacer[j].getEndTime() < tempMillis && pacer[j].getIsActiveWorkout()) {		// for when we need to break out of this loop to get our next workout instructions
+				pacer[j].setSecondsPerLap(0);
+				pacer[j].setIsWaitingOnWorkout(true);
+			}
+			else {
+				leds[pacer[j].getCurrentHighlightedPacingPanel()] = getColorFromInt(pacer[j].getColorInt());
+			}
+		}
+		// when does the pacer need to ask for it's workout instructions? - when it's endTime is less than millis(), it's in an active workout, and it's waiting on workout instructions
+		else if (pacer[j].getEndTime() < tempMillis && pacer[j].getIsActiveWorkout() && pacer[j].getIsWaitingOnWorkout()) {
+			phpCall2 = "http://";
+			phpCall2.concat(ipAddress);
+			phpCall2.concat("/sd/TrackPractice/runWorkout.php");
+			//phpCall2.concat("/sd/TrackPractice/runWorkout.php?pacerIndex=");
+			//phpCall2.concat(j);
+			updateYunFromDB(phpCall2);
 		}
 	}
 	FastLED.show();              // refresh strip display
@@ -685,7 +799,7 @@ int getLowestUnusedPacerIndex() {
 // Returns the index of the highest pacer instance with getSecondsPerLap() > 0 or returns -1 if no pacers have getSecondsPerLap > 0
 int getHighestActivePacerIndex() {
 	for (int i = pacer[0].getNumberPacers()-1; i > -1; i--) {
-		if (pacer[i].getSecondsPerLap() > 0) {
+		if (pacer[i].getSecondsPerLap() > 0 || pacer[i].getIsActiveWorkout()) {
 			return i;
 		}
 	}

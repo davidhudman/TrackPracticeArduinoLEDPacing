@@ -60,7 +60,8 @@ $meters = -1;
 $next = -1;
 $previous = -1;
 
-$results = $db->query('SELECT * FROM workout WHERE pacerIndex=0 ORDER BY pacerIndex ASC');		// This will only work with the 0 index pacer.
+$results = $db->query('SELECT * FROM workout WHERE pacerIndex=0 AND active=1 ORDER BY pacerIndex ASC LIMIT 1');		// This will only work with the 0 index pacer.
+// echo "<br />SELECT query Executed Successfully";
 
 while ($row = $results->fetchArray()) {
 			
@@ -75,23 +76,52 @@ while ($row = $results->fetchArray()) {
 			// $next = $row['next'];
 			// $previous = $row['previous'];
 			
-			$lapTimes[$i] = $secondsPerLap;
-			$metersToRun[$i] = $meters;
-			$type[$i] = $typer;
-			
-			$i = $i + 1;
+			// $lapTimes[$i] = $secondsPerLap;
+			// $metersToRun[$i] = $meters;
+			// $type[$i] = $typer;
+			// $i = $i + 1;
 }
 
+// first make sure that we got something
+if ($workoutIndex != -1) {
+	if ($typer == 0) {		// Rest
+		$delayTime = $secondsPerLap;
+		file_get_contents($ipAddress . "/arduino/13/" . $pacerIndex . "/-" . $delayTime);		// send the delayTime with a negative number to indicate a rest period
+		// echo "Status: 204 No Content\r\n\r\n";
+		// echo "<br />Rest command made it through to Arduino. type=" . $typer . " delay=" . $delayTime;
+	}
+	else if ($typer == 1) {		// rep
+		$delayTime = $secondsPerLap * ($meters / 400);
+		file_get_contents($ipAddress . "/arduino/13/" . $pacerIndex . "/" . $delayTime);		// set the time on that pacer
+		
+		// echo "Status: 204 No Content\r\n\r\n";
+		// echo "<br />Rest command made it through to Arduino. type=" . $typer . " delay=" . $delayTime;
+	}
+
+	// Change that row in the database to inactive
+	$db->query('UPDATE Workout SET active=0 WHERE workoutIndex=' . $workoutIndex);
+	// echo "<br />UPDATE query Executed Successfully";
+
+}
+else {		// no workout available, so let's end the pacer's workout on the Yun
+	file_get_contents($ipAddress . "/arduino/13/" . $pacerIndex . "/0");		// send the command to end the pacer's workout
+}
+
+
+
+/*
 $arrayLength = count($lapTimes);
 
 for($x = 0; $x < $arrayLength; $x++) {
     $delayTime = 0;
 	
+	set_time_limit(900);
 	if ($type[$x] == 0) {		// Rest
 		$delayTime = $lapTimes[$x];
 		file_get_contents($ipAddress . "/arduino/0/" . $pacerIndex . "/" . $lapTimes[$x]);		// clear that pacer
 		$delayTime = $delayTime;
 		sleep($delayTime);
+		echo "Status: 204 No Content\r\n\r\n";
 		echo "<br />Rest command made it through to Arduino." . $x . " type=" . $type[$x] . " delay=" . $delayTime;
 	}
 	else if ($type[$x] == 1) {		// rep
@@ -100,6 +130,7 @@ for($x = 0; $x < $arrayLength; $x++) {
 		file_get_contents($ipAddress . "/arduino/2/" . $pacerIndex . "/" . $lapTimes[$x]);		// reset delay that pacer
 		$delayTime = $delayTime + 10;		// adding ten seconds accounts for the countdown delay.
 		sleep($delayTime);
+		echo "Status: 204 No Content\r\n\r\n";
 		echo "<br />Rep command made it through to Arduino." . $x . " type=" . $type[$x] . " delay=" . $delayTime;
 	}
 }
@@ -107,9 +138,10 @@ for($x = 0; $x < $arrayLength; $x++) {
 // now that we're done, clear the pacer
 file_get_contents($ipAddress . "/arduino/0/" . $pacerIndex . "/0");		// clear that pacer
 echo "<br />Pacer cleared.";
+*/
 
 $db->close();
 
-echo "<br />Query Executed Successfully";
+// echo "<br />PHP Executed Successfully";
 
 ?>

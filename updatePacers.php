@@ -13,6 +13,7 @@ $rqSscondsPerLap = 0;					// holds the rqSscondsPerLap value from the request
 $rqNeedNewPacer = -1;					// holds the rqNeedNewPacer value from the request
 $rqNeedYunSyncWithDB = -1;		// holds the rqNeedYunSyncWithDB value from the request
 $updatePacerButtonsNeeded = -1;	// holds the updatePacerButtonsNeeded from the request
+$fourthCommand = -1;
 
 //$rqPacerIndex = "0";
 //$rqSscondsPerLap = 2.0;
@@ -62,7 +63,7 @@ if ($updatePacerButtonsNeeded == 1) {
 if ($rqNeedYunSyncWithDB == 1) {
 	// Retrieve the Pacer data that was already in the Database
 	// $results = $db->query('SELECT * FROM Pin WHERE active = 0 ORDER BY pacerIndex ASC LIMIT 1');
-	file_get_contents($ipAddress . "/arduino/0/99/0");
+	file_get_contents($ipAddress . "/arduino/0/99/0/0" . "/" . $fourthCommand);
 	
 	$results = $db->query('SELECT * FROM Pin WHERE active = 1 ORDER BY pacerIndex ASC');
 
@@ -72,12 +73,12 @@ if ($rqNeedYunSyncWithDB == 1) {
 			$dbColor = $row['color'];
 			// send requests to the Yun to update the Pacers with their data
 			// *** add this: if (dbPacerData != yunPacerData)
-			file_get_contents($ipAddress . "/arduino/" . "5" . "/" . $dbPacerIndex . "/" . $dbColor);
-			file_get_contents($ipAddress . "/arduino/" . "7" . "/" . $dbPacerIndex . "/" . $dbSecondsPerLap);
+			file_get_contents($ipAddress . "/arduino/" . "5" . "/" . $dbPacerIndex . "/" . $dbColor) . "/" . $fourthCommand;
+			file_get_contents($ipAddress . "/arduino/" . "7" . "/" . $dbPacerIndex . "/" . $dbSecondsPerLap . "/" . $fourthCommand);
 			echo "Command made it through to Arduino. pacerIndex = " . $dbPacerIndex . " dbSecondsPerLap=" . $dbSecondsPerLap;
 			// sleep(5);	// sleep x seconds
 	}
-	file_get_contents($ipAddress . "/arduino/2/99/0");
+	file_get_contents($ipAddress . "/arduino/2/99/0" . "/" . $fourthCommand);
 	$db->exec($query);
 	$db->close();
 }

@@ -37,8 +37,8 @@
 		    createNewPacerViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
 		    existingPacerViewSequence = ["start", "pacerSelect", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
 		    coachSequence = ["start", "normalMode", "advancedCoachFeatures", "showEverything"];
-		    showViewArray = [showFirstTimeUserStartView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView];
-		    showExistingViewArray = [showFirstTimeUserStartView, showPacerButtonsView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView];
+		    showViewArray = [showFirstTimeUserStartView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView, showCreateWorkoutView];
+		    showExistingViewArray = [showFirstTimeUserStartView, showPacerButtonsView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView, showCreateWorkoutView];
 		    showCoachViewArray = [showFirstTimeUserStartView, showNormalView, showAdvancedCoachFeatures, showEverything];
 
 		    massesCurrentView = createNewPacerViewSequence[0];
@@ -253,6 +253,7 @@
 		        $("#advancedButton").click(function () {
 		            if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true) {
 		                // put something here if you want the advanced button to do something special when the first time user clicks it
+		                forwardOneView();
 		            }
 		            else {
 		                if (onCoachSequence == true) {
@@ -435,6 +436,67 @@
 
 		        });
 
+		        // Reacts to click of setAllWorkoutsToAcitveButton Button so that it can call the php file that updates the database to make all workouts active
+		        $("#setAllWorkoutsToAcitveButton").click(function () {
+		            var xhttp = new XMLHttpRequest();
+		            xhttp.onreadystatechange = function () {
+		                if (xhttp.readyState == 4 && xhttp.status == 200) {
+		                    alert(xhttp.responseText);
+		                }
+		            };
+		            xhttp.open("GET", "setAllWorkoutsToActive.php", true);
+		            xhttp.send();
+
+		        });
+
+		        // Reacts to click of startWorkoutButton Button so that any existing workouts will be started
+		        $("#startWorkoutButton").click(function () {
+		            var xhttp = new XMLHttpRequest();
+		            xhttp.onreadystatechange = function () {
+		                if (xhttp.readyState == 4 && xhttp.status == 200) {
+		                    alert(xhttp.responseText);
+		                }
+		            };
+		            xhttp.open("GET", "runWorkout.php?pacerIndex=" + masterPacerSelected, true);
+		            xhttp.send();
+
+		        });
+
+		        // Reacts to click of createWorkoutSubmit Button by validating the data and sending the created workout to the database
+		        $("#createWorkoutSubmit").click(function () {
+
+		            var numSets = $("#workoutSetsInput").val();
+		            var numMeters = $("#workoutMetersInput").val();
+		            var secondsLapPace = $("#workoutLapPaceInput").val();
+		            var secondsRest = $("#workoutRestInput").val();
+
+		            if ($("#workoutMetersInput2").val() > 0 && $("#workoutLapPaceInput2").val() > 0 && $("#workoutRestInput2").val() > 0) {
+		                var numMeters2 = $("#workoutMetersInput2").val();
+		                var secondsLapPace2 = $("#workoutLapPaceInput2").val();
+		                var secondsRest2 = $("#workoutRestInput2").val();
+		            }
+
+		            var xhttp = new XMLHttpRequest();
+		            xhttp.onreadystatechange = function () {
+		                if (xhttp.readyState == 4 && xhttp.status == 200) {
+		                    alert(xhttp.responseText);
+		                }
+		            };
+
+		            if ($("#workoutMetersInput2").val() > 0 && $("#workoutLapPaceInput2").val() > 0 && $("#workoutRestInput2").val() > 0) {
+		                xhttp.open("GET", "createWorkout.php?pacerIndex=" + masterPacerSelected + "&sets=" + numSets + "&meters=" + numMeters + "&secondsPerLap=" + secondsLapPace + "&secondsRest=" + secondsRest +
+                            "&meters2=" + numMeters2 + "&secondsPerLap2=" + secondsLapPace2 + "&secondsRest2=" + secondsRest2, true);
+		            }
+		            else {
+		                xhttp.open("GET", "createWorkout.php?pacerIndex=" + masterPacerSelected + "&sets=" + numSets + "&meters=" + numMeters + "&secondsPerLap=" + secondsLapPace + "&secondsRest=" + secondsRest, true);
+		            }
+
+		            xhttp.send();
+
+		            alert("Please allow up to 30 seconds to create your workout.");
+
+		        });
+
 		    });
 
 		    // Do all this stuff as soon as the page loads
@@ -444,12 +506,13 @@
 		        assignHelpTextToButtons();
 		        colorButtonTextColorFix();
 		        // createPacerButtons();
-		        $("#pinInputField").numpad({
+		        $("#pinInputField, #workoutMetersInput, #workoutRestInput, #workoutSetsInput").numpad({
 		            // displayTpl: '<input data-theme="b" type="password" />',
 		            hidePlusMinusButton: true,
 		            hideDecimalButton: true
 		        });
-		        $("#pacerTimeInput").numpad({
+                
+		        $("#pacerTimeInput, #workoutLapPaceInput").numpad({
 		            // displayTpl: '<input data-theme="b" type="password" />',
 		            hidePlusMinusButton: true,
 		            hideDecimalButton: false,
@@ -723,6 +786,21 @@
 
 		    }
 
+		    // show the view that allows the user to create their workout by adding reps and rest periods
+		    function showCreateWorkoutView() {
+		        hideEverything();
+		        $("#viewEscape").show();
+		        $("#advancedCoachDiv").show();
+
+                $("#writeFileMode").hide();
+                $("#lightStripMode").hide();
+                $("#selectAllPinButton").hide();
+                $("#setAllWorkoutsToAcitveButton").hide();
+                $("#resetYunFromDbButton").hide();
+
+		        $("#createWorkoutDiv").show();
+		    }
+
 		    // show all the advanced elements and hide the advanced button
 		    function showAdvancedElements() {
 		        $(".advancedElement").show()
@@ -880,8 +958,40 @@
                     <button id="writeFileMode" style="background-color:lightgreen">Write Mode On/Off</button>
                     <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
                     <button id="selectAllPinButton" style="background-color:#E6E6E6">Select * From Pin</button>
+                    <button id="setAllWorkoutsToAcitveButton" style="background-color:#E6E6E6">Make all workouts active</button>
+                    <button id="startWorkoutButton" style="background-color:#E6E6E6">Start Workout</button>
                     <a id="resetYunFromDbButton" class="btn" url="-1" otherNum="1" data-role="button">Reset Yun DB</a>
 				</div>
+
+                <div id="createWorkoutDiv" class="contentElement advancedElement" >
+                    <h3 for="createWorkoutSubmit" class="">Create your workout: </h3>
+
+                    <label for="workoutSetsInput" class="select">Number of Sets:</label>
+				    <input type="number" pattern="[0-9]*" name="name" id="workoutSetsInput" value="Number of Sets" step="1" min="1" max="900" url="13" />
+
+                    <label for="workoutMetersInput" class="select">Distance (meters) of Each Interval:</label>
+				    <input type="number" pattern="[0-9]*" name="name" id="workoutMetersInput" value="Distance (meters) of Each Interval" step="1" min="1" max="900" url="13" />
+                    
+                    <label for="workoutLapPaceInput" class="select">Enter your one-lap pace:</label>
+				    <input type="number" pattern="[0-9]*" name="name" id="workoutLapPaceInput" value="Enter your one-lap pace:" step="0.1" min="1" max="900" url="13" />
+
+                    <label for="workoutRestInput" class="select">Enter your rest (in seconds):</label>
+				    <input type="number" pattern="[0-9]*" name="name" id="workoutRestInput" value="Enter your rest (in seconds)" step="1" min="25" max="900" url="13" />
+
+                    <h3>If each set has more than one interval, fill out the fields below.</h3>
+                    <label for="workoutMetersInput2" class="select">Distance (meters) of Each Interval:</label>
+				    <input type="number" pattern="[0-9]*" name="name" id="workoutMetersInput2" value="0" step="1" min="0" max="900" url="13" />
+                    
+                    <label for="workoutLapPaceInput2" class="select">Enter your one-lap pace:</label>
+				    <input type="number" pattern="[0-9]*" name="name" id="workoutLapPaceInput2" value="0" step="0.1" min="0" max="900" url="13" />
+
+                    <label for="workoutRestInput2" class="select">Enter your rest (in seconds):</label>
+				    <input type="number" pattern="[0-9]*" name="name" id="workoutRestInput2" value="0" step="0" min="25" max="900" url="13" />
+
+
+                    <br />
+                    <input id="createWorkoutSubmit" type="button" class="btn" otherNum="0" data-role="button" style="background-color:#f00" value="<h2>Create!</h2>" />
+                </div>
 
                 <!-- Start View for the first time users -->
                 <div id="firstTimeUserStartDiv" class="contentElement advancedElement" >

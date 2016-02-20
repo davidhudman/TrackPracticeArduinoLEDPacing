@@ -25,6 +25,8 @@
     <None Include="..\updateDBandYun.php" />
     <None Include="..\createWorkoutTable.php" />
     <None Include="..\runWorkout.php" />
+    <None Include="..\setAllWorkoutsToActive.php" />
+    <None Include="..\createWorkout.php" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FastLED.cpp">

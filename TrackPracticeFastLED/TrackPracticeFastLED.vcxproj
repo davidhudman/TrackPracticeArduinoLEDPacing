@@ -68,12 +68,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="..\createWorkout.php" />
     <None Include="..\createWorkoutTable.php" />
     <None Include="..\findOpenPacer.php" />
     <None Include="..\index.html" />
     <None Include="..\refreshDb.php" />
     <None Include="..\runWorkout.php" />
     <None Include="..\selectPin.php" />
+    <None Include="..\setAllWorkoutsToActive.php" />
     <None Include="..\updateDBandYun.php" />
     <None Include="..\updatePacers.php" />
     <None Include="..\verifyPIN.php">

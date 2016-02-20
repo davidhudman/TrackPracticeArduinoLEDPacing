@@ -14,6 +14,7 @@ $ipAddress = "http://172.20.10.7";			// holds the ipAddress that needs to be use
 $pacerIndex = -1;
 $value = -1;
 $command = -1;
+$fourthCommand = -1;
 $pin = -1;
 $queryResultPin = -1;
 
@@ -47,12 +48,12 @@ if ($pacerIndex == 99) {
 			case -1:	// nothing entered
 				break;
 			case 0:	// clear
-				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value);
+				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value . "/" . $fourthCommand);
 				echo "Command made it through to Arduino.";
 				file_get_contents($ipAddress . "/sd/TrackPractice/refreshDb.php");
 				break;
 			case 4:	// backwards
-				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value);
+				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value . "/" . $fourthCommand);
 				echo "Command made it through to Arduino.";
 				/*$backwards = $db->query('SELECT backwards FROM Pin WHERE pacerIndex=' . $pacerIndex);
 				
@@ -70,13 +71,13 @@ if ($pacerIndex == 99) {
 				}*/
 				break;
 			case 5:	// color
-				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value);
+				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value . "/" . $fourthCommand);
 				echo "Command made it through to Arduino.";
 				$db->query('UPDATE Pin SET color=' . $value);
 				// $db->exec($query);
 				break;
 			case 6:	// lights
-				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value);
+				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value . "/" . $fourthCommand);
 				echo "Command made it through to Arduino.";
 				break;
 			case 7:	// time
@@ -89,7 +90,7 @@ if ($pacerIndex == 99) {
 				// if there's a pacer available:
 				if ($queryPacerIndex != -1) {
 					// do the arduino requests
-					file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value);
+					file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value . "/" . $fourthCommand);
 					echo "Command made it through to Arduino.";
 					
 					// update the database
@@ -106,14 +107,14 @@ if ($pacerIndex == 99) {
 						$myVar = $row['lapTime'];
 						$pacerIndex = $row['pacerIndex'];
 						$myVar = $myVar + $value;
-						file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $myVar);
+						file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $myVar . "/" . $fourthCommand);
 						$results = $db->query('UPDATE Pin SET lapTime=' . $myVar . ' WHERE pacerIndex=' . $pacerIndex);
 						$db->exec($query);
 					}
 					break;
 			case 11:	// color array crappy
 			default:	// clear, reset, reset delay, etc.
-				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value);
+				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value . "/" . $fourthCommand);
 				echo "Command made it through to Arduino.";
 				break;
 		}
@@ -134,7 +135,7 @@ else {
 			
 			if (command != -1) {
 				// then do the arduino requests
-				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value);
+				file_get_contents($ipAddress . "/arduino/" . $command . "/" . $pacerIndex . "/" . $value . "/" . $fourthCommand);
 				echo "Command made it through to Arduino.";
 			}
 			else {

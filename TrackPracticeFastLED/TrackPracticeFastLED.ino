@@ -405,6 +405,7 @@ int serial1AvailableIterator = 0, serial1FeedbackIterator = 0, serialFeedbackIte
 	serialCountTo = 50, trafficLightCountTo = 100, partySerialCountTo = 5, 
 	tempLowestDelayedPacerIndex = -1, totalPacingPanels = 26, intHolder,
 	minimumLapTime = 0.5;	// user cannot change to a pace faster than 0.5 second lap
+	char curlSeparator = '/';
 
 bool isChangePacerSpeedNeeded = false, // trigger to determine whether we need to figure out which pacer is going to change its speed
 		partyMode = false;				// This mode (now partyMode) String (now bool) has two possible values: "track" and "party" (now true and false). Each value will result in different function calls
@@ -464,11 +465,11 @@ void updateYunFromDB(String php_Call) {
 	c.get(php_Call);
 
 
-	delay(5000);
+	// delay(5000);
 
-	while (c.available()) {
-		String command = c.readStringUntil('/');
-	}
+	// while (c.available()) {
+	// 	String command = c.readStringUntil('/');
+	// }
 
 	/* YunClient tempClient = server.accept();		// Get clients coming from server
 
@@ -538,9 +539,12 @@ void assignPacerColors() {
 
 // Process the cURL command
 void process(YunClient client) {
-	int command = client.readStringUntil('/').toInt(),		// read the command
-		pacerIndex = client.readStringUntil('/').toInt();	// read pacer index number
-	double thirdCommand = client.parseFloat();
+	int command = client.readStringUntil(curlSeparator).toInt(),				// read the command
+			pacerIndex = client.readStringUntil(curlSeparator).toInt();		// read pacer index number
+	double thirdCommand = client.readStringUntil(curlSeparator).toFloat(),
+			fourthCommand = client.parseFloat();
+	// double thirdCommand = client.readStringUntil('/').toFloat(),	// read pacer data
+			// fourthCommand = client.parseFloat();					// currently only used in case 13 where we need to know the pace it will run and the number of meters it will run
 
 	// If the next character is a '/' it means we have an URL
 	// with a value like: "/1/99/0"
@@ -734,7 +738,8 @@ void process(YunClient client) {
 			}
 			if (thirdCommand > 0) {							// A positive number indicates that a rep will begin
 				pacer[pacerIndex].setSecondsPerLap(thirdCommand);
-				pacer[pacerIndex].setEndTime(tempMillis+resetDelayDefaultDelayTimeMillis+(thirdCommand*1000));
+				// pacer[pacerIndex].setEndTime(tempMillis+resetDelayDefaultDelayTimeMillis+(thirdCommand*1000));
+				pacer[pacerIndex].setEndTime(tempMillis+resetDelayDefaultDelayTimeMillis+((fourthCommand/400)*thirdCommand*1000));		// This multiplies the user's lap pace by the number of laps that they plan to run
 				pacer[pacerIndex].setIsWaitingOnWorkout(true);
 				pacer[pacerIndex].setIsVisible(true);
 				pacer[pacerIndex].setStartTime(tempMillis+resetDelayDefaultDelayTimeMillis);
@@ -777,9 +782,9 @@ void setPixelColorBasedOnTime() {
 		else if (pacer[j].getEndTime() < tempMillis && pacer[j].getIsActiveWorkout() && pacer[j].getIsWaitingOnWorkout()) {
 			phpCall2 = "http://";
 			phpCall2.concat(ipAddress);
-			phpCall2.concat("/sd/TrackPractice/runWorkout.php");
-			//phpCall2.concat("/sd/TrackPractice/runWorkout.php?pacerIndex=");
-			//phpCall2.concat(j);
+			// phpCall2.concat("/sd/TrackPractice/runWorkout.php");
+			phpCall2.concat("/sd/TrackPractice/runWorkout.php?pacerIndex=");
+			phpCall2.concat(j);
 			updateYunFromDB(phpCall2);
 		}
 	}

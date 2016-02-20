@@ -27,6 +27,7 @@
     <None Include="..\runWorkout.php" />
     <None Include="..\setAllWorkoutsToActive.php" />
     <None Include="..\createWorkout.php" />
+    <None Include="..\selectWorkout.php" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FastLED.cpp">

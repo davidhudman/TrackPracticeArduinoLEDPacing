@@ -436,6 +436,19 @@
 
 		        });
 
+		        // Reacts to click of selectAllWorkoutButton Button
+		        $("#selectAllWorkoutButton").click(function () {
+		            var xhttp = new XMLHttpRequest();
+		            xhttp.onreadystatechange = function () {
+		                if (xhttp.readyState == 4 && xhttp.status == 200) {
+		                    alert(xhttp.responseText);
+		                }
+		            };
+		            xhttp.open("GET", "selectWorkout.php?backslashNNeeded=1", true);
+		            xhttp.send();
+
+		        });
+
 		        // Reacts to click of setAllWorkoutsToAcitveButton Button so that it can call the php file that updates the database to make all workouts active
 		        $("#setAllWorkoutsToAcitveButton").click(function () {
 		            var xhttp = new XMLHttpRequest();
@@ -797,6 +810,7 @@
                 $("#selectAllPinButton").hide();
                 $("#setAllWorkoutsToAcitveButton").hide();
                 $("#resetYunFromDbButton").hide();
+                $("#selectAllWorkoutButton").hide();
 
 		        $("#createWorkoutDiv").show();
 		    }
@@ -958,6 +972,7 @@
                     <button id="writeFileMode" style="background-color:lightgreen">Write Mode On/Off</button>
                     <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
                     <button id="selectAllPinButton" style="background-color:#E6E6E6">Select * From Pin</button>
+                    <button id="selectAllWorkoutButton" style="background-color:#E6E6E6">Select * From Workout</button>
                     <button id="setAllWorkoutsToAcitveButton" style="background-color:#E6E6E6">Make all workouts active</button>
                     <button id="startWorkoutButton" style="background-color:#E6E6E6">Start Workout</button>
                     <a id="resetYunFromDbButton" class="btn" url="-1" otherNum="1" data-role="button">Reset Yun DB</a>

@@ -1,5 +1,6 @@
 <?php
 // selectWorkout.php
+// used to select everything from the "workout" table in the database
 
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 

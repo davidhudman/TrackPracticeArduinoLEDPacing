@@ -1,5 +1,6 @@
 <?php
 // runWorkout.php
+// used to find the workouts in the workout table of the database that need to be run - where "active=0"
 
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 
@@ -9,6 +10,7 @@ $ipAddress = "http://172.20.10.7";			// holds the ipAddress that needs to be use
 
 $i = 0;		// used to increment array in the while loop
 $arrayLength = 0;
+$arduinoGetRequestDelay = 22;	// the time that it takes for the Yun to make a GET request.
 
 $workoutIndex = -1;
 $pacerIndex = -1;
@@ -34,11 +36,10 @@ if ($pacerIndex != -1) {
 	$results = $db->query('SELECT * FROM workout WHERE pacerIndex=' . $pacerIndex . ' AND active=1 ORDER BY pacerIndex ASC LIMIT 1');
 }
 else {
-	$results = $db->query('SELECT * FROM workout WHERE pacerIndex=0 AND active=1 ORDER BY pacerIndex ASC LIMIT 1');		// This will only work with the 0 index pacer.
+	$results = $db->query('SELECT * FROM workout WHERE pacerIndex=0 AND active=1 ORDER BY pacerIndex ASC LIMIT 1');		// OLD CODE - TEST BEFORE REMOVING THIS ENTIRE ELSE STATEMENT- This will only work with the 0 index pacer.
 }
 
-// echo "<br />SELECT query Executed Successfully";
-
+// Read the results of the database query - it should just be one row
 while ($row = $results->fetchArray()) {
 			
 			$workoutIndex = $row['workoutIndex'];
@@ -58,29 +59,31 @@ while ($row = $results->fetchArray()) {
 			// $i = $i + 1;
 }
 
-// first make sure that we got something
+// First, make sure that we got something from the query
 if ($workoutIndex != -1) {
-	if ($typer == 0) {		// Rest - we're going to have to subtract 25-30 seconds from their rest because that's how long the processing takes
+	// The workout type is "Rest" - we're going to have to subtract 20-30 seconds from their rest because that's how long the processing takes
+	if ($typer == 0) {
 		$delayTime = $secondsPerLap;
-		if ($delayTime <= 22) {
+		if ($delayTime <= $arduinoGetRequestDelay) {
 			$delayTime = 1;
 		}
 		else {
-			$delayTime = $delayTime - 22;
+			$delayTime = $delayTime - $arduinoGetRequestDelay;
 		}
 		file_get_contents($ipAddress . "/arduino/13/" . $pacerIndex . "/-" . $delayTime . "/" . $meters);		// send the delayTime with a negative number to indicate a rest period
 	}
-	else if ($typer == 1) {		// rep
+	// The workout type is "Rep"
+	else if ($typer == 1) {
 		file_get_contents($ipAddress . "/arduino/13/" . $pacerIndex . "/" . $secondsPerLap . "/" . $meters);		// set the time on that pacer
 	}
 
-	// Change that row in the database to inactive
+	// Change that row in the database to inactive (because it's already running and we don't want it to run again)
 	$db->query('UPDATE Workout SET active=0 WHERE workoutIndex=' . $workoutIndex);
-	// $db->exec($query);
 	echo "<br />UPDATE query Executed Successfully";
 
 }
-else {		// no workout available, so let's end the pacer's workout on the Yun
+// No workout available, so let's end the pacer's workout on the Yun
+else {
 	file_get_contents($ipAddress . "/arduino/13/" . $pacerIndex . "/0" . "/" . $meters);		// send the command to end the pacer's workout
 	echo "<br />Pacer cleared successfully";
 }

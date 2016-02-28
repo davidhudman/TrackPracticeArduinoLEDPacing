@@ -1,5 +1,6 @@
 <?php
 // createWorkoutTable.php
+// used to create the workout table in the pacer database - this is a backup of the original table - this won't work if the table already exists
 
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 

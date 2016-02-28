@@ -1,5 +1,6 @@
 <?php
 // refreshDb.php
+// used to bring the Pin table back to its original state
 
 // $sqlite3 DatabaseName.db
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');

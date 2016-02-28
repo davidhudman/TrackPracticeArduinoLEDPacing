@@ -1,5 +1,6 @@
 <?php
 // createWorkout.php
+// used to add the workout that the user creates in the app to the workout table in the database
 
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 
@@ -35,9 +36,10 @@ else {
 	$secondsRest2 = $_REQUEST["secondsRest2"];
 }
 
+// Delete whatever workout that pacer already had in the database
 $db->query('DELETE FROM Workout WHERE pacerIndex=' . $pacerIndex);
 
-// for loop to add the same workout sequence for all the sets
+// Loop to add the same workout sequence for all the sets - maybe we could change this to pass an array of values in the GET request so we can add unlimited number of intervals in each set
 for ($x = 0; $x < $sets; $x++) {
 	// Query to add the rep portion
 	$db->query('INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . $secondsPerLap . ', ' . $meters . ')');
@@ -45,6 +47,7 @@ for ($x = 0; $x < $sets; $x++) {
 	// Query to add the rest portion
 	$db->query('INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '0' . ', ' . $secondsRest . ', ' . $meters . ')');
 	
+	// If there is a second interval to be done in each set, this is where it is set up
 	if ($meters2 > 0 && $secondsPerLap2 > 0 && $secondsRest2 > 0) {
 		// Query to add the rep portion
 		$db->query('INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . $secondsPerLap2 . ', ' . $meters2 . ')');
@@ -54,12 +57,12 @@ for ($x = 0; $x < $sets; $x++) {
 	}
 } 
 
-
+// set all the workout entries in the workout table for this pacer to "active=1" to indicate that they need to be run
 $db->query('UPDATE Workout SET active=1 WHERE pacerIndex=' . $pacerIndex);					
 
 
 $db->close();
 
-echo "Query Executed Successfully";
+echo "Your workout was successfully added.";
 
 ?>

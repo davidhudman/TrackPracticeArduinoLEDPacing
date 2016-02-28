@@ -496,6 +496,7 @@
 		                }
 		            };
 
+		            // ?arr[]=1&arr[]=2&arr[]=3&arr[]=4
 		            if ($("#workoutMetersInput2").val() > 0 && $("#workoutLapPaceInput2").val() > 0 && $("#workoutRestInput2").val() > 0) {
 		                xhttp.open("GET", "createWorkout.php?pacerIndex=" + masterPacerSelected + "&sets=" + numSets + "&meters=" + numMeters + "&secondsPerLap=" + secondsLapPace + "&secondsRest=" + secondsRest +
                             "&meters2=" + numMeters2 + "&secondsPerLap2=" + secondsLapPace2 + "&secondsRest2=" + secondsRest2, true);

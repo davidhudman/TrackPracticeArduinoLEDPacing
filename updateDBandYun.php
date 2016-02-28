@@ -1,5 +1,6 @@
 <?php
 // updateDBandYun.php
+// used to process all pacer change requests before they go to the Yun. It validates the PIN number or validates that we're in "Coach Mode" before updating the database or sending the request to the Yun
 
 // Example link command: http://172.20.10.7/sd/TrackPractice/updateDBandYun.php?command=7&pacerIndex=2&value=4&pin=222
 

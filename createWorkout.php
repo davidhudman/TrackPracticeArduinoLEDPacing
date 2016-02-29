@@ -6,36 +6,33 @@ $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 
 $pacerIndex = -1;
 $sets = 1;
-$meters = -1;
-$secondsPerLap = -1;
-$secondsRest = -1;
-$meters2 = 0;
-$secondsPerLap2 = 0;
-$secondsRest2 = 0;
+$intervals = -1;
+
+echo $_REQUEST;
+// echo $_REQUEST["numMetersArray"];
 
 // Pull all your values out of the GET request
 if (empty($_REQUEST["pacerIndex"])) {
 	$pacerIndex = $_REQUEST["pacerIndex"];
 	$sets = $_REQUEST["sets"];
-	$meters = $_REQUEST["meters"];
-	$secondsPerLap = $_REQUEST["secondsPerLap"];
-	$secondsRest = $_REQUEST["secondsRest"];
-	$meters2 = $_REQUEST["meters2"];
-	$secondsPerLap2 = $_REQUEST["secondsPerLap2"];
-	$secondsRest2 = $_REQUEST["secondsRest2"];
+	$intervals = $_REQUEST["intervals"];
 }
 else {
 	// do nothing - for some reason it always gets recognized as "empty" even though there are clearly parameters
 	$pacerIndex = $_REQUEST["pacerIndex"];
 	$sets = $_REQUEST["sets"];
-	$meters = $_REQUEST["meters"];
-	$secondsPerLap = $_REQUEST["secondsPerLap"];
-	$secondsRest = $_REQUEST["secondsRest"];
-	$meters2 = $_REQUEST["meters2"];
-	$secondsPerLap2 = $_REQUEST["secondsPerLap2"];
-	$secondsRest2 = $_REQUEST["secondsRest2"];
+	$intervals = $_REQUEST["intervals"];
 }
 
+$echoString = "";
+// loop to get all array elements out of the request
+for ($x = 0; $x < $intervals; $x++) {
+	$echoString .= $_REQUEST["numMetersArray[intervals]"];
+	$echoString .= $_REQUEST["secondsLapPaceArray[intervals]"];
+	$echoString .= $_REQUEST["secondsRestArray[intervals]"];
+}
+
+/*
 // Delete whatever workout that pacer already had in the database
 $db->query('DELETE FROM Workout WHERE pacerIndex=' . $pacerIndex);
 
@@ -59,10 +56,12 @@ for ($x = 0; $x < $sets; $x++) {
 
 // set all the workout entries in the workout table for this pacer to "active=1" to indicate that they need to be run
 $db->query('UPDATE Workout SET active=1 WHERE pacerIndex=' . $pacerIndex);					
-
+*/
 
 $db->close();
 
+/*
 echo "Your workout was successfully added.";
+*/
 
 ?>

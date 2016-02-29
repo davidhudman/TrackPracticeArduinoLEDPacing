@@ -41,6 +41,12 @@
 		    showExistingViewArray = [showFirstTimeUserStartView, showPacerButtonsView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView, showCreateWorkoutView];
 		    showCoachViewArray = [showFirstTimeUserStartView, showNormalView, showAdvancedCoachFeatures, showEverything];
 
+            // workout creation
+		    numMetersArray = [];
+		    secondsLapPaceArray = [];
+		    secondsRestArray = [];
+		    currentInterval = 0;
+
 		    massesCurrentView = createNewPacerViewSequence[0];
 		    window.onload = Pinstatus;
 
@@ -477,18 +483,44 @@
 
 		        // Reacts to click of createWorkoutSubmit Button by validating the data and sending the created workout to the database
 		        $("#createWorkoutSubmit").click(function () {
-
+                    
 		            var numSets = $("#workoutSetsInput").val();
-		            var numMeters = $("#workoutMetersInput").val();
+                    var numMeters = $("#workoutMetersInput").val();
 		            var secondsLapPace = $("#workoutLapPaceInput").val();
 		            var secondsRest = $("#workoutRestInput").val();
-
+                    /*
 		            if ($("#workoutMetersInput2").val() > 0 && $("#workoutLapPaceInput2").val() > 0 && $("#workoutRestInput2").val() > 0) {
 		                var numMeters2 = $("#workoutMetersInput2").val();
 		                var secondsLapPace2 = $("#workoutLapPaceInput2").val();
 		                var secondsRest2 = $("#workoutRestInput2").val();
+		            }*/
+
+                    // if the data is valid, add it to the workout arrays
+		            if (numMeters > 0 && secondsLapPace > 0 && secondsRest > 0) {
+		                numMetersArray[currentInterval] = $("#workoutMetersInput").val();
+		                secondsLapPaceArray[currentInterval] = $("#workoutLapPaceInput").val();
+		                secondsRestArray[currentInterval] = $("#workoutRestInput").val();
+		            }
+		            else {
+		                alert("The interval you were on was not saved because the distance you will run, the pace you will run, and the rest you will take must all be greater than 0.");
 		            }
 
+		            var i = 0;
+		            var numMetersArrayRequestString = "";
+		            var secondsLapPaceArrayRequestString = "";
+		            var secondsRestArrayRequestString = "";
+		            while (numMetersArray[i] > 0 && secondsLapPaceArray[i] > 0 && secondsRestArray[i] > 0) {
+		                // while these instances of the array is greater than 0, add them to the string to be appended to the GET request
+                        /*
+		                numMetersArrayRequestString += "&numMetersArray[]="
+		                numMetersArrayRequestString += numMetersArray[i];
+		                secondsLapPaceArrayRequestString += "&secondsLapPaceArray[]="
+		                secondsLapPaceArrayRequestString += secondsLapPaceArray[i];
+		                secondsRestArrayRequestString += "&secondsRestArray[]="
+		                secondsRestArrayRequestString += secondsRestArray[i];*/
+		                i++;
+		            }
+                    
 		            var xhttp = new XMLHttpRequest();
 		            xhttp.onreadystatechange = function () {
 		                if (xhttp.readyState == 4 && xhttp.status == 200) {
@@ -497,19 +529,108 @@
 		            };
 
 		            // ?arr[]=1&arr[]=2&arr[]=3&arr[]=4
+		            // numMetersArray = [];
+		            // secondsLapPaceArray = [];
+		            // secondsRestArray = [];
+
+                    // We need to change the GET reqest to include the values from the arrays if they are valid
+
+                    /*
 		            if ($("#workoutMetersInput2").val() > 0 && $("#workoutLapPaceInput2").val() > 0 && $("#workoutRestInput2").val() > 0) {
 		                xhttp.open("GET", "createWorkout.php?pacerIndex=" + masterPacerSelected + "&sets=" + numSets + "&meters=" + numMeters + "&secondsPerLap=" + secondsLapPace + "&secondsRest=" + secondsRest +
                             "&meters2=" + numMeters2 + "&secondsPerLap2=" + secondsLapPace2 + "&secondsRest2=" + secondsRest2, true);
 		            }
 		            else {
 		                xhttp.open("GET", "createWorkout.php?pacerIndex=" + masterPacerSelected + "&sets=" + numSets + "&meters=" + numMeters + "&secondsPerLap=" + secondsLapPace + "&secondsRest=" + secondsRest, true);
-		            }
+		            }*/
+
+		            xhttp.open("GET", "createWorkout.php?pacerIndex=" + masterPacerSelected + "&sets=" + numSets + "&intervals=" + i + JSON.stringify(numMetersArray) + JSON.stringify(secondsLapPaceArray) + JSON.stringify(secondsRestArray), true);
 
 		            xhttp.send();
 
+		            // reset the arrays to empty
+		            numMetersArray = [];
+		            secondsLapPaceArray = [];
+		            secondsRestArray = [];
+
 		            alert("Please allow up to 30 seconds to create your workout.");
 
+		            backOneView();
+
 		        });
+
+		        // Reacts to click of previousWorkoutSetButton Button by saving the data of the set previously entered into the array if it's valid before moving to the previous element of the array
+		        $("#previousWorkoutSetButton").click(function () {
+		            var numMeters = $("#workoutMetersInput").val();
+		            var secondsLapPace = $("#workoutLapPaceInput").val();
+		            var secondsRest = $("#workoutRestInput").val();
+
+		            if (currentInterval > 0) {
+		                if (numMeters > 0 && secondsLapPace > 0 && secondsRest > 0) {
+                            // save the values entered by the user into the workout arrays
+		                    numMetersArray[currentInterval] = numMeters;
+		                    secondsLapPaceArray[currentInterval] = secondsLapPace;
+		                    secondsRestArray[currentInterval] = secondsRest;
+		                }
+		                else {
+		                    alert("The interval will not be saved because the distance you will run, the pace you will run, and the rest you will take must all be greater than 0.");
+		                }
+
+		                // next we need to decrement the currentInterval value
+		                currentInterval--;
+
+		                // next we need to reset all those values in the view back to what the user previously entered
+		                $("#workoutMetersInput").val(numMetersArray[currentInterval]);
+		                $("#workoutLapPaceInput").val(secondsLapPaceArray[currentInterval]);
+		                $("#workoutRestInput").val(secondsRestArray[currentInterval]);
+
+		                // next we need to show the user the correct currentInterval value
+		                userViewCurrentInterval = currentInterval + 1;
+		                $("#setNumberIndicator").text("Setup interval #" + userViewCurrentInterval);
+		            }
+		            else {
+		                alert("You are on the first interval, so you can only go to the next interval.");
+		            }
+		        });
+
+		        // Reacts to click of nextWorkoutSetButton Button by saving the data of the set previously entered into the array if it's valid before moving to the next element of the array
+		        $("#nextWorkoutSetButton").click(function () {
+		            var numMeters = $("#workoutMetersInput").val();
+		            var secondsLapPace = $("#workoutLapPaceInput").val();
+		            var secondsRest = $("#workoutRestInput").val();
+
+		            if (numMeters > 0 && secondsLapPace > 0 && secondsRest > 0) {
+		                // save the values entered by the user into the workout arrays
+		                numMetersArray[currentInterval] = numMeters;
+		                secondsLapPaceArray[currentInterval] = secondsLapPace;
+		                secondsRestArray[currentInterval] = secondsRest;
+
+
+		                // next we need to increment the currentInterval value
+		                currentInterval++;
+
+
+		                // next we need to reset all those values in the view back to what the user entered or to 0 if they didn't enter anything previously
+		                if (numMetersArray[currentInterval] > 0 && secondsLapPaceArray[currentInterval] > 0 && secondsRestArray[currentInterval] > 0) {
+		                    $("#workoutMetersInput").val(numMetersArray[currentInterval]);
+		                    $("#workoutLapPaceInput").val(secondsLapPaceArray[currentInterval]);
+		                    $("#workoutRestInput").val(secondsRestArray[currentInterval]);
+		                }
+		                else {
+		                    $("#workoutMetersInput").val("0");
+		                    $("#workoutLapPaceInput").val("0");
+		                    $("#workoutRestInput").val("0");
+		                }
+
+		                // next we need to show the user the correct currentInterval value
+		                userViewCurrentInterval = currentInterval + 1;
+		                $("#setNumberIndicator").text("Setup interval #" + userViewCurrentInterval);
+		            }
+		            else {
+		                alert("The distance you will run, the pace you will run, and the rest you will take must all be greater than 0 before you can setup the next interval.");
+		            }
+		        });
+		        
 
 		    });
 
@@ -813,7 +934,20 @@
                 $("#resetYunFromDbButton").hide();
                 $("#selectAllWorkoutButton").hide();
 
-		        $("#createWorkoutDiv").show();
+                $("#createWorkoutDiv").show();
+
+                // arrays need to be cleared for future workout data
+                numMetersArray = [];
+                secondsLapPaceArray = [];
+                secondsRestArray = [];
+
+                // Set all the fields to 0 along with the currentInterval
+                currentInterval = 0;
+                $("#workoutMetersInput").val("0");
+                $("#workoutLapPaceInput").val("0");
+                $("#workoutRestInput").val("0");
+
+                $("#setNumberIndicator").text("Setup interval #1");
 		    }
 
 		    // show all the advanced elements and hide the advanced button
@@ -985,6 +1119,8 @@
                     <label for="workoutSetsInput" class="select">Number of Sets:</label>
 				    <input type="number" pattern="[0-9]*" name="name" id="workoutSetsInput" value="Number of Sets" step="1" min="1" max="900" url="13" />
 
+                    <h4 id="setNumberIndicator">Setup interval #</h4>
+
                     <label for="workoutMetersInput" class="select">Distance (meters) of Each Interval:</label>
 				    <input type="number" pattern="[0-9]*" name="name" id="workoutMetersInput" value="Distance (meters) of Each Interval" step="1" min="1" max="900" url="13" />
                     
@@ -994,7 +1130,10 @@
                     <label for="workoutRestInput" class="select">Enter your rest (in seconds):</label>
 				    <input type="number" pattern="[0-9]*" name="name" id="workoutRestInput" value="Enter your rest (in seconds)" step="1" min="25" max="900" url="13" />
 
-                    <h3>If each set has more than one interval, fill out the fields below.</h3>
+                    <button id="previousWorkoutSetButton" style="background-color:#E6E6E6">Previous Interval</button>
+                    <button id="nextWorkoutSetButton" style="background-color:#E6E6E6">Next Interval</button>
+
+                    <!--<h3>If each set has more than one interval, fill out the fields below.</h3>
                     <label for="workoutMetersInput2" class="select">Distance (meters) of Each Interval:</label>
 				    <input type="number" pattern="[0-9]*" name="name" id="workoutMetersInput2" value="0" step="1" min="0" max="900" url="13" />
                     
@@ -1002,7 +1141,7 @@
 				    <input type="number" pattern="[0-9]*" name="name" id="workoutLapPaceInput2" value="0" step="0.1" min="0" max="900" url="13" />
 
                     <label for="workoutRestInput2" class="select">Enter your rest (in seconds):</label>
-				    <input type="number" pattern="[0-9]*" name="name" id="workoutRestInput2" value="0" step="0" min="25" max="900" url="13" />
+				    <input type="number" pattern="[0-9]*" name="name" id="workoutRestInput2" value="0" step="0" min="25" max="900" url="13" />-->
 
 
                     <br />

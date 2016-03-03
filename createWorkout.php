@@ -7,61 +7,50 @@ $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 $pacerIndex = -1;
 $sets = 1;
 $intervals = -1;
+$metersArray = [];
+$paceArray = [];
+$restArray = [];
 
-echo $_REQUEST;
+// echo $_REQUEST["pace9"];
 // echo $_REQUEST["numMetersArray"];
 
-// Pull all your values out of the GET request
-if (empty($_REQUEST["pacerIndex"])) {
-	$pacerIndex = $_REQUEST["pacerIndex"];
-	$sets = $_REQUEST["sets"];
-	$intervals = $_REQUEST["intervals"];
-}
-else {
-	// do nothing - for some reason it always gets recognized as "empty" even though there are clearly parameters
-	$pacerIndex = $_REQUEST["pacerIndex"];
-	$sets = $_REQUEST["sets"];
-	$intervals = $_REQUEST["intervals"];
-}
 
-$echoString = "";
+// Pull all your values out of the GET request
+$pacerIndex = $_REQUEST["pacerIndex"];
+$sets = $_REQUEST["sets"];
+$intervals = $_REQUEST["intervals"];
+
+
 // loop to get all array elements out of the request
 for ($x = 0; $x < $intervals; $x++) {
-	$echoString .= $_REQUEST["numMetersArray[intervals]"];
-	$echoString .= $_REQUEST["secondsLapPaceArray[intervals]"];
-	$echoString .= $_REQUEST["secondsRestArray[intervals]"];
+	$tempString = "m" . $x;
+	$metersArray[$x] = $_REQUEST[$tempString];
+	$tempString = "p" . $x;
+	$paceArray[$x] = $_REQUEST[$tempString];
+	$tempString = "r" . $x;
+	$restArray[$x] = $_REQUEST[$tempString];
 }
 
-/*
 // Delete whatever workout that pacer already had in the database
 $db->query('DELETE FROM Workout WHERE pacerIndex=' . $pacerIndex);
 
 // Loop to add the same workout sequence for all the sets - maybe we could change this to pass an array of values in the GET request so we can add unlimited number of intervals in each set
 for ($x = 0; $x < $sets; $x++) {
-	// Query to add the rep portion
-	$db->query('INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . $secondsPerLap . ', ' . $meters . ')');
-				
-	// Query to add the rest portion
-	$db->query('INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '0' . ', ' . $secondsRest . ', ' . $meters . ')');
-	
-	// If there is a second interval to be done in each set, this is where it is set up
-	if ($meters2 > 0 && $secondsPerLap2 > 0 && $secondsRest2 > 0) {
+	// loop through the intervals in each set
+	for ($y = 0; $y < $intervals; $y++) {
 		// Query to add the rep portion
-		$db->query('INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . $secondsPerLap2 . ', ' . $meters2 . ')');
-				
+		$db->query('INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . $paceArray[$y] . ', ' . $metersArray[$y] . ')');
+					
 		// Query to add the rest portion
-		$db->query('INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '0' . ', ' . $secondsRest2 . ', ' . $meters2 . ')');
+		$db->query('INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '0' . ', ' . $restArray[$y] . ', ' . $metersArray[$y] . ')');
 	}
 } 
 
 // set all the workout entries in the workout table for this pacer to "active=1" to indicate that they need to be run
-$db->query('UPDATE Workout SET active=1 WHERE pacerIndex=' . $pacerIndex);					
-*/
+$db->query('UPDATE Workout SET active=1 WHERE pacerIndex=' . $pacerIndex);
 
 $db->close();
 
-/*
-echo "Your workout was successfully added.";
-*/
+echo "Your workout was successfully added." . " sets=" . $sets . ", intervals=" . $intervals . ", last rest entered=" . $restArray[$intervals-1];
 
 ?>

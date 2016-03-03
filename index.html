@@ -488,12 +488,6 @@
                     var numMeters = $("#workoutMetersInput").val();
 		            var secondsLapPace = $("#workoutLapPaceInput").val();
 		            var secondsRest = $("#workoutRestInput").val();
-                    /*
-		            if ($("#workoutMetersInput2").val() > 0 && $("#workoutLapPaceInput2").val() > 0 && $("#workoutRestInput2").val() > 0) {
-		                var numMeters2 = $("#workoutMetersInput2").val();
-		                var secondsLapPace2 = $("#workoutLapPaceInput2").val();
-		                var secondsRest2 = $("#workoutRestInput2").val();
-		            }*/
 
                     // if the data is valid, add it to the workout arrays
 		            if (numMeters > 0 && secondsLapPace > 0 && secondsRest > 0) {
@@ -509,15 +503,21 @@
 		            var numMetersArrayRequestString = "";
 		            var secondsLapPaceArrayRequestString = "";
 		            var secondsRestArrayRequestString = "";
+		            var getRequestString = "";                      // a variable to hold the string that will be used in the GET request
 		            while (numMetersArray[i] > 0 && secondsLapPaceArray[i] > 0 && secondsRestArray[i] > 0) {
 		                // while these instances of the array is greater than 0, add them to the string to be appended to the GET request
-                        /*
-		                numMetersArrayRequestString += "&numMetersArray[]="
-		                numMetersArrayRequestString += numMetersArray[i];
-		                secondsLapPaceArrayRequestString += "&secondsLapPaceArray[]="
-		                secondsLapPaceArrayRequestString += secondsLapPaceArray[i];
-		                secondsRestArrayRequestString += "&secondsRestArray[]="
-		                secondsRestArrayRequestString += secondsRestArray[i];*/
+		                getRequestString += "&m";       // meters to run
+		                getRequestString += i;
+		                getRequestString += "=";
+		                getRequestString += numMetersArray[i];
+		                getRequestString += "&p";       // pace to run per lap (in seconds)
+		                getRequestString += i;
+		                getRequestString += "=";
+		                getRequestString += secondsLapPaceArray[i];
+		                getRequestString += "&r";       // rest to take after the interval (in seconds)
+		                getRequestString += i;
+		                getRequestString += "=";
+		                getRequestString += secondsRestArray[i];
 		                i++;
 		            }
                     
@@ -528,24 +528,13 @@
 		                }
 		            };
 
-		            // ?arr[]=1&arr[]=2&arr[]=3&arr[]=4
+		            // may want to consider serializing like this -> unserializedString = JSON.parse(arr)
+		            // serialized GET request might look like this -> ?arr[]=1&arr[]=2&arr[]=3&arr[]=4
 		            // numMetersArray = [];
 		            // secondsLapPaceArray = [];
 		            // secondsRestArray = [];
 
-                    // We need to change the GET reqest to include the values from the arrays if they are valid
-
-                    /*
-		            if ($("#workoutMetersInput2").val() > 0 && $("#workoutLapPaceInput2").val() > 0 && $("#workoutRestInput2").val() > 0) {
-		                xhttp.open("GET", "createWorkout.php?pacerIndex=" + masterPacerSelected + "&sets=" + numSets + "&meters=" + numMeters + "&secondsPerLap=" + secondsLapPace + "&secondsRest=" + secondsRest +
-                            "&meters2=" + numMeters2 + "&secondsPerLap2=" + secondsLapPace2 + "&secondsRest2=" + secondsRest2, true);
-		            }
-		            else {
-		                xhttp.open("GET", "createWorkout.php?pacerIndex=" + masterPacerSelected + "&sets=" + numSets + "&meters=" + numMeters + "&secondsPerLap=" + secondsLapPace + "&secondsRest=" + secondsRest, true);
-		            }*/
-
-		            xhttp.open("GET", "createWorkout.php?pacerIndex=" + masterPacerSelected + "&sets=" + numSets + "&intervals=" + i + JSON.stringify(numMetersArray) + JSON.stringify(secondsLapPaceArray) + JSON.stringify(secondsRestArray), true);
-
+		            xhttp.open("GET", "createWorkout.php?pacerIndex=" + masterPacerSelected + "&sets=" + numSets + "&intervals=" + i + getRequestString, true);
 		            xhttp.send();
 
 		            // reset the arrays to empty

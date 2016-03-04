@@ -26,6 +26,7 @@
 		    var onCreateNewPacerViewSequence = false;
 		    var onExistingPacerSequence = false;
 		    var onCoachSequence = false;
+		    var extrasMode = false;
 		    var masterPacerSelected = 99;
 		    var lapTimeInputConstraints = [1, 900];
 		    var pinVar = 111;
@@ -35,10 +36,10 @@
 
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 		    createNewPacerViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
-		    existingPacerViewSequence = ["start", "pacerSelect", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
+		    existingPacerViewSequence = ["start", "pacerSelect", "pin", "simpleControls", "extraControls"];
 		    coachSequence = ["start", "normalMode", "advancedCoachFeatures", "showEverything"];
 		    showViewArray = [showFirstTimeUserStartView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView, showCreateWorkoutView];
-		    showExistingViewArray = [showFirstTimeUserStartView, showPacerButtonsView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView, showCreateWorkoutView];
+		    showExistingViewArray = [showFirstTimeUserStartView, showPacerButtonsView, showCreatePinView, showSimplePacerControlView, showExtrasPacerControlView];
 		    showCoachViewArray = [showFirstTimeUserStartView, showNormalView, showAdvancedCoachFeatures, showEverything];
 
             // workout creation
@@ -193,6 +194,28 @@
 		            request.send();
 		        });
 
+		        /*$(".quickAccessButtons").click(function () {
+		            $(this).attr("viewFunction")();
+		            extrasMode = true;
+		            if ($(this) == $("#cancelButton")) {
+		                extrasMode = false;
+		            }
+		        });*/
+		        // changePaceExtrasButton, changeColorExtrasButton, createWorkoutExtrasButton, cancelButton
+		        // showCreateWorkoutExtrasView, showColorButtonsExtrasView, showPacerTimeInputExtrasView, showCurrentViewBeforeExtras
+		        $("#changePaceExtrasButton").click(function () {
+		            showPacerTimeInputExtrasView();
+		        });
+		        $("#changeColorExtrasButton").click(function () {
+		            showColorButtonsExtrasView();
+		        });
+		        $("#createWorkoutExtrasButton").click(function () {
+		            showCreateWorkoutExtrasView();
+		        });
+		        $("#cancelButton").click(function () {
+		            showCurrentViewBeforeExtras();
+		        });
+
 		        // Handles the submission of the normal view lap time
 		        $("#pacerTimeSubmit").click(function () {
 		            commandURL = parseInt($(this).attr("url"), 10);
@@ -307,6 +330,9 @@
 		        $("#viewEscapeButton").click(function () {
 		            if (onCreateNewPacerViewSequence == true || onExistingPacerSequence == true || onCoachSequence == true) {
 		                backOneView();
+		            }
+		            else if (extrasMode == true) {
+		                showCurrentViewBeforeExtras();
 		            }
 		            else {
 		                showNormalView();
@@ -827,8 +853,9 @@
 		        $("#simpleViewActionButtonsDiv, #advancedButtonDiv").show();
 		        // $("#clearButton, #resetButton, #colorSelect, #helpButton").show();
 		        massesCurrentView = createNewPacerViewSequence[4];
+		        extrasMode = false;
 		    }
-
+		    
 		    // show pacer time input View
 		    function showPacerTimeInputView() {
 		        hideEverything();
@@ -837,6 +864,12 @@
 		        massesCurrentView = createNewPacerViewSequence[3];
 		    }
 
+		    // Extras mode: show pacer time input View
+		    function showPacerTimeInputExtrasView() {
+		        hideEverything();
+		        $("#pacerTimeInputDiv").show();
+		        $("#cancelButtonDiv").show();
+		    }
 		    // show create PIN view
 		    function showCreatePinView() {
 		        hideEverything();
@@ -869,7 +902,7 @@
 		            massesCurrentView = existingPacerViewSequence[1];
 		        }
 		    }
-
+		    
 		    // show Color Buttons View "page"
 		    function showColorButtonsView() {
 		        hideEverything();
@@ -881,6 +914,14 @@
 		        if (onExistingPacerSequence == true) {
 		            massesCurrentView = existingPacerViewSequence[3];
 		        }
+		    }
+
+		    // Extras mode: show Color Buttons View "page"
+		    function showColorButtonsExtrasView() {
+		        hideEverything();
+		        $("#colorButtonView").show();
+
+		        $("#cancelButtonDiv").show();
 		    }
 
 		    // View for when the user requests a pacer and there isn't one available
@@ -910,18 +951,19 @@
 
 		    }
 
+		    // show the extra control features for pacers
+		    function showExtrasPacerControlView() {
+		        hideEverything();
+		        $("#viewEscape").show();
+		        $("#advancedCoachDiv").show();
+		        $("#extrasControlDiv").show();
+		        extrasMode = true;
+		    }
+
 		    // show the view that allows the user to create their workout by adding reps and rest periods
 		    function showCreateWorkoutView() {
 		        hideEverything();
 		        $("#viewEscape").show();
-		        $("#advancedCoachDiv").show();
-
-                $("#writeFileMode").hide();
-                $("#lightStripMode").hide();
-                $("#selectAllPinButton").hide();
-                $("#setAllWorkoutsToAcitveButton").hide();
-                $("#resetYunFromDbButton").hide();
-                $("#selectAllWorkoutButton").hide();
 
                 $("#createWorkoutDiv").show();
 
@@ -937,6 +979,40 @@
                 $("#workoutRestInput").val("0");
 
                 $("#setNumberIndicator").text("Setup interval #1");
+		    }
+
+		    // Extras mode: show the view that allows the user to create their workout by adding reps and rest periods
+		    function showCreateWorkoutExtrasView() {
+		        hideEverything();
+
+		        $("#createWorkoutDiv").show();
+
+		        // arrays need to be cleared for future workout data
+		        numMetersArray = [];
+		        secondsLapPaceArray = [];
+		        secondsRestArray = [];
+
+		        // Set all the fields to 0 along with the currentInterval
+		        currentInterval = 0;
+		        $("#workoutMetersInput").val("0");
+		        $("#workoutLapPaceInput").val("0");
+		        $("#workoutRestInput").val("0");
+
+		        $("#setNumberIndicator").text("Setup interval #1");
+
+		        $("#cancelButtonDiv").show();
+		    }
+		    // show the current view before the user went into the extras
+		    function showCurrentViewBeforeExtras() {
+		        var i=0;
+		        while (massesCurrentView != existingPacerViewSequence[i] && i < existingPacerViewSequence.length) {
+		            i++;
+		        }
+		        if (i < existingPacerViewSequence.length) {
+		            if (massesCurrentView == existingPacerViewSequence[i]) {
+		                showExistingViewArray[i]();
+		            }
+		        }
 		    }
 
 		    // show all the advanced elements and hide the advanced button
@@ -1091,7 +1167,19 @@
                     <a id="colorButton5" class="btn colorButtonClass" otherNum="6" data-role="button" data-icon="star"></a>
                     <a id="colorButton6" class="btn colorButtonClass" otherNum="7" data-role="button" data-icon="star"></a>
                 </div>
-
+                <!--changePaceExtrasButton, changeColorExtrasButton, createWorkoutExtrasButton, cancelButton
+                showCreateWorkoutView, showColorButtonsView, showPacerTimeInputView, showCurrentViewBeforeExtras-->
+                <div id="extrasControlDiv" class="contentElement advancedElement" >
+                    <a id="changePaceExtrasButton" class="btn quickAccessButtons" viewFunction="showPacerTimeInputExtrasView" url="-1" otherNum="1" data-role="button"><h3>Change Pace</h3></a>
+                    <br />
+                    <a id="changeColorExtrasButton" class="btn quickAccessButtons" viewFunction="showColorButtonsExtrasView" url="-1" otherNum="1" data-role="button"><h3>Change Color</h3></a>
+                    <br />
+                    <a id="createWorkoutExtrasButton" class="btn quickAccessButtons" viewFunction="showCreateWorkoutExtrasView" url="-1" otherNum="1" data-role="button"><h3>Create Workout</h3></a>
+                    <br /><br /><br />
+				</div>
+                <div id="cancelButtonDiv" class="contentElement advancedElement" >
+                    <a id="cancelButton" class="btn quickAccessButtons" viewFunction="showCurrentViewBeforeExtras" url="-1" otherNum="1" data-role="button">Cancel</a>
+				</div>
                 <div id="advancedCoachDiv" class="contentElement advancedElement" >
                     <button id="writeFileMode" style="background-color:lightgreen">Write Mode On/Off</button>
                     <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
@@ -1101,7 +1189,7 @@
                     <button id="startWorkoutButton" style="background-color:#E6E6E6">Start Workout</button>
                     <a id="resetYunFromDbButton" class="btn" url="-1" otherNum="1" data-role="button">Reset Yun DB</a>
 				</div>
-
+                
                 <div id="createWorkoutDiv" class="contentElement advancedElement" >
                     <h3 for="createWorkoutSubmit" class="">Create your workout: </h3>
 

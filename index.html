@@ -38,7 +38,7 @@
 		    createNewPacerViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
 		    existingPacerViewSequence = ["start", "pacerSelect", "pin", "simpleControls", "extraControls"];
 		    coachSequence = ["start", "normalMode", "advancedCoachFeatures", "showEverything"];
-		    showViewArray = [showFirstTimeUserStartView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView, showCreateWorkoutView];
+		    showViewArray = [showFirstTimeUserStartView, showCreatePinView, showColorButtonsView, showPacerTimeInputView, showSimplePacerControlView, showExtrasPacerControlView];  // alternatively last could be: showCreateWorkoutView
 		    showExistingViewArray = [showFirstTimeUserStartView, showPacerButtonsView, showCreatePinView, showSimplePacerControlView, showExtrasPacerControlView];
 		    showCoachViewArray = [showFirstTimeUserStartView, showNormalView, showAdvancedCoachFeatures, showEverything];
 
@@ -230,7 +230,7 @@
 		            else {
 		                requestCommand(commandURL, pacerIndex, newNum);
 		                forwardOneView();
-		                alert("Starting Traffic Light Countdown\n\nRED will appear on the third light\n\nfollowed by YELLOW on the second light.");
+		                alert("Starting Traffic Light Countdown\n\nRED will appear on 3rd light\n\nYELLOW will then appear on 2nd light.");
 		            }
 		        });
 
@@ -1004,13 +1004,25 @@
 		    }
 		    // show the current view before the user went into the extras
 		    function showCurrentViewBeforeExtras() {
-		        var i=0;
-		        while (massesCurrentView != existingPacerViewSequence[i] && i < existingPacerViewSequence.length) {
-		            i++;
+		        var i = 0;
+		        if (onExistingPacerSequence == true) {
+		            while (massesCurrentView != existingPacerViewSequence[i] && i < existingPacerViewSequence.length) {
+		                i++;
+		            }
+		            if (i < existingPacerViewSequence.length) {
+		                if (massesCurrentView == existingPacerViewSequence[i]) {
+		                    showExistingViewArray[i]();
+		                }
+		            }
 		        }
-		        if (i < existingPacerViewSequence.length) {
-		            if (massesCurrentView == existingPacerViewSequence[i]) {
-		                showExistingViewArray[i]();
+		        if (onCreateNewPacerViewSequence == true) {
+		            while (massesCurrentView != createNewPacerViewSequence[i] && i < createNewPacerViewSequence.length) {
+		                i++;
+		            }
+		            if (i < createNewPacerViewSequence.length) {
+		                if (massesCurrentView == createNewPacerViewSequence[i]) {
+		                    showViewArray[i]();
+		                }
 		            }
 		        }
 		    }
@@ -1187,7 +1199,7 @@
                     <button id="selectAllWorkoutButton" style="background-color:#E6E6E6">Select * From Workout</button>
                     <button id="setAllWorkoutsToAcitveButton" style="background-color:#E6E6E6">Make all workouts active</button>
                     <button id="startWorkoutButton" style="background-color:#E6E6E6">Start Workout</button>
-                    <a id="resetYunFromDbButton" class="btn" url="-1" otherNum="1" data-role="button">Reset Yun DB</a>
+                    <a id="resetYunFromDbButton" class="btn" url="-1" otherNum="1" data-role="button">Refresh Pacers based on Yun DB</a>
 				</div>
                 
                 <div id="createWorkoutDiv" class="contentElement advancedElement" >

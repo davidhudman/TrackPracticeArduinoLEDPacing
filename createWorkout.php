@@ -10,6 +10,9 @@ $intervals = -1;
 $metersArray = [];
 $paceArray = [];
 $restArray = [];
+$queryArray = [];
+$queryArrayCounter = 0;
+$concatenatedString = "";
 
 // echo $_REQUEST["pace9"];
 // echo $_REQUEST["numMetersArray"];
@@ -39,12 +42,19 @@ for ($x = 0; $x < $sets; $x++) {
 	// loop through the intervals in each set
 	for ($y = 0; $y < $intervals; $y++) {
 		// Query to add the rep portion
-		$db->query('INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . $paceArray[$y] . ', ' . $metersArray[$y] . ')');
-					
+		$queryArray[$queryArrayCounter] = 'INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . $paceArray[$y] . ', ' . $metersArray[$y] . ');';
+		$queryArrayCounter = $queryArrayCounter + 1;			
+		
 		// Query to add the rest portion
-		$db->query('INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '0' . ', ' . $restArray[$y] . ', ' . $metersArray[$y] . ')');
+		$queryArray[$queryArrayCounter] = 'INSERT INTO Workout (pacerIndex, repeat, remaining, active, type, secondsPerLap, meters) VALUES (' . $pacerIndex . ', ' . '1' . ', ' . '1' . ', ' . '1' . ', ' . '0' . ', ' . $restArray[$y] . ', ' . $metersArray[$y] . ');';
+		$queryArrayCounter = $queryArrayCounter + 1;
 	}
 } 
+
+for ($x = 0; $x <= count($queryArray); $x++) {
+	$concatenatedString .= $queryArray[$x];
+}
+$db->query($concatenatedString);
 
 // set all the workout entries in the workout table for this pacer to "active=1" to indicate that they need to be run
 $db->query('UPDATE Workout SET active=1 WHERE pacerIndex=' . $pacerIndex);

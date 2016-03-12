@@ -22,14 +22,17 @@ $secondsPerLap = -1;
 $meters = -1;
 $next = -1;
 $previous = -1;
+$webAppGeneratedRequest = -1;
 
 // Pull all your values out of the GET request
 if (empty($_REQUEST["pacerIndex"])) {
 	$pacerIndex = $_REQUEST["pacerIndex"];
+	$webAppGeneratedRequest = $_REQUEST["webAppGeneratedRequest"];
 }
 else {
 	// do nothing - for some reason it always gets recognized as "empty" even though there are clearly parameters
 	$pacerIndex = $_REQUEST["pacerIndex"];
+	$webAppGeneratedRequest = $_REQUEST["webAppGeneratedRequest"];
 }
 
 if ($pacerIndex != -1) {
@@ -60,7 +63,7 @@ while ($row = $results->fetchArray()) {
 }
 
 // First, make sure that we got something from the query
-if ($workoutIndex != -1) {
+if ($workoutIndex > -1) {
 	// The workout type is "Rest" - we're going to have to subtract 20-30 seconds from their rest because that's how long the processing takes
 	if ($typer == 0) {
 		$delayTime = $secondsPerLap;
@@ -79,13 +82,19 @@ if ($workoutIndex != -1) {
 
 	// Change that row in the database to inactive (because it's already running and we don't want it to run again)
 	$db->query('UPDATE Workout SET active=0 WHERE workoutIndex=' . $workoutIndex);
-	echo "<br />UPDATE query Executed Successfully";
+	echo "<br />Your interval that you created will begin shortly.";
 
 }
 // No workout available, so let's end the pacer's workout on the Yun
 else {
-	file_get_contents($ipAddress . "/arduino/13/" . $pacerIndex . "/0" . "/" . $meters);		// send the command to end the pacer's workout
-	echo "<br />Pacer cleared successfully";
+	// if this request did not come from the app
+	if ($webAppGeneratedRequest != 1) {
+		file_get_contents($ipAddress . "/arduino/13/" . $pacerIndex . "/0" . "/" . $meters);		// send the command to end the pacer's workout
+		echo "<br />Pacer cleared successfully";
+	}
+	else {	// if the request came from the app
+		echo "No workout available.";
+	}
 }
 
 $db->close();

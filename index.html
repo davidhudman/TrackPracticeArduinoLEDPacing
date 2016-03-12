@@ -12,6 +12,21 @@
         <link rel="stylesheet" href="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.css">
 		<script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
 		<script>
+		    var isDeveloperMode = false;
+
+		    // Globals specific to the client's track and desired permissions
+		    var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
+		    // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
+		    // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
+		    var numPacers = 10;
+		    var lapTimeInputConstraints = [1, 900];
+		    var trackDistanceInMeters = 400;
+		    var isUserBackwardsPermissionEnabled = true;
+		    var isUserWorkoutPermissionEnabled = true;
+		    var isUserVisiblePermissionEnabled = true;
+		    var isUserSpeedChangePermissionEnabled = true;
+		    var isUserNameChangePermissionEnabled = true;
+
 		    // Numpad global variable stuff
 		    $.fn.numpad.defaults.gridTpl = '<table class="ui-bar-a"></table>';
 		    $.fn.numpad.defaults.backgroundTpl = '<div class="ui-popup-screen ui-overlay-a"></div>';
@@ -20,7 +35,6 @@
 		    $.fn.numpad.defaults.buttonFunctionTpl = '<a data-role="button" data-theme="a"></a>';
 		    $.fn.numpad.defaults.onKeypadCreate = function () { $(this).enhanceWithin(); };
 
-		    var numPacers = 10;
 		    var pacerButton = [];
 		    var advancedButtonPressed = false;
 		    var onCreateNewPacerViewSequence = false;
@@ -28,13 +42,11 @@
 		    var onCoachSequence = false;
 		    var extrasMode = false;
 		    var masterPacerSelected = 99;
-		    var lapTimeInputConstraints = [1, 900];
 		    var pinVar = 111;
-		    var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
-		    // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
-		    // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
 
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
+
+		    // Views
 		    createNewPacerViewSequence = ["start", "pin", "colorEntry", "timeEntry", "simpleControls", "activePacers"];
 		    existingPacerViewSequence = ["start", "pacerSelect", "pin", "simpleControls", "extraControls"];
 		    coachSequence = ["start", "normalMode", "advancedCoachFeatures", "showEverything"];
@@ -42,7 +54,7 @@
 		    showExistingViewArray = [showFirstTimeUserStartView, showPacerButtonsView, showCreatePinView, showSimplePacerControlView, showExtrasPacerControlView];
 		    showCoachViewArray = [showFirstTimeUserStartView, showNormalView, showAdvancedCoachFeatures, showEverything];
 
-            // workout creation
+		    // workout creation
 		    numMetersArray = [];
 		    secondsLapPaceArray = [];
 		    secondsRestArray = [];
@@ -182,6 +194,23 @@
 		            requestCommand(commandURL, pacerIndex, newNum);
 		        });
 
+		        // handles pacer action commands - clear, reset, backwards, new number of lights, change in speed, etc.
+		        $("#accelerateNew, #slowNew").click(function () {
+		            var commandURL = parseInt($(this).attr("url"), 10);
+		            var pacerIndex = parseInt(masterPacerSelected, 10);
+		            var newNum = parseFloat($(this).attr("otherNum"));
+		            var signlessNum = parseFloat($("#speedChangeInput").val());
+
+		            if (signlessNum <= 0.0) {
+		                alert("Speed change value must be greater than 0.");
+		            }
+		            else {
+		                newNum = signlessNum * newNum;   // multiply by newNum because '$(this).attr("otherNum")' is actually the "sign" of the number
+		            }
+
+		            requestCommand(commandURL, pacerIndex, newNum);
+		        });
+
 		        $("#resetYunFromDbButton").click(function () {
 		            var request = new XMLHttpRequest();
 		            request.onreadystatechange = function () {
@@ -212,6 +241,9 @@
 		        $("#createWorkoutExtrasButton").click(function () {
 		            showCreateWorkoutExtrasView();
 		        });
+		        $("#changeSpeedInFlightButton").click(function () {
+		            showInflightSpeedChangeExtrasView();
+		        });
 		        $("#cancelButton").click(function () {
 		            showCurrentViewBeforeExtras();
 		        });
@@ -230,14 +262,14 @@
 		            else {
 		                requestCommand(commandURL, pacerIndex, newNum);
 		                forwardOneView();
-		                alert("Starting Traffic Light Countdown\n\nRED will appear on 3rd light\n\nYELLOW will then appear on 2nd light.");
+		                alert("Starting Traffic Light Countdown\n\nRED will appear on 3rd light\n\nYELLOW will then appear on 2nd light.");	// user alert
 		            }
 		        });
 
 		        // handles longpress of all buttons to show their help text
 		        $(".submitButton3, #lightsSubmit, .speedChangeButton, #advancedButton, #helpButton, #helpButtonMasses").on("taphold", function (event) {
 		            var text = $(this).attr("help");
-		            alert(text);
+		            alert(text);	// user alert
 		        });
 
 		        // handles longpress for of description button to make it into a reset delay button and vice versa
@@ -249,13 +281,13 @@
 		                    $("#resetButton").attr("url", "2");
 		                    $("#resetButton").attr("data-icon", "clock");
 		                    $("#demo").text("button is now delay");
-		                    alert("Reset button will now reset pacers on a delay.");
+		                    alert("Reset button will now reset pacers on a delay."); // user alert
 		                }
 		                else {
 		                    $("#resetButton").attr("url", "1");
 		                    $("#resetButton").attr("data-icon", "refresh");
 		                    $("#demo").text("button is now reset");
-		                    alert("Reset button will now reset pacers immediately when pressed.");
+		                    alert("Reset button will now reset pacers immediately when pressed.");		// user alert
 		                }
 		            }
 		            else {
@@ -276,6 +308,17 @@
 		        // handles longpress of advancedButton in order to show the first time user start view
 		        $("#advancedButton").on("taphold", function (event) {
 		            showFirstTimeUserStartView();
+		        });
+
+		        // handles longpress of existingPacerButton to change whether the user is in developer mode or not
+		        $("#existingPacerButton").on("taphold", function (event) {
+		            isDeveloperMode = !isDeveloperMode;
+		            if (isDeveloperMode == true) {
+		                alert("You are now in Developer Mode. You will just see some weird alerts. Long-press the red button again to leave this mode.");		// user alert
+		            }
+		            else {
+		                alert("You have quit Developer Mode. Long-press the red button again to go back.");		// user alert
+		            }
 		        });
 
 		        // reveals the secret demo field whenever you click the advancedButton
@@ -302,7 +345,7 @@
 		        // Display help when the help button is clicked
 		        $("#helpButton, #helpLink, #helpButtonMasses").click(function () {
 		            var text = $(this).attr("help");
-		            alert(text);
+		            alert(text);		// user alert
 		        });
 
 		        // hide everything when the allPacersButton is clicked except the group of pacerButtons and its escape button
@@ -376,11 +419,16 @@
 		                        if (xhttp.responseText != "incorrect") {
 		                            pinSubmitText = xhttp.responseText;
 		                            masterPacerSelected = pinSubmitText;
-		                            alert(masterPacerSelected);
+		                            if (isDeveloperMode == true) {
+		                                alert(masterPacerSelected);
+		                            }
+		                            else {
+		                                // user alert
+		                            }
 		                            forwardOneView();
 		                        }
 		                        else {
-		                            alert(xhttp.responseText);  // incorrect PIN
+		                            alert(xhttp.responseText);  // incorrect PIN  // user alert
 		                        }
 		                    }
 		                };
@@ -393,7 +441,7 @@
 		                xhttp.send();
 		            }
 		            else {
-		                alert("Please enter 3 digits");
+		                alert("Please enter 3 digits");		// user alert
 		            }
 		        });
 
@@ -460,7 +508,7 @@
 		            var xhttp = new XMLHttpRequest();
 		            xhttp.onreadystatechange = function () {
 		                if (xhttp.readyState == 4 && xhttp.status == 200) {
-		                    alert(xhttp.responseText);
+		                    alert(xhttp.responseText);		// developer alert
 		                }
 		            };
 		            xhttp.open("GET", "selectPin.php?backslashNNeeded=1", true);
@@ -473,7 +521,7 @@
 		            var xhttp = new XMLHttpRequest();
 		            xhttp.onreadystatechange = function () {
 		                if (xhttp.readyState == 4 && xhttp.status == 200) {
-		                    alert(xhttp.responseText);
+		                    alert(xhttp.responseText);		// developer alert
 		                }
 		            };
 		            xhttp.open("GET", "selectWorkout.php?backslashNNeeded=1", true);
@@ -499,30 +547,36 @@
 		            var xhttp = new XMLHttpRequest();
 		            xhttp.onreadystatechange = function () {
 		                if (xhttp.readyState == 4 && xhttp.status == 200) {
-		                    alert(xhttp.responseText);
+		                    if (isDeveloperMode == true) {
+		                        alert(xhttp.responseText);		// developer alert
+		                    }
+		                    else {
+		                        alert(xhttp.responseText);		// user alert
+		                        // alert("After the countdown, your workout will begin.");	// user alert
+		                    }
 		                }
 		            };
-		            xhttp.open("GET", "runWorkout.php?pacerIndex=" + masterPacerSelected, true);
+		            xhttp.open("GET", "runWorkout.php?pacerIndex=" + masterPacerSelected + "&webAppGeneratedRequest=1", true);
 		            xhttp.send();
 
 		        });
 
 		        // Reacts to click of createWorkoutSubmit Button by validating the data and sending the created workout to the database
 		        $("#createWorkoutSubmit").click(function () {
-                    
+
 		            var numSets = $("#workoutSetsInput").val();
-                    var numMeters = $("#workoutMetersInput").val();
+		            var numMeters = $("#workoutMetersInput").val();
 		            var secondsLapPace = $("#workoutLapPaceInput").val();
 		            var secondsRest = $("#workoutRestInput").val();
 
-                    // if the data is valid, add it to the workout arrays
+		            // if the data is valid, add it to the workout arrays
 		            if (numMeters > 0 && secondsLapPace > 0 && secondsRest > 0) {
 		                numMetersArray[currentInterval] = $("#workoutMetersInput").val();
 		                secondsLapPaceArray[currentInterval] = $("#workoutLapPaceInput").val();
 		                secondsRestArray[currentInterval] = $("#workoutRestInput").val();
 		            }
 		            else {
-		                alert("The interval you were on was not saved because the distance you will run, the pace you will run, and the rest you will take must all be greater than 0.");
+		                alert("The interval you were on was not saved because the distance you will run, the pace you will run, and the rest you will take must all be greater than 0.");	// user alert
 		            }
 
 		            var i = 0;
@@ -546,11 +600,16 @@
 		                getRequestString += secondsRestArray[i];
 		                i++;
 		            }
-                    
+
 		            var xhttp = new XMLHttpRequest();
 		            xhttp.onreadystatechange = function () {
 		                if (xhttp.readyState == 4 && xhttp.status == 200) {
-		                    alert(xhttp.responseText);
+		                    if (isDeveloperMode == true) {
+		                        alert(xhttp.responseText);	// developer alert
+		                    }
+		                    else {
+		                        alert("Your workout was successfully created.");	// user alert
+		                    }
 		                }
 		            };
 
@@ -568,7 +627,7 @@
 		            secondsLapPaceArray = [];
 		            secondsRestArray = [];
 
-		            alert("Please allow up to 30 seconds to create your workout.");
+		            alert("Please allow up to 30 seconds to create your workout.");		// user alert
 
 		            backOneView();
 
@@ -582,13 +641,13 @@
 
 		            if (currentInterval > 0) {
 		                if (numMeters > 0 && secondsLapPace > 0 && secondsRest > 0) {
-                            // save the values entered by the user into the workout arrays
+		                    // save the values entered by the user into the workout arrays
 		                    numMetersArray[currentInterval] = numMeters;
 		                    secondsLapPaceArray[currentInterval] = secondsLapPace;
 		                    secondsRestArray[currentInterval] = secondsRest;
 		                }
 		                else {
-		                    alert("The interval will not be saved because the distance you will run, the pace you will run, and the rest you will take must all be greater than 0.");
+		                    alert("The interval will not be saved because the distance you will run, the pace you will run, and the rest you will take must all be greater than 0.");		// user alert
 		                }
 
 		                // next we need to decrement the currentInterval value
@@ -604,7 +663,7 @@
 		                $("#setNumberIndicator").text("Setup interval #" + userViewCurrentInterval);
 		            }
 		            else {
-		                alert("You are on the first interval, so you can only go to the next interval.");
+		                alert("You are on the first interval, so you can only go to the next interval.");	// user alert
 		            }
 		        });
 
@@ -642,10 +701,10 @@
 		                $("#setNumberIndicator").text("Setup interval #" + userViewCurrentInterval);
 		            }
 		            else {
-		                alert("The distance you will run, the pace you will run, and the rest you will take must all be greater than 0 before you can setup the next interval.");
+		                alert("The distance you will run, the pace you will run, and the rest you will take must all be greater than 0 before you can setup the next interval.");		// user alert
 		            }
 		        });
-		        
+
 
 		    });
 
@@ -661,7 +720,7 @@
 		            hidePlusMinusButton: true,
 		            hideDecimalButton: true
 		        });
-                
+
 		        $("#pacerTimeInput, #workoutLapPaceInput").numpad({
 		            // displayTpl: '<input data-theme="b" type="password" />',
 		            hidePlusMinusButton: true,
@@ -855,7 +914,7 @@
 		        massesCurrentView = createNewPacerViewSequence[4];
 		        extrasMode = false;
 		    }
-		    
+
 		    // show pacer time input View
 		    function showPacerTimeInputView() {
 		        hideEverything();
@@ -902,7 +961,7 @@
 		            massesCurrentView = existingPacerViewSequence[1];
 		        }
 		    }
-		    
+
 		    // show Color Buttons View "page"
 		    function showColorButtonsView() {
 		        hideEverything();
@@ -955,9 +1014,40 @@
 		    function showExtrasPacerControlView() {
 		        hideEverything();
 		        $("#viewEscape").show();
-		        $("#advancedCoachDiv").show();
 		        $("#extrasControlDiv").show();
 		        extrasMode = true;
+
+		        if (isDeveloperMode == true) {
+		            $("#advancedCoachDiv").show();
+		        }
+		        else {
+		            $("#test00, #test01, #test02, #test03, #test04").hide();
+		        }
+		    }
+
+		    // show the view that renames the pacer - renamePacerDiv, nameChangeSkipButton
+		    function showPacerRenameView() {
+		        // if we're in coachMode or userNameChangePermission is enabled
+		        if (true) {
+		            hideEverything();
+		            $("#renamePacerDiv").show();
+		            $("#nameChangeSkipButton").show();
+		            $("#viewEscape").show();
+		            // if in extrasMode, hide nameChangeSkipButton and show cancelButton
+		            if (extrasMode == true) {
+		                $("#nameChangeSkipButton").hide();
+		                $("#viewEscape").hide();
+		                $("#cancelButtonDiv").show();
+		            }
+		        }
+		        else {
+		            if (extrasMode == true) {
+		                // don't show the view
+		            }
+		            else {
+		                // skip to the next view or to the previous depending on what the user was trying to do
+		            }
+		        }
 		    }
 
 		    // show the view that allows the user to create their workout by adding reps and rest periods
@@ -965,20 +1055,28 @@
 		        hideEverything();
 		        $("#viewEscape").show();
 
-                $("#createWorkoutDiv").show();
+		        $("#createWorkoutDiv").show();
 
-                // arrays need to be cleared for future workout data
-                numMetersArray = [];
-                secondsLapPaceArray = [];
-                secondsRestArray = [];
+		        // arrays need to be cleared for future workout data
+		        numMetersArray = [];
+		        secondsLapPaceArray = [];
+		        secondsRestArray = [];
 
-                // Set all the fields to 0 along with the currentInterval
-                currentInterval = 0;
-                $("#workoutMetersInput").val("0");
-                $("#workoutLapPaceInput").val("0");
-                $("#workoutRestInput").val("0");
+		        // Set all the fields to 0 along with the currentInterval
+		        currentInterval = 0;
+		        $("#workoutMetersInput").val("0");
+		        $("#workoutLapPaceInput").val("0");
+		        $("#workoutRestInput").val("0");
 
-                $("#setNumberIndicator").text("Setup interval #1");
+		        $("#setNumberIndicator").text("Setup interval #1");
+		    }
+
+		    // Extras mode: show inflight speed change View
+		    function showInflightSpeedChangeExtrasView() {
+		        // inflightSpeedChangeDiv, changeSpeedInFlightButton
+		        hideEverything();
+		        $("#cancelButtonDiv").show();
+		        $("#inflightSpeedChangeDiv").show();
 		    }
 
 		    // Extras mode: show the view that allows the user to create their workout by adding reps and rest periods
@@ -1075,11 +1173,12 @@
 					</ul>
 				</div>
 			</div>
+			<!-- viewEscape and cancelButtonDiv should probably be moved into the content div so that their width and alignment will be consistent with everything else.-->
             <div id="viewEscape" class="contentElement advancedElement" >
                     <input id="viewEscapeButton" type="button" style="background-color:#E6E6E6" data-icon="arrow-l" value="Back" />
             </div>
             <div id="cancelButtonDiv" class="contentElement advancedElement" >
-                <a id="cancelButton" class="btn quickAccessButtons" viewFunction="showCurrentViewBeforeExtras" url="-1" otherNum="1" data-role="button">Cancel</a>
+					<input id="cancelButton" type="button" style="background-color:#E6E6E6" data-icon="arrow-l" value="Back" />
 			</div>
 			<div data-role="content" data-theme="a">
                 <div id="feedbackParagraphs" class="contentElement advancedElement">
@@ -1101,6 +1200,14 @@
 				    <label for="select-choice-a" class="select"><h3>Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></h3></label>
 				    <input type="number" pattern="[0-9]*" name="name" id="pacerTimeInput" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
                     <input id="pacerTimeSubmit" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
+				</div>
+				
+				<!-- renamePacerDiv, nameChangeSkipButton -->
+				<div id="renamePacerDiv" class="contentElement advancedElement">
+				    <label for="select-choice-a" class="select"><h3>Enter New Pacer Name: </h3></label>
+				    <input type="alpha" pattern="[a-z]*" name="name" id="nameChangeInput" value="Name Change Input" url="-1" />
+					<input id="nameChangeSubmitButton" type="button" url="-1" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Submit</h3>" />
+                    <input id="nameChangeSkipButton" type="button" url="-1" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Skip</h3>" />
 				</div>
 
                 <!-- Simple Pacer control buttons for first time end user -->
@@ -1146,6 +1253,16 @@
 				    </div>
                 </div>
 				
+				<div id="inflightSpeedChangeDiv" class="contentElement advancedElement" >
+						<label for="speedChangeInput" class="select"><h3>Enter New The Number of Seconds Per Lap to Accelerate / Slow Down: </h3></label>
+						<div>
+							<input class="test031016" data-mini="true" type="number" name="name" id="speedChangeInput" url="8" value="2" min="0.1" max="100.0" step="0.1" />
+						</div>
+						<input id="accelerateNew" type="button" class="test031016" url="8" otherNum="-1.0" data-icon="arrow-u" style="background-color:#00ff21" data-iconpos="right" value="<h3>Faster</h3>" />
+						<br />
+						<input id="slowNew" type="button" class="test031016" url="8" otherNum="1.0" data-icon="arrow-d" style="background-color:#f53434" data-iconpos="right" value="<h3>Slower</h3>" />
+				</div>
+				
                 <div id="advancedButtonDiv" data-role="fieldcontain" class="contentElement">
 					<input id="advancedButton" type="button" data-icon="gear" data-iconpos="notext" url="clear" data-theme="a" />
 				</div>	
@@ -1190,15 +1307,28 @@
                     <a id="changeColorExtrasButton" class="btn quickAccessButtons" viewFunction="showColorButtonsExtrasView" url="-1" otherNum="1" data-role="button"><h3>Change Color</h3></a>
                     <br />
                     <a id="createWorkoutExtrasButton" class="btn quickAccessButtons" viewFunction="showCreateWorkoutExtrasView" url="-1" otherNum="1" data-role="button"><h3>Create Workout</h3></a>
+					<br />
+                    <a id="startWorkoutButton" class="btn quickAccessButtons" viewFunction="showCreateWorkoutExtrasView" url="-1" otherNum="1" data-role="button"><h3>Start Workout</h3></a>
+					<br />
+					<a id="test00" class="btn quickAccessButtons" viewFunction="showCreateWorkoutExtrasView" url="-1" otherNum="1" data-role="button"><h3>Pause Workout</h3></a>
+					<br />
+					<a id="test01" class="btn quickAccessButtons" viewFunction="showCreateWorkoutExtrasView" url="-1" otherNum="1" data-role="button"><h3>Change Direction</h3></a>
+					<br />
+					<a id="test02" class="btn quickAccessButtons" viewFunction="showCreateWorkoutExtrasView" url="-1" otherNum="1" data-role="button"><h3>Change Visibility</h3></a>
+					<br />
+					<a id="changeSpeedInFlightButton" class="btn quickAccessButtons" viewFunction="showCreateWorkoutExtrasView" url="-1" otherNum="1" data-role="button"><h3>Change Speed In Flight</h3></a>
+					<br />
+					<a id="test04" class="btn quickAccessButtons" viewFunction="showCreateWorkoutExtrasView" url="-1" otherNum="1" data-role="button"><h3>Change Name</h3></a>
                     <br /><br /><br />
 				</div>
+				
                 <div id="advancedCoachDiv" class="contentElement advancedElement" >
                     <button id="writeFileMode" style="background-color:lightgreen">Write Mode On/Off</button>
                     <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
                     <button id="selectAllPinButton" style="background-color:#E6E6E6">Select * From Pin</button>
                     <button id="selectAllWorkoutButton" style="background-color:#E6E6E6">Select * From Workout</button>
                     <button id="setAllWorkoutsToAcitveButton" style="background-color:#E6E6E6">Make all workouts active</button>
-                    <button id="startWorkoutButton" style="background-color:#E6E6E6">Start Workout</button>
+                    <!--<button id="startWorkoutButton" style="background-color:#E6E6E6">Start Workout</button>-->
                     <a id="resetYunFromDbButton" class="btn" url="-1" otherNum="1" data-role="button">Refresh Pacers based on Yun DB</a>
 				</div>
                 
@@ -1221,17 +1351,6 @@
 
                     <button id="previousWorkoutSetButton" style="background-color:#E6E6E6">Previous Interval</button>
                     <button id="nextWorkoutSetButton" style="background-color:#E6E6E6">Next Interval</button>
-
-                    <!--<h3>If each set has more than one interval, fill out the fields below.</h3>
-                    <label for="workoutMetersInput2" class="select">Distance (meters) of Each Interval:</label>
-				    <input type="number" pattern="[0-9]*" name="name" id="workoutMetersInput2" value="0" step="1" min="0" max="900" url="13" />
-                    
-                    <label for="workoutLapPaceInput2" class="select">Enter your one-lap pace:</label>
-				    <input type="number" pattern="[0-9]*" name="name" id="workoutLapPaceInput2" value="0" step="0.1" min="0" max="900" url="13" />
-
-                    <label for="workoutRestInput2" class="select">Enter your rest (in seconds):</label>
-				    <input type="number" pattern="[0-9]*" name="name" id="workoutRestInput2" value="0" step="0" min="25" max="900" url="13" />-->
-
 
                     <br />
                     <input id="createWorkoutSubmit" type="button" class="btn" otherNum="0" data-role="button" style="background-color:#f00" value="<h2>Create!</h2>" />

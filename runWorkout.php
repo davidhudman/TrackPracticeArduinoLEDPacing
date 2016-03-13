@@ -82,7 +82,7 @@ if ($workoutIndex > -1) {
 
 	// Change that row in the database to inactive (because it's already running and we don't want it to run again)
 	$db->query('UPDATE Workout SET active=0 WHERE workoutIndex=' . $workoutIndex);
-	echo "<br />Your interval that you created will begin shortly.";
+	echo "Your interval that you created will begin shortly.";
 
 }
 // No workout available, so let's end the pacer's workout on the Yun
@@ -90,7 +90,7 @@ else {
 	// if this request did not come from the app
 	if ($webAppGeneratedRequest != 1) {
 		file_get_contents($ipAddress . "/arduino/13/" . $pacerIndex . "/0" . "/" . $meters);		// send the command to end the pacer's workout
-		echo "<br />Pacer cleared successfully";
+		echo "Pacer cleared successfully";
 	}
 	else {	// if the request came from the app
 		echo "No workout available.";

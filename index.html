@@ -80,7 +80,9 @@
 		    })(jQuery, window);
 
 		    function Pinstatus() {
-		        morestatus();
+		        // morestatus();
+		        // readFeedbackFile();
+		        refreshPacerButtonData();
 		    }
 
 		    // reads DataLogger.txt file that is updated with by Yun feedback
@@ -139,11 +141,6 @@
 		            document.getElementById("description").innerHTML = "Lights: " + lights;
 		            document.getElementById("feedbackData").innerHTML = "Lights: " + lights;
 		        }
-		    }
-
-		    // Makes a request to Arduino for feedback
-		    function morestatus() {
-		        readFeedbackFile();
 		    }
 
 		    // send an extra command in case Arduino is lagging because it is still waiting for something
@@ -309,7 +306,7 @@
 		        $("#feedbackData").on("taphold", function (event) {
 		            $("#feedbackData").text("Just requested updated data.");
 		            askForFeedback();
-		            readFeedbackFile();
+		            refreshPacerButtonData();  // readFeedbackFile();
 		        });
 
 		        // handles longpress of advancedButton in order to show the first time user start view
@@ -454,7 +451,7 @@
 
 		        // Updates the paragraph with new feedback
 		        $("#newFeedBack").click(function () {
-		            readFeedbackFile();
+		            refreshPacerButtonData(); // readFeedbackFile();
 		        });
 
 		        // Reacts to click of pacerSelect button
@@ -482,7 +479,7 @@
 		                    masterPacerSelected = $(this).attr("otherNum");
 		                    $("#pacerSelect").text($(this).text());
 		                    $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color")).css('color', $(this).css("color"));
-		                    morestatus();
+		                    refreshPacerButtonData(); // readFeedbackFile();
 		                }
 		            }
 		        });
@@ -509,7 +506,7 @@
 		            requestCommand(11, masterPacerSelected, 0);
 		        });
 
-		        // Reacts to click of selectAllPinButton Button
+		        // Reacts to click of selectAllPinButton Button and retrieves the Pin table
 		        $("#selectAllPinButton").click(function () {
 		            // GET request for selectPin.php
 		            var xhttp = new XMLHttpRequest();
@@ -523,7 +520,7 @@
 
 		        });
 
-		        // Reacts to click of selectAllWorkoutButton Button
+		        // Reacts to click of selectAllWorkoutButton Button and retrieves the Workout table
 		        $("#selectAllWorkoutButton").click(function () {
 		            var xhttp = new XMLHttpRequest();
 		            xhttp.onreadystatechange = function () {
@@ -559,7 +556,6 @@
 		                    }
 		                    else {
 		                        alert(xhttp.responseText);		// user alert
-		                        // alert("After the countdown, your workout will begin.");	// user alert
 		                    }
 		                }
 		            };
@@ -765,43 +761,71 @@
 		        requestCommand(9, masterPacerSelected, 0);
 		    }
 
-		    // Refreshes the pacerButtons with what is currently in the database
+		    // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
 		    function refreshPacerButtonData() {
+		        var newPacer = [];  // in order to store array objects, you must create this variable like this
+
 		        // get lapTime, name, and color from PHP
 		        var request = new XMLHttpRequest();
 		        request.onreadystatechange = function () {
 		            if (request.readyState == 4 && request.status == 200) {
-		                // if (request.responseText != "incorrect") {
-		                txtFeedback = request.responseText;
-		                fullset = txtFeedback.split("#");
-		                for (i = 0; i < fullset.length; i++) {
-		                    j = i; // j = i - 1;
-		                    if (i != 0) {
-		                        myset = fullset[i].split(",");  // split up the feedback
-		                        // make your newPacer array instance out of what you just split up
-		                        newPacer[j] = {
-		                            index: myset[0], lapTime: myset[1],
-		                            color: colorArray[myset[2] % colorArray.length],
-		                            colorText: "background-color:" + colorArray[myset[2] % colorArray.length],
-		                            // text: "Pacer " + myset[0] + " - " + myset[1]
-		                            text: myset[3]
-		                        };
+		                // split up the feedback
+		                pacerGroupSet = request.responseText.split("#");
+
+		                for (i = 0; i < pacerGroupSet.length; i++) {
+		                    // split up the already split pieces
+		                    singlePacerSet = pacerGroupSet[i].split(",");
+
+		                    // make your newPacer variable out of what you just split up
+		                    newPacer[i] = {
+		                        index: singlePacerSet[0],
+		                        lapTime: singlePacerSet[1],
+		                        color: colorArray[singlePacerSet[2] % colorArray.length],
+		                        colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
+		                        name: singlePacerSet[3],
+		                        activeText: singlePacerSet[3] + " - " + singlePacerSet[1] + " sec lap",
+		                        inactiveText: singlePacerSet[3] + " - inactive"
+		                    };
+
+		                    // update the buttons
+		                    $("#pacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+		                    if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
+		                        $("#pacerButton" + i).css('color', 'white');
 		                    }
-		                };
-
-		                request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
-		                request.send();
-
-
-		                $("#pacerButton" + j).text(newPacer[j].text + " sec lap").attr('style', newPacer[j].colorText);
-		                if (myset[2] % colorArray.length == "2" || myset[2] % colorArray.length == "6" || myset[2] % colorArray.length == "7") {
-		                    $("#pacerButton" + j).css('color', 'white');
-		                }
-		                if (myset[1] == "0.0") {
-		                    $("#pacerButton" + j).text(newPacer[j].text + " - " + newPacer[j].color).attr('style', "background-color:black").css('color', 'white');
+		                    if (singlePacerSet[1] == "0") {
+		                        $("#pacerButton" + i).text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
+		                    }
+                            
+		                    // update other text fields - used in Coach Mode
+		                    if (masterPacerSelected == i) {
+                                // update some text fields with pacer data
+		                        
+		                        $("#newFeedBack2").text("newPacer[i] text: " + newPacer[i].text);
+		                        document.getElementById("description").innerHTML = newPacer[i].lapTime + " | " + newPacer[i].color;
+		                        document.getElementById("feedbackData").innerHTML = "Name: " + newPacer[i].name + ", LapTime: " + newPacer[i].lapTime + ", Color: " + newPacer[i].color;
+                                
+		                        if (masterPacerSelected != 99) {
+		                            // update pacerSelect button for Coach Mode
+		                            $("#pacerSelect").text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+		                            if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
+		                                $("#pacerSelect").css('color', 'white');
+		                            }
+		                            if (singlePacerSet[1] == "0") {
+		                                $("#pacerSelect").text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
+		                            }
+		                        }
+		                    }
+		                    /*
+		                    if (masterPacerSelected == 99) {
+                                // update some text fields with the number of lights
+		                        document.getElementById("description").innerHTML = "Lights: " + lights;
+		                        document.getElementById("feedbackData").innerHTML = "Lights: " + lights;
+		                    }*/
 		                }
 		            }
 		        }
+		        request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
+		        request.send();
 		    }
 
 		    // Define a help attribute for all buttons and dropdowns that can be used when the user requests help
@@ -957,8 +981,8 @@
 		    // show Pacer Buttons View "page"
 		    function showPacerButtonsView() {
 		        hideEverything();
-		        readFeedbackFile();
-		        // refreshPacerButtonData();
+		        // readFeedbackFile();
+		        refreshPacerButtonData();
 		        $("#pacerButtonView").show();
 		        $("#viewEscape").show();
 		        if (onCreateNewPacerViewSequence == true) {

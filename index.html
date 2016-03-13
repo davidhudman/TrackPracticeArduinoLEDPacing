@@ -419,9 +419,14 @@
 		                else {
 		                    showNormalView();
 		                    masterPacerSelected = $(this).attr("otherNum");
-		                    $("#pacerSelect").text($(this).text());
-		                    $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color")).css('color', $(this).css("color"));
-		                    refreshPacerButtonData(); // readFeedbackFile();
+		                    if (masterPacerSelected != 99) {
+		                        $("#pacerSelect").text($(this).text());
+		                        $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color")).css('color', $(this).css("color"));
+		                        refreshPacerButtonData(); // readFeedbackFile();
+		                    }
+		                    else {  // we're in coach mode and the user selected all pacers
+		                        $("#pacerSelect").text("Select Pacer: All Pacers");
+		                    }
 		                }
 		            }
 		        });
@@ -933,6 +938,9 @@
 		        if (onExistingPacerSequence == true) {
 		            massesCurrentView = existingPacerViewSequence[1];
 		        }
+		        if (onCoachSequence == true) {
+		            $("#selectAllPacersDiv").show();
+		        }
 		    }
 
 		    // show Color Buttons View "page"
@@ -1001,7 +1009,7 @@
 		    // show the view that renames the pacer - renamePacerDiv, nameChangeSkipButton
 		    function showPacerRenameView() {
 		        // if we're in coachMode or userNameChangePermission is enabled
-		        if (true) {
+		        if (onCoachSequence == true || isDeveloperMode == true || isUserNameChangePermissionEnabled == true) {
 		            hideEverything();
 		            $("#renamePacerDiv").show();
 		            $("#nameChangeSkipButton").show();
@@ -1243,6 +1251,10 @@
 				<div id="existingPacerSelectHeader" class="contentElement advancedElement" >
 					<h3>Select your pacer</h3>
 				</div>
+
+                <div id="selectAllPacersDiv" class="contentElement advancedElement" >
+                    <a href="#" id="selectAllPacersButton" class="btn pacerButtonClass" otherNum="99" data-role="button" data-icon="star">All Pacers</a>
+                </div>
 				
                 <div id="pacerButtonView" class="contentElement advancedElement" >
                     <!--<a id="allPacersButton" class="pacerButtonClass" otherNum="99" data-role="button" style="background-color:#E6E6E6" data-icon="star">Select Pacers: All Pacers</a>-->

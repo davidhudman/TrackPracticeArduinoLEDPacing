@@ -85,64 +85,6 @@
 		        refreshPacerButtonData();
 		    }
 
-		    // reads DataLogger.txt file that is updated with by Yun feedback
-		    function readFeedbackFile() {
-		        var xhttp = new XMLHttpRequest();
-		        var feedbackText;   // holds text from datalog.txt file
-		        xhttp.onreadystatechange = function () {
-		            if (xhttp.readyState == 4 && xhttp.status == 200) {
-		                feedbackText = xhttp.responseText;
-		                parseFeedbackFile(feedbackText);
-		                document.getElementById("newFeedBack").innerHTML = feedbackText;
-		            }
-		        };
-		        xhttp.open("GET", "selectPin.php", true);
-		        xhttp.send();
-		    }
-
-		    // Parse the datalog.txt file - not working yet
-		    function parseFeedbackFile(txtFeedback) {
-		        var lights;
-		        var pacerIndex = masterPacerSelected;
-		        var newPacer = [];
-
-		        fullset = txtFeedback.split("<br />");
-		        for (i = 0; i < fullset.length; i++) {
-		            if (i < 100) {
-		                myset = fullset[i].split(" | ");  // split up the feedback
-		                // make your newPacer array instance out of what you just split up
-		                newPacer[i] = {
-		                    index: myset[0], lapTime: myset[4],
-		                    color: colorArray[myset[3] % colorArray.length],
-		                    colorText: "background-color:" + colorArray[myset[3] % colorArray.length],
-		                    text: "Pacer " + myset[0] + " - " + myset[4]
-		                };
-
-		                if (i == pacerIndex) {
-		                    $("#newFeedBack2").text("newPacer[i] text: " + newPacer[i].text);
-		                    document.getElementById("description").innerHTML = newPacer[i].lapTime + " | " + newPacer[i].color;
-		                    document.getElementById("feedbackData").innerHTML = "Lap Time: " + newPacer[i].lapTime + ", Color: " + newPacer[i].color;
-		                }
-
-		                $("#pacerButton" + i).text(newPacer[i].text + " secs per lap").attr('style', newPacer[i].colorText);
-		                if (myset[3] % colorArray.length == "2" || myset[3] % colorArray.length == "6" || myset[3] % colorArray.length == "7") {
-		                    $("#pacerButton" + i).css('color', 'white');
-		                }
-		                if (myset[4] == "0") {
-		                    $("#pacerButton" + i).text(newPacer[i].text + " - " + newPacer[i].color).attr('style', "background-color:black").css('color', 'white');
-		                }
-		            }
-		            else {
-		                lights = fullset[0];
-		            }
-		        }
-
-		        if (pacerIndex == 99) {
-		            document.getElementById("description").innerHTML = "Lights: " + lights;
-		            document.getElementById("feedbackData").innerHTML = "Lights: " + lights;
-		        }
-		    }
-
 		    // send an extra command in case Arduino is lagging because it is still waiting for something
 		    function testCommand() {
 		        requestCommand(-1, 0, 0);

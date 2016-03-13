@@ -159,7 +159,14 @@
 		        var request = new XMLHttpRequest();
 		        request.onreadystatechange = function () {
 		            if (request.readyState == 4 && request.status == 200) {
-
+		                if (isDeveloperMode == true) {
+		                    alert(request.responseText);
+		                }
+		                else {
+		                    if (request.responseText.substr(0, 8) == "USER MSG") {
+		                        alert(request.responseText.substr(10));
+		                    }
+		                }
 		            }
 		        };
 
@@ -194,7 +201,7 @@
 		            requestCommand(commandURL, pacerIndex, newNum);
 		        });
 
-		        // handles pacer action commands - clear, reset, backwards, new number of lights, change in speed, etc.
+		        // handles inflight speed change
 		        $("#accelerateNew, #slowNew").click(function () {
 		            var commandURL = parseInt($(this).attr("url"), 10);
 		            var pacerIndex = parseInt(masterPacerSelected, 10);

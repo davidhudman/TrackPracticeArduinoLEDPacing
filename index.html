@@ -21,7 +21,7 @@
 		    var numPacers = 10;
 		    var lapTimeInputConstraints = [1, 900];
 		    var trackDistanceInMeters = 400;
-		    var isUserBackwardsPermissionEnabled = true;
+		    var isUserBackwardsPermissionEnabled = false;
 		    var isUserWorkoutPermissionEnabled = true;
 		    var isUserVisiblePermissionEnabled = true;
 		    var isUserSpeedChangePermissionEnabled = true;
@@ -120,24 +120,32 @@
 		            var pacerIndex = parseInt(masterPacerSelected, 10);
 		            var newNum = parseFloat($(this).attr("otherNum"));
 		            var signlessNum = parseFloat($("#lightsNumberInput").val());
+		            var featureEnabled = $(this).attr("featureEnabled") == "true";    // this returns a string
 
-		            switch (commandURL) {
-		                case 6:         // light change
-		                    newNum = signlessNum;
-		                    break;
-		                case 8:         // speed change
-		                    if (signlessNum <= 0.0) {
-		                        return;
-		                    }
-		                    else {
-		                        newNum = signlessNum * newNum;   // multiply by newNum because '$(this).attr("otherNum")' is actually the "sign" of the number
-		                    }
-		                    break;
-		                default:
-		                    break;
+		            // if we're not onCoachSequence and not in Developer Mode and the featureEnabled variable is false
+		            if (onCoachSequence == false && isDeveloperMode == false && featureEnabled == false) {
+		                alert("Feature not enabled.");
 		            }
+		            else {
+		                // alert(featureEnabled);
+		                switch (commandURL) {
+		                    case 6:         // light change
+		                        newNum = signlessNum;
+		                        break;
+		                    case 8:         // speed change
+		                        if (signlessNum <= 0.0) {
+		                            return;
+		                        }
+		                        else {
+		                            newNum = signlessNum * newNum;   // multiply by newNum because '$(this).attr("otherNum")' is actually the "sign" of the number
+		                        }
+		                        break;
+		                    default:
+		                        break;
+		                }
 
-		            requestCommand(commandURL, pacerIndex, newNum);
+		                requestCommand(commandURL, pacerIndex, newNum);
+		            }
 		        });
 
 		        // handles inflight speed change
@@ -168,24 +176,25 @@
 		            request.open("GET", "updatePacers.php?needYunSyncWithDB=1", true);
 		            request.send();
 		        });
+                
+		        /* // Extras Buttons click handlers */
 
-		        /*$(".quickAccessButtons").click(function () {
-		            $(this).attr("viewFunction")();
-		            extrasMode = true;
-		            if ($(this) == $("#cancelButton")) {
-		                extrasMode = false;
-		            }
-		        });*/
-		        // changePaceExtrasButton, changeColorExtrasButton, createWorkoutExtrasButton, cancelButton
-		        // showCreateWorkoutExtrasView, showColorButtonsExtrasView, showPacerTimeInputExtrasView, showCurrentViewBeforeExtras
 		        $("#changePaceExtrasButton").click(function () {
 		            showPacerTimeInputExtrasView();
 		        });
+
 		        $("#changeColorExtrasButton").click(function () {
 		            showColorButtonsExtrasView();
 		        });
+
 		        $("#createWorkoutExtrasButton").click(function () {
-		            showCreateWorkoutExtrasView();
+		            // if we're onCoachSequence or in Developer Mode or if isUserWorkoutPermissionEnabled is enabled
+		            if (onCoachSequence == true || isDeveloperMode == true || isUserWorkoutPermissionEnabled == true) {
+		                showCreateWorkoutExtrasView();
+		            }
+		            else {
+		                alert("Feature not enabled.");
+		            }
 		        });
 		        $("#changeSpeedInFlightButton").click(function () {
 		            showInflightSpeedChangeExtrasView();
@@ -453,19 +462,8 @@
 		            requestCommand(11, masterPacerSelected, 0);
 		        });
 
-		        /*
-				// Reacts to click of changeDirectionExtrasButton
-				$("#changeDirectionExtrasButton").click(function () {
-		            requestCommand(11, masterPacerSelected, 0);
-					requestCommand(commandURL, pacerIndex, newNum);
-		        });
-				
-				// Reacts to click of changeVisibilityExtrasButton
-				$("#changeVisibilityExtrasButton").click(function () {
-		            requestCommand($(this).url, masterPacerSelected, 0);
-					requestCommand(commandURL, pacerIndex, newNum);
-		        });
-				*/
+
+		        /* // Advanced Extras Menu Click Handlers */
 
 		        // Reacts to click of selectAllPinButton Button and retrieves the Pin table
 		        $("#selectAllPinButton").click(function () {
@@ -524,6 +522,10 @@
 		            xhttp.send();
 
 		        });
+
+		        /* 
+                // Create Workout View Buttons 
+                */
 
 		        // Reacts to click of createWorkoutSubmit Button by validating the data and sending the created workout to the database
 		        $("#createWorkoutSubmit").click(function () {
@@ -677,6 +679,7 @@
 		        // hideAdvancedElements();
 		        // showNormalView();
 		        assignHelpTextToButtons();
+		        assignFeatureEnabledAttributeToButtons();
 		        colorButtonTextColorFix();
 		        // createPacerButtons();
 		        $("#pinInputField, #workoutMetersInput, #workoutRestInput, #workoutSetsInput").numpad({
@@ -811,6 +814,14 @@
 		        $("#clearButtonMasses").attr('help', '**Clear Button**\n\nStop your light pacer from running.');
 		        $("#resetButtonMasses").attr('help', '**Reset Button**\n\nReset your light pacer on a delay at your defined starting point.');
 
+		    }
+
+		    // Define a featureEnabled attribute to help us determine when certain features should be used.
+		    function assignFeatureEnabledAttributeToButtons() {
+		        $("#changeDirectionExtrasButton").attr('featureEnabled', isUserBackwardsPermissionEnabled);
+		        $("#createWorkoutExtrasButton, #startWorkoutButton").attr('featureEnabled', isUserWorkoutPermissionEnabled);
+		        $("#changeVisibilityExtrasButton").attr('featureEnabled', isUserVisiblePermissionEnabled);
+		        $("#changeSpeedInFlightButton").attr('featureEnabled', isUserSpeedChangePermissionEnabled);
 		    }
 
 		    // change colorButton text color as needed

@@ -21,7 +21,7 @@
 		    var numPacers = 10;
 		    var lapTimeInputConstraints = [1, 900];
 		    var trackDistanceInMeters = 400;
-		    var isUserBackwardsPermissionEnabled = false;
+		    var isUserBackwardsPermissionEnabled = true;
 		    var isUserWorkoutPermissionEnabled = true;
 		    var isUserVisiblePermissionEnabled = true;
 		    var isUserSpeedChangePermissionEnabled = true;
@@ -120,10 +120,10 @@
 		            var pacerIndex = parseInt(masterPacerSelected, 10);
 		            var newNum = parseFloat($(this).attr("otherNum"));
 		            var signlessNum = parseFloat($("#lightsNumberInput").val());
-		            var featureEnabled = $(this).attr("featureEnabled") == "true";    // this returns a string
+		            var featureEnabled = $(this).attr("featureEnabled");    // this returns a string
 
 		            // if we're not onCoachSequence and not in Developer Mode and the featureEnabled variable is false
-		            if (onCoachSequence == false && isDeveloperMode == false && featureEnabled == false) {
+		            if (onCoachSequence == false && isDeveloperMode == false && featureEnabled == "false") {
 		                alert("Feature not enabled.");
 		            }
 		            else {

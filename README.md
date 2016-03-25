@@ -29,59 +29,20 @@ This setup requires the following items:
 * HC-05 Bluetooth Module - [Setup Explained](http://www.instructables.com/id/Arduino-AND-Bluetooth-HC-05-Connecting-easily/)
 * WS2801 Addressable RGB LEDs (or WS2812 or WS2811, it's possible that more will work too)
 
+Version: 1.1
+
+This setup requires the following items:
+
+* Arduino Yun
+* Micro SD card
+* Password-protected Wifi network that you can connect to
+* WS2801 Addressable RGB LEDs (or WS2812 or WS2811, it's possible that more will work too)
+
 ---------
 
 ### End User Instructions ###
 
-Commands:
-
-| Command       | Desc       | Example |
-| ------------- |:-------------| -----:|
-| "c"           | **C**lear all pacers that are currently running |  |
-| "r"           | **R**eset all pacers that are currently running and start them immediately      |  |
-| "rd"          | (**R**eset **D**elay) reset all pacers that are currently running but wait a predetermined amount of time before starting them     |  |
-| "b"           | (**B**ackwards) set all pacers to run the opposite direction that the first pacer is currently running (including the first pacer)     |  |
-| "(any floating point or whole number)"          | sets a new pacer to run at x seconds per lap, which in this case is 75 seconds |    75 or 68.72 |
-| "c(any whole number)"          | **C**lears a currently running pacer at a certain index off the track; this certain index is 2, so it clears pacer 2; |    "c2" |
-| "r(any whole number)"          | **R**esets the pacer at a certain index to run immediately; this certain index is 1, so it resets pacer 1 |   "r1" |
-| "rd(any whole number)"          | **R**esets all pacers to run following the **D**elay defined by the number on the end of the text; In this case, the number on the end of the text is 10, so all currently running pacers will be immediately removed from the track and will start following a 10 second delay |  "rd10" |
-| "rdp(any whole number)"          | **R**esets following a predetermined **D**elay a **P**acer at a certain index to run; In this case, the index is 4, so pacer 4 will be immediately removed from the track and will start following a predetermined delay |    "rdp4" |
-| "b(any whole number)"          | set a pacer at a specific index to run the opposite direction (**B**ackwards) that the it is currently running; this certain index is 3, so it will make pacer 3 run in the opposite direction | "b3" |
-| "l(any whole number)"          | set the number of **L**ights that are on the track based on the whole number on the end of the text; In this case, the number of lights will be set to 45 | "l45" |
-| "spt(any floating point number)"         | Set the **S**peed of the **P**acer **T**o whatever speed that you tell it to; so the example would set the pacer at index 1 to 60.5 seconds per lap, whether it was currently running or not. If it was currently running, it would be as if it just sped up or slowed down to the new pace | "spt1,60.5" |
-| "a(any whole number)"          | set clockAdjustmentFactor to the number of deci-seconds that you give it (so 10 in the example will be setting it to 1.0). This is basically not used anymore and is only necessary if you have timing issues. | "a10" |
-| "pct(any whole number)"         | Set the index of your **P**acer **C**olor **T**o whatever color corresponds to the integer that was sent on the end. In the example, the pacer index is 2 and the color integer is 0 which corresponds to the color "white" | "pct2,0" |
-
-
-* "c" - **C**lear all pacers that are currently running
-
-* "r" - **R**eset all pacers that are currently running and start them immediately
-
-* "rd" - (**R**eset **D**elay) reset all pacers that are currently running but wait a predetermined amount of time before starting them
-
-* "b" - (**B**ackwards) set all pacers to run the opposite direction that the first pacer is currently running (including the first pacer)
-
-* "(any floating point or whole number)"; Example: "75"; sets a new pacer to run at x seconds per lap, which in this case is 75 seconds
-
-* "c(any whole number)": Example: "c2"; **C**lears a currently running pacer at a certain index off the track; this certain index is 2, so it clears pacer 2;*
-
-* "r(any whole number)": Example: "r1"; **R**esets the pacer at a certain index to run immediately; this certain index is 1, so it resets pacer 1*
-
-* "rd(any whole number)": Example: "rd10"; **R**esets all pacers to run following the **D**elay defined by the number on the end of the text; In this case, the number on the end of the text is 10, so all currently running pacers will be immediately removed from the track and will start following a 10 second delay
-
-* "rdp(any whole number)": Example: "rdp4"; **R**esets following a predetermined **D**elay a **P**acer at a certain index to run; In this case, the index is 4, so pacer 4 will be immediately removed from the track and will start following a predetermined delay*
-
-* "b(any whole number)": Example: "b3"; set a pacer at a specific index to run the opposite direction (**B**ackwards) that the it is currently running; this certain index is 3, so it will make pacer 3 run in the opposite direction*;
-
-* "l(any whole number)": Example: "l45"; set the number of **L**ights that are on the track based on the whole number on the end of the text; In this case, the number of lights will be set to 45
-
-* "spt(any floating point number)": Example: "spt1,60"; Set the **S**peed of the **P**acer **T**o whatever speed that you tell it to; so the example would set the pacer at index 1 to 60 seconds per lap, whether it was currently running or not. If it was currently running, it would be as if it just sped up or slowed down to the new pace
-
-* "a(any whole number)": Example: "a10"; set clock**A**djustmentFactor to the number of deci-seconds that you give it (so 10 in the example will be setting it to 1.0). This is basically not used anymore and is only necessary if you have timing issues.
-
-* "pct(any whole number)": Example: "pct2,0"; Set the index of your **P**acer **C**olor **T**o whatever color corresponds to the integer that was sent on the end. In the example, the pacer index is 2 and the color integer is 0 which corresponds to the color "white"
-
-*(keep in mind that the index of the first pacer is 0)
+Create your pacer through an intuitive web app.
 
 -------------
 

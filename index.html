@@ -692,6 +692,7 @@
 		            // displayTpl: '<input data-theme="b" type="password" />',
 		            hidePlusMinusButton: true,
 		            hideDecimalButton: false,
+		            // appendKeypadTo: $("#pacerTimeInput"),
 		            decimalSeparator: '.'
 		        });
 		        $("input[name='radio-choice-1']").change(radioValueChanged);
@@ -924,6 +925,8 @@
 		        $("#viewEscape").show();
 		        $("#pacerTimeInputDiv").show();
 		        massesCurrentView = createNewPacerViewSequence[3];
+		        //alert("Enter your one lap pace in seconds.");
+		        //$("#pacerTimeInput").trigger("click");
 		    }
 
 		    // Extras mode: show pacer time input View
@@ -938,6 +941,8 @@
 		        $("#viewEscape").show();
 		        $("#createPinView").show();
 		        massesCurrentView = createNewPacerViewSequence[1];
+		        //alert("Create a 3 digit passcode.");
+		        //$("#pacerTimeInput").trigger("click");
 		    }
 
 		    // show First Time User Start View "page"

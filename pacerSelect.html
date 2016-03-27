@@ -1,0 +1,239 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<title>jQuery Mobile Bootstrap Theme</title>
+		<link rel="stylesheet" href="themes/Bootstrap.css">
+		<link rel="stylesheet" href="jquery.mobile-1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+		<link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+		<script src="jquery-1.8.2.min.js"></script>
+		<script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <link rel="stylesheet" href="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.css">
+		<script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
+		<script>
+		    var isDeveloperMode = false;
+
+		    // Globals specific to the client's track and desired permissions
+		    var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
+		    // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
+		    // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
+		    var numPacers = 10;
+		    var lapTimeInputConstraints = [1, 900];
+		    var trackDistanceInMeters = 400;
+		    var isUserBackwardsPermissionEnabled = true;
+		    var isUserWorkoutPermissionEnabled = true;
+		    var isUserVisiblePermissionEnabled = true;
+		    var isUserSpeedChangePermissionEnabled = true;
+		    var isUserNameChangePermissionEnabled = true;
+
+		    var pacerButton = [];
+		    var advancedButtonPressed = false;
+		    var onCreateNewPacerViewSequence = false;
+		    var onExistingPacerSequence = false;
+		    var onCoachSequence = false;
+		    var extrasMode = false;
+		    var masterPacerSelected = 99;
+		    var pinVar = 111;
+
+		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
+
+		    // Do all this stuff as soon as the page loads
+		    $(document).ready(function () {
+		        refreshPacerButtonData();
+
+		        // Determines view after a pacerButton is clicked
+		        $(".pacerButtonClass").click(function () {
+		            // showCreatePinView();
+		            alert(getCookie("username"));
+		            alert("You clicked a pacer button. Change the commented code back when done testing." + username);
+		        });
+		        /*
+                // Determines view after a pacerButton is clicked
+		        $(".pacerButtonClass").click(function () {
+		            if (onExistingPacerSequence == true) {
+		                masterPacerSelected = $(this).attr("otherNum");
+		                showCreatePinView();
+		            }
+		            else {
+		                if (onCreateNewPacerViewSequence == true) {
+		                    showCreatePinView();
+		                }
+		                else {
+		                    showNormalView();
+		                    masterPacerSelected = $(this).attr("otherNum");
+		                    if (masterPacerSelected != 99) {
+		                        $("#pacerSelect").text($(this).text());
+		                        $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color")).css('color', $(this).css("color"));
+		                        refreshPacerButtonData(); // readFeedbackFile();
+		                    }
+		                    else {  // we're in coach mode and the user selected all pacers
+		                        $("#pacerSelect").text("Select Pacer: All Pacers");
+		                    }
+		                }
+		            }
+		        });
+                */
+
+		        
+		    });
+
+		    function setCookie(cname, cvalue, exdays) {
+		        var d = new Date();
+		        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+		        var expires = "expires=" + d.toUTCString();
+		        document.cookie = cname + "=" + cvalue + "; " + expires;
+		    }
+
+		    function getCookie(cname) {
+		        var name = cname + "=";
+		        var ca = document.cookie.split(';');
+		        for (var i = 0; i < ca.length; i++) {
+		            var c = ca[i];
+		            while (c.charAt(0) == ' ') c = c.substring(1);
+		            if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+		        }
+		        return "";
+		    }
+
+		    function checkCookie() {
+		        var user = getCookie("username");
+		        if (user != "") {
+		            alert("Welcome again " + user);
+		        } else {
+		            user = prompt("Please enter your name:", "");
+		            if (user != "" && user != null) {
+		                setCookie("username", user, 30);
+		            }
+		        }
+		    }
+
+		    // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
+		    function refreshPacerButtonData() {
+		        var newPacer = [];  // in order to store array objects, you must create this variable like this
+
+		        // get lapTime, name, and color from PHP
+		        var request = new XMLHttpRequest();
+		        request.onreadystatechange = function () {
+		            if (request.readyState == 4 && request.status == 200) {
+		                // split up the feedback
+		                pacerGroupSet = request.responseText.split("#");
+
+		                for (i = 0; i < pacerGroupSet.length; i++) {
+		                    // split up the already split pieces
+		                    singlePacerSet = pacerGroupSet[i].split(",");
+
+		                    // make your newPacer variable out of what you just split up
+		                    newPacer[i] = {
+		                        index: singlePacerSet[0],
+		                        lapTime: singlePacerSet[1],
+		                        color: colorArray[singlePacerSet[2] % colorArray.length],
+		                        colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
+		                        name: singlePacerSet[3],
+		                        activeText: singlePacerSet[3] + " - " + singlePacerSet[1] + " sec lap",
+		                        inactiveText: singlePacerSet[3] + " - inactive"
+		                    };
+
+		                    // update the buttons
+		                    $("#pacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+		                    if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
+		                        $("#pacerButton" + i).css('color', 'white');
+		                    }
+		                    if (singlePacerSet[1] == "0") {
+		                        $("#pacerButton" + i).text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
+		                    }
+
+		                    // update other text fields - used in Coach Mode
+		                    if (masterPacerSelected == i) {
+		                        // update some text fields with pacer data
+
+		                        $("#newFeedBack2").text("newPacer[i] text: " + newPacer[i].text);
+		                        document.getElementById("description").innerHTML = newPacer[i].lapTime + " | " + newPacer[i].color;
+		                        document.getElementById("feedbackData").innerHTML = "Name: " + newPacer[i].name + ", LapTime: " + newPacer[i].lapTime + ", Color: " + newPacer[i].color;
+
+		                        if (masterPacerSelected != 99) {
+		                            // update pacerSelect button for Coach Mode
+		                            $("#pacerSelect").text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+		                            if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
+		                                $("#pacerSelect").css('color', 'white');
+		                            }
+		                            if (singlePacerSet[1] == "0") {
+		                                $("#pacerSelect").text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
+		                            }
+		                        }
+		                    }
+		                    /*
+		                    if (masterPacerSelected == 99) {
+                                // update some text fields with the number of lights
+		                        document.getElementById("description").innerHTML = "Lights: " + lights;
+		                        document.getElementById("feedbackData").innerHTML = "Lights: " + lights;
+		                    }*/
+		                }
+		            }
+		        }
+		        request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
+		        request.send();
+		    }
+
+		    // show Pacer Buttons View "page"
+		    function showPacerButtonsView() {
+		        hideEverything();
+		        refreshPacerButtonData();
+		        $("#pacerButtonView").show();
+		        // $("#viewEscape").show();
+		    }
+
+		    // show all the advanced elements and hide the advanced button
+		    function showAdvancedElements() {
+		        $(".advancedElement").show()
+		    }
+
+		    // hide all the advanced elements and show the advanced button
+		    function hideAdvancedElements() {
+		        $(".advancedElement").hide()
+		    }
+
+		    // hide everything except the top header
+		    function hideEverything() {
+		        $(".contentElement").hide();
+		    }
+
+		    // show everything - all contentElement class
+		    function showEverything() {
+		        onCoachSequence = true;
+		        massesCurrentView = coachSequence[3];
+		        $(".contentElement").show();
+		    }
+
+		    // End of JavaScript
+		</script>
+	</head>
+	<body>
+		<div id="pageWrapper" data-role="page" data-theme="a">
+			<div data-role="header" data-position="inline">
+				<h1 id="tpHeader"><a href="index.html">Track Practice</a></h1>
+			</div>
+			<div data-role="content" data-theme="a">
+				
+                <!-- Pacer Button View -->
+                
+                <div id="pacerButtonView" class="contentElement advancedElement" >
+                    <!--<a id="allPacersButton" class="pacerButtonClass" otherNum="99" data-role="button" style="background-color:#E6E6E6" data-icon="star">Select Pacers: All Pacers</a>-->
+                    <a href="#" id="pacerButton0" class="btn pacerButtonClass" otherNum="0" data-role="button" data-icon="star">Pacer0</a>
+                    <a href="#" id="pacerButton1" class="btn pacerButtonClass" otherNum="1" data-role="button" data-icon="star">Pacer1</a>
+                    <a href="#" id="pacerButton2" class="btn pacerButtonClass" otherNum="2" data-role="button" data-icon="star">Pacer2</a>
+                    <a href="#" id="pacerButton3" class="btn pacerButtonClass" otherNum="3" data-role="button" data-icon="star">Pacer3</a>
+                    <a href="#" id="pacerButton4" class="btn pacerButtonClass" otherNum="4" data-role="button" data-icon="star">Pacer4</a>
+                    <a href="#" id="pacerButton5" class="btn pacerButtonClass" otherNum="5" data-role="button" data-icon="star">Pacer5</a>
+                    <a href="#" id="pacerButton6" class="btn pacerButtonClass" otherNum="6" data-role="button" data-icon="star">Pacer6</a>
+                    <a href="#" id="pacerButton7" class="btn pacerButtonClass" otherNum="7" data-role="button" data-icon="star">Pacer7</a>
+                    <a href="#" id="pacerButton8" class="btn pacerButtonClass" otherNum="8" data-role="button" data-icon="star">Pacer8</a>
+                    <a href="#" id="pacerButton9" class="btn pacerButtonClass" otherNum="9" data-role="button" data-icon="star">Pacer9</a>
+                </div>
+
+			</div>
+		</div>
+		
+		<a href="https://github.com/commadelimited/jQuery-Mobile-Bootstrap-Theme" data-role="button" data-icon="star">Get the code</a>
+	</body>
+</html>

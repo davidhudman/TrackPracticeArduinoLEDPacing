@@ -354,8 +354,39 @@
 		            onExistingPacerSequence = true;
 		            massesCurrentView = existingPacerViewSequence[0];           // the view we're on before the button is pressed
 		            forwardOneView();
-
+		            //document.cookie = "username=John Doe";
+		            setCookie("username", "David Studman", 2);
 		        });
+
+		        function setCookie(cname, cvalue, exdays) {
+		            var d = new Date();
+		            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+		            var expires = "expires=" + d.toUTCString();
+		            document.cookie = cname + "=" + cvalue + "; " + expires;
+		        }
+
+		        function getCookie(cname) {
+		            var name = cname + "=";
+		            var ca = document.cookie.split(';');
+		            for (var i = 0; i < ca.length; i++) {
+		                var c = ca[i];
+		                while (c.charAt(0) == ' ') c = c.substring(1);
+		                if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+		            }
+		            return "";
+		        }
+
+		        function checkCookie() {
+		            var user = getCookie("username");
+		            if (user != "") {
+		                alert("Welcome again " + user);
+		            } else {
+		                user = prompt("Please enter your name:", "");
+		                if (user != "" && user != null) {
+		                    setCookie("username", user, 30);
+		                }
+		            }
+		        }
 
 		        function chooseExistingPacerView() {
 		            hideEverything();
@@ -1381,7 +1412,8 @@
                     <br /><br /><br />
                     <input id="newPacerButton" type="button" class="btn btn-success" otherNum="1" style="background-color:#00ff21" value="<h2>Let's Get Started!</h2>" />
                     <br /><br /><br />
-                    <input id="existingPacerButton" type="button" class="btn btn-danger" otherNum="2" style="background-color:#f00" value="<h3>Wait, my light is running.</h3>" />
+                    <!--<input id="existingPacerButton" type="button" class="btn btn-danger" otherNum="2" style="background-color:#f00" value="<h3>Wait, my light is running.</h3>" />-->
+                    <a href="pacerSelect.html" id="existingPacerButton" class="btn btn-danger" style="background-color:#f00" data-role="button"><h3>Wait, my light is running.</h3></a>
                 </div>
 
                 <!-- Create PIN View -->

@@ -38,16 +38,22 @@
 
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 
-		    // Do all this stuff as soon as the page loads
-		    $(document).ready(function () {
+		    $(document).on("pagecontainerbeforeload", function () {
 		        refreshPacerButtonData();
 
+		    });
+
+		    // Do all this stuff as soon as the page loads
+		    function ready() {
+		        setInterval(refreshPacerButtonData, 2000);
+		        
 		        // Determines view after a pacerButton is clicked
 		        $(".pacerButtonClass").click(function () {
 		            // showCreatePinView();
 		            alert(getCookie("username"));
-		            alert("You clicked a pacer button. Change the commented code back when done testing." + username);
+		            alert(getCookie("PIN"));
 		        });
+
 		        /*
                 // Determines view after a pacerButton is clicked
 		        $(".pacerButtonClass").click(function () {
@@ -76,36 +82,67 @@
                 */
 
 		        
-		    });
+		    };
+
+
+		    $("#pacerButtonView").on('pageinit', ready);
+
+		    // $(document).on('pageinit pageshow', ready);
+		    /*
+            if (document.readyState == 'complete') {
+		        ready();
+		    }
+
+		    $(window).bind("load", ready);
+            */
+		    /*$(document).ready(function () {
+		        if (!window.location.hash) {
+		            window.location = window.location + '#loaded';
+		            window.location.reload();
+		        } else {
+		            ready();
+		        }
+		    });*/
+		    // $(document).ready(ready);
+		    // $(document).on('page:load', ready);
+		    // $(document).on('page:change', ready);
+		    // $(window).load(ready);
+		    // $(window).bind('page:change', ready);
+
+		    /* Functions for cookies */
+		    var createCookie = function (name, value, days) {
+		        var expires;
+		        if (days) {
+		            var date = new Date();
+		            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+		            expires = "; expires=" + date.toGMTString();
+		        }
+		        else {
+		            expires = "";
+		        }
+		        document.cookie = name + "=" + value + expires + "; path=/";
+		    }
+
+		    function getCookie(c_name) {
+		        if (document.cookie.length > 0) {
+		            c_start = document.cookie.indexOf(c_name + "=");
+		            if (c_start != -1) {
+		                c_start = c_start + c_name.length + 1;
+		                c_end = document.cookie.indexOf(";", c_start);
+		                if (c_end == -1) {
+		                    c_end = document.cookie.length;
+		                }
+		                return unescape(document.cookie.substring(c_start, c_end));
+		            }
+		        }
+		        return "";
+		    }
 
 		    function setCookie(cname, cvalue, exdays) {
 		        var d = new Date();
 		        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
 		        var expires = "expires=" + d.toUTCString();
 		        document.cookie = cname + "=" + cvalue + "; " + expires;
-		    }
-
-		    function getCookie(cname) {
-		        var name = cname + "=";
-		        var ca = document.cookie.split(';');
-		        for (var i = 0; i < ca.length; i++) {
-		            var c = ca[i];
-		            while (c.charAt(0) == ' ') c = c.substring(1);
-		            if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
-		        }
-		        return "";
-		    }
-
-		    function checkCookie() {
-		        var user = getCookie("username");
-		        if (user != "") {
-		            alert("Welcome again " + user);
-		        } else {
-		            user = prompt("Please enter your name:", "");
-		            if (user != "" && user != null) {
-		                setCookie("username", user, 30);
-		            }
-		        }
 		    }
 
 		    // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields

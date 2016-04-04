@@ -28,6 +28,8 @@
     <None Include="..\setAllWorkoutsToActive.php" />
     <None Include="..\createWorkout.php" />
     <None Include="..\selectWorkout.php" />
+    <None Include="..\pacerSelect.html" />
+    <None Include="..\createPinTable.php" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FastLED.cpp">

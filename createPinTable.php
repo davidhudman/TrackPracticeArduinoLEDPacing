@@ -1,11 +1,10 @@
 <?php
-// refreshDb.php
+// createPinTable.php
 // used to bring the Pin table back to its original state
 
 // $sqlite3 DatabaseName.db
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 
-/*
 // Creating database
 $db->query('CREATE TABLE Pin(
 						pacerIndex INT PRIMARY KEY,
@@ -35,9 +34,9 @@ $db->query('INSERT INTO Pin (pacerIndex, passcode, active, color, lapTime, name)
 $db->query('INSERT INTO Pin (pacerIndex, passcode, active, color, lapTime, name)
 						VALUES (8, "888", 0, 2, 0, "Pacer8")');
 $db->query('INSERT INTO Pin (pacerIndex, passcode, active, color, lapTime, name)
-						VALUES (9, "999", 0, 3, 0, "Pacer9")');							
-*/
+						VALUES (9, "999", 0, 3, 0, "Pacer9")');						
 
+/*
 // Resetting data in database to original
 $db->query('UPDATE Pin SET passcode="123", active=0, color=1, lapTime=0, name="Pacer0" WHERE pacerIndex=0');
 $db->query('UPDATE Pin SET passcode="111", active=0, color=2, lapTime=0, name="Pacer1" WHERE pacerIndex=1');
@@ -49,6 +48,7 @@ $db->query('UPDATE Pin SET passcode="666", active=0, color=7, lapTime=0, name="P
 $db->query('UPDATE Pin SET passcode="777", active=0, color=1, lapTime=0, name="Pacer7" WHERE pacerIndex=7');
 $db->query('UPDATE Pin SET passcode="888", active=0, color=2, lapTime=0, name="Pacer8" WHERE pacerIndex=8');
 $db->query('UPDATE Pin SET passcode="999", active=0, color=3, lapTime=0, name="Pacer9" WHERE pacerIndex=9');
+*/
 
 echo "Executed successfully";
 

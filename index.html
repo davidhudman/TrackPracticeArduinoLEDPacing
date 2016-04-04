@@ -354,38 +354,44 @@
 		            onExistingPacerSequence = true;
 		            massesCurrentView = existingPacerViewSequence[0];           // the view we're on before the button is pressed
 		            forwardOneView();
-		            //document.cookie = "username=John Doe";
-		            setCookie("username", "David Studman", 2);
 		        });
 
-		        function setCookie(cname, cvalue, exdays) {
-		            var d = new Date();
-		            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-		            var expires = "expires=" + d.toUTCString();
-		            document.cookie = cname + "=" + cvalue + "; " + expires;
-		        }
+		        $("#testNewPage").click(function () {
+		            //document.cookie = "username=John Doe";
+		            createCookie("username", "David the Stud Studman", 2);
+		            createCookie("PIN", "123", 2);
+		        })
+                .on("taphold", function () {
+                    alert("tapHold event fired.");
+		        });
 
-		        function getCookie(cname) {
-		            var name = cname + "=";
-		            var ca = document.cookie.split(';');
-		            for (var i = 0; i < ca.length; i++) {
-		                var c = ca[i];
-		                while (c.charAt(0) == ' ') c = c.substring(1);
-		                if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+                /* Functions for cookies */
+		        var createCookie = function (name, value, days) {
+		            var expires;
+		            if (days) {
+		                var date = new Date();
+		                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+		                expires = "; expires=" + date.toGMTString();
 		            }
-		            return "";
+		            else {
+		                expires = "";
+		            }
+		            document.cookie = name + "=" + value + expires + "; path=/";
 		        }
 
-		        function checkCookie() {
-		            var user = getCookie("username");
-		            if (user != "") {
-		                alert("Welcome again " + user);
-		            } else {
-		                user = prompt("Please enter your name:", "");
-		                if (user != "" && user != null) {
-		                    setCookie("username", user, 30);
+		        function getCookie(c_name) {
+		            if (document.cookie.length > 0) {
+		                c_start = document.cookie.indexOf(c_name + "=");
+		                if (c_start != -1) {
+		                    c_start = c_start + c_name.length + 1;
+		                    c_end = document.cookie.indexOf(";", c_start);
+		                    if (c_end == -1) {
+		                        c_end = document.cookie.length;
+		                    }
+		                    return unescape(document.cookie.substring(c_start, c_end));
 		                }
 		            }
+		            return "";
 		        }
 
 		        function chooseExistingPacerView() {
@@ -420,9 +426,15 @@
 		                };
 		                if (onExistingPacerSequence == true) {
 		                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected, true);
+		                    if (isDeveloperMode == true) {
+		                        alert("You entered the following PIN: " + pinVar);
+		                    }
 		                }
 		                else {
 		                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
+		                    if (isDeveloperMode == true) {
+		                        alert("You entered the following PIN: " + pinVar);
+		                    }
 		                }
 		                xhttp.send();
 		            }
@@ -1408,12 +1420,14 @@
 
                 <!-- Start View for the first time users -->
 				
-                <div id="firstTimeUserStartDiv" class="contentElement advancedElement" >
+                <div id="firstTimeUserStartDiv" class="contentElement advancedElement" data-no-turbolink>
                     <br /><br /><br />
                     <input id="newPacerButton" type="button" class="btn btn-success" otherNum="1" style="background-color:#00ff21" value="<h2>Let's Get Started!</h2>" />
                     <br /><br /><br />
-                    <!--<input id="existingPacerButton" type="button" class="btn btn-danger" otherNum="2" style="background-color:#f00" value="<h3>Wait, my light is running.</h3>" />-->
-                    <a href="pacerSelect.html" id="existingPacerButton" class="btn btn-danger" style="background-color:#f00" data-role="button"><h3>Wait, my light is running.</h3></a>
+                    <input id="existingPacerButton" type="button" class="btn btn-danger" otherNum="2" style="background-color:#f00" value="<h3>Wait, my light is running.</h3>" />
+                    <!--<a href="pacerSelect.html" id="existingPacerButton" class="btn btn-danger" style="background-color:#f00" data-role="button"><h3>Wait, my light is running.</h3></a>-->
+                    <br /><br /><br />
+                    <a href="pacerSelect.html" id="testNewPage" class="btn btn-danger" style="background-color:#f00" data-role="button"><h3>Test - new page</h3></a>
                 </div>
 
                 <!-- Create PIN View -->
@@ -1421,7 +1435,7 @@
 				<div id="createPinView" class="contentElement advancedElement" >
                     <br /><br /><br />
                     <h3 for="createPinSubmit" class="">Create your 3 digit passcode: </h3>
-                    <input type="number" pattern="[0-9]*" name="name" id="pinInputField" value="3 Digit Passcode Input" step="1" min="0" max="999" url="" />
+                    <input type="text" pattern="[0-9]*" name="name" id="pinInputField" value="3 Digit Passcode Input" step="1" min="0" max="999" url="" />
                     <br /><br /><br />
                     <input id="createPinSubmit" type="button" class="btn" otherNum="2" data-role="button" style="background-color:#f00" value="<h2>Create!</h2>" />
                 </div>

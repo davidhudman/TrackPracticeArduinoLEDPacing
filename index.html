@@ -405,6 +405,16 @@
 		        $("#createPinSubmit").click(function pinCreated() {
 		            if (isPinFormatValid() == true) {
 		                pinVar = $("#pinInputField").val();
+                        
+		                // map the numerical values into letters so leading zeroes will be compatible with sqlite database
+		                var str = pinVar.split("");
+		                for (i = 0; i < str.length; i++) {
+		                    if (str[i] == "0") {
+		                        str[i] = "A";
+		                    }
+		                }
+		                pinVar = str[0] + str[1] + str[2];
+                        
 		                var xhttp = new XMLHttpRequest();
 		                xhttp.onreadystatechange = function () {
 		                    if (xhttp.readyState == 4 && xhttp.status == 200) {

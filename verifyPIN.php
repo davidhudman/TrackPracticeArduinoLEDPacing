@@ -82,7 +82,7 @@ else {
 
 // If the flag for requesting a new Pacer is true - MAY BE UNNECESSARY AS WELL AS ITS VARIABLE ABOVE
 if ($needNewPacer != "1") {
-	$results = $db->query('Select * from Pin WHERE passcode=' . $pinAsArray[0] . $pinAsArray[1] . $pinAsArray[2] . ' AND pacerIndex=' . $pIndex);
+	$results = $db->query('Select * from Pin WHERE passcode="' . $pinAsArray[0] . $pinAsArray[1] . $pinAsArray[2] . '" AND pacerIndex=' . $pIndex);
 	while ($row = $results->fetchArray()) {
 	// echo var_dump($row);
 	$DbPin = $row['passcode'];
@@ -108,7 +108,7 @@ else {		// the user is requesting a new pacer
 
 	$db->exec($query);
 
-	$results = $db->query('UPDATE Pin SET active = 1, passcode=' . $pinAsArray[0] . $pinAsArray[1] . $pinAsArray[2] . ' WHERE pacerIndex=' . $pacerIndex);
+	$results = $db->query('UPDATE Pin SET active = 1, passcode="' . $pinAsArray[0] . $pinAsArray[1] . $pinAsArray[2] . '" WHERE pacerIndex=' . $pacerIndex);
 
 	$db->exec($query);
 	$db->close();

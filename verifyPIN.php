@@ -58,7 +58,7 @@ echo "select executed";
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 
 $pIndex = "-1";					// the pacerIndex from the request that needs to be verified PIN
-$pin = " ";							// the PIN from the request that needs to be verified with the pIndex
+$pin = "-1";							// the PIN from the request that needs to be verified with the pIndex
 $DbPin = "-1";						// the correct PIN
 $needNewPacer = "-1";		// the flag that indicates whether a new pacer is needed
 
@@ -99,8 +99,6 @@ if ($needNewPacer != "1") {
 	}
 }
 else {		// the user is requesting a new pacer
-	echo "pinAsArray[0]= " . $pinAsArray[0] . ", pinAsArray[1]= " . $pinAsArray[1] . ", pinAsArray[2]= " . $pinAsArray[2];
-	
 	$results = $db->query('SELECT * FROM Pin WHERE active = 0 ORDER BY pacerIndex ASC LIMIT 1');
 
 	while ($row = $results->fetchArray()) {
@@ -110,12 +108,10 @@ else {		// the user is requesting a new pacer
 
 	$db->exec($query);
 
-	// $results = $db->query('UPDATE Pin SET active = 1, passcode=' . $pinAsArray[0] . $pinAsArray[1] . $pinAsArray[2] . ' WHERE pacerIndex=' . $pacerIndex);
-	$results = $db->query('UPDATE Pin SET active = 1, passcode="' . $pin . '" WHERE pacerIndex=' . $pacerIndex);
+	$results = $db->query('UPDATE Pin SET active = 1, passcode=' . $pinAsArray[0] . $pinAsArray[1] . $pinAsArray[2] . ' WHERE pacerIndex=' . $pacerIndex);
 
 	$db->exec($query);
 	$db->close();
-	
 }
 
 ?>

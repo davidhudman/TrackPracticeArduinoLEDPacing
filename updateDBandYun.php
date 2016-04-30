@@ -16,8 +16,8 @@ $pacerIndex = -1;
 $value = -1;
 $command = -1;
 $fourthCommand = -1;
-$pin = " ";
-$queryResultPin = " ";
+$pin = -1;
+$queryResultPin = -1;
 
 $queryPacerIndex = -1;
 $backwards = -1;
@@ -41,16 +41,6 @@ else {
 	$command = $_REQUEST["command"];
 	$pin = $_REQUEST["pin"];
 }
-
-// parse the PIN to be a character array
-$length = strlen($pin);
-$pinAsArray = array();
-$pinString = "";
-for ($i=0; $i<$length; $i++) {
-	$pinAsArray[$i] = $pin[$i];
-	$pinString .= $pinAsArray[$i];
-}
-
 
 // If the pacerIndex is 99, we are in "Coach Mode" so it's not necessary to do a PIN check.
 if ($pacerIndex == 99) {
@@ -136,7 +126,7 @@ else {
 		$db->exec($query);
 
 		// make sure the $pacerIndex matches $pin
-		if ($queryResultPin == $pinString || $coachPin == $pinString)  {
+		if ($queryResultPin == $pin || $coachPin == $pin)  {
 			
 			if (command != -1) {
 				// then do the arduino requests
@@ -217,7 +207,7 @@ else {
 		}
 		else {
 			$db->close();
-			echo "the PIN you're using does not match the PIN for the pacer in the Database. Query result PIN is " . $queryResultPin . " but your PIN was " . $pinString;
+			echo "the PIN you're using does not match the PIN for the pacer in the Database. Query result PIN is " . $queryResultPin . " but your PIN was " . $pin;
 		}
 	}
 	else {

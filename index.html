@@ -176,7 +176,7 @@
 		            request.open("GET", "updatePacers.php?needYunSyncWithDB=1", true);
 		            request.send();
 		        });
-                
+
 		        /* // Extras Buttons click handlers */
 
 		        $("#changePaceExtrasButton").click(function () {
@@ -363,9 +363,9 @@
 		        })
                 .on("taphold", function () {
                     alert("tapHold event fired.");
-		        });
+                });
 
-                /* Functions for cookies */
+		        /* Functions for cookies */
 		        var createCookie = function (name, value, days) {
 		            var expires;
 		            if (days) {
@@ -405,16 +405,6 @@
 		        $("#createPinSubmit").click(function pinCreated() {
 		            if (isPinFormatValid() == true) {
 		                pinVar = $("#pinInputField").val();
-                        
-		                // map the numerical values into letters so leading zeroes will be compatible with sqlite database
-		                var str = pinVar.split("");
-		                for (i = 0; i < str.length; i++) {
-		                    if (str[i] == "0") {
-		                        str[i] = "A";
-		                    }
-		                }
-		                pinVar = str[0] + str[1] + str[2];
-                        
 		                var xhttp = new XMLHttpRequest();
 		                xhttp.onreadystatechange = function () {
 		                    if (xhttp.readyState == 4 && xhttp.status == 200) {
@@ -449,7 +439,7 @@
 		                xhttp.send();
 		            }
 		            else {
-		                alert("Please enter 3 digits");		// user alert.
+		                alert("Please enter 3 digits");		// user alert
 		            }
 		        });
 

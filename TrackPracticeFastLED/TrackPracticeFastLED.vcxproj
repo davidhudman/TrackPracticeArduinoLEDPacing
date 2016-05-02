@@ -73,7 +73,9 @@
     <None Include="..\createWorkoutTable.php" />
     <None Include="..\findOpenPacer.php" />
     <None Include="..\index.html" />
+    <None Include="..\indexOriginalBackup.html" />
     <None Include="..\pacerSelect.html" />
+    <None Include="..\pageSlide.html" />
     <None Include="..\refreshDb.php" />
     <None Include="..\runWorkout.php" />
     <None Include="..\selectPin.php" />

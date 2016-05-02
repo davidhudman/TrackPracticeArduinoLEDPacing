@@ -38,10 +38,12 @@
 
 		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 
-		    $(document).on("pagecontainerbeforeload", function () {
-		        refreshPacerButtonData();
+		    //$(document).on("pagecontainerbeforeload", function () {
+		    //    refreshPacerButtonData();
 
-		    });
+		    //});
+
+		    $(document).ready(ready);
 
 		    // Do all this stuff as soon as the page loads
 		    function ready() {
@@ -85,7 +87,7 @@
 		    };
 
 
-		    $("#pacerButtonView").on('pageinit', ready);
+		    // $("#pacerButtonView").on('pageinit', ready);
 
 		    // $(document).on('pageinit pageshow', ready);
 		    /*

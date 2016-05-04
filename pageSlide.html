@@ -99,6 +99,70 @@
                 }
             });
 
+            // Click Handler for colorButtonClass to take User to time input - New Pacer
+            $(".colorButtonClass_create").click(function () {
+                var newNum = $(this).attr("otherNum");
+                requestCommand(5, masterPacerSelected, newNum);
+                $(":mobile-pagecontainer").pagecontainer("change", "#timeInputView_create", {
+                    transition: "slide"
+                });
+            });
+
+            // Handles the submission of the normal view lap time
+            $("#timeSubmit_create").click(function () {
+                commandURL = parseInt($(this).attr("url"), 10);
+                pacerIndex = parseInt(masterPacerSelected, 10);
+                newNum = $("#timeInput_create").val();
+                if (newNum < lapTimeInputConstraints[0] || newNum > lapTimeInputConstraints[1]) {
+                    if (newNum < lapTimeInputConstraints[0])
+                        $("#timeInput_create").val(lapTimeInputConstraints[0]);
+                    else
+                        $("#timeInput_create").val(lapTimeInputConstraints[1]);
+                }
+                else {
+                    alert("When you click OK, Traffic Light Countdown will start\n\nRED will appear on 3rd light\n\nYELLOW will then appear on 2nd light.");	// user alert
+                    requestCommand(commandURL, pacerIndex, newNum);
+                    // needs to go to simple user control view for new pacers
+                    $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl_create", {
+                        transition: "slide"
+                    });
+                }
+            });
+
+            // handles pacer action commands - clear, reset, backwards, new number of lights, change in speed, etc.
+            $(".pacerActionButton").click(function () {
+                var commandURL = parseInt($(this).attr("url"), 10);
+                var pacerIndex = parseInt(masterPacerSelected, 10);
+                var newNum = parseFloat($(this).attr("otherNum"));
+                // var signlessNum = parseFloat($("#lightsNumberInput").val());
+                // var featureEnabled = $(this).attr("featureEnabled");    // this returns a string
+
+                // if we're not onCoachSequence and not in Developer Mode and the featureEnabled variable is false
+                //if (onCoachSequence == false && isDeveloperMode == false && featureEnabled == "false") {
+                //    alert("Feature not enabled.");
+                //}
+                //else {
+                    // alert(featureEnabled);
+                    switch (commandURL) {
+                        case 6:         // light change
+                            newNum = signlessNum;
+                            break;
+                        case 8:         // speed change
+                            if (signlessNum <= 0.0) {
+                                return;
+                            }
+                            else {
+                                newNum = signlessNum * newNum;   // multiply by newNum because '$(this).attr("otherNum")' is actually the "sign" of the number
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+
+                    requestCommand(commandURL, pacerIndex, newNum);
+                // }
+            });
+
             // Takes you a view where the user can edit their new pacer
             $("#createPinSubmit").click(function pinCreated() {
                 pinVar = $("#pinInputField").val();
@@ -196,13 +260,36 @@
             });
         });
 
+        // sends GET request for the commands that the Yun will accept; parameters: x - command, y - pacerIndex, z - value
+        function requestCommand(x, y, z) {
+            if (masterPacerSelected == 99) {		// If you're in "Coach Mode" where you can control all pacers at once, as well as update the database just like below
+                y = masterPacerSelected;
+            }
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (request.readyState == 4 && request.status == 200) {
+                    if (isDeveloperMode == true) {
+                        alert(request.responseText);
+                    }
+                    else {
+                        if (request.responseText.substr(0, 8) == "USER MSG") {
+                            alert(request.responseText.substr(10));
+                        }
+                    }
+                }
+            };
+
+            request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
+            request.send();
+        }
+
         // initialize the colorButtons with text and color
         function colorButtonInitialize() {
             for (var i = 0; i < colorArray.length - 1; i++) {
                 j = i + 1;
-                $("#colorButton" + i).attr('otherNum', j).text(colorArray[j]).attr('style', 'background-color:' + colorArray[j]);
+                $("#colorButton" + i + "_create").attr('otherNum', j).text(colorArray[j]).attr('style', 'background-color:' + colorArray[j]);
                 if (i == 1 || i == 5 || i == 6) {
-                    $("#colorButton" + i).css('color', 'white');
+                    $("#colorButton" + i + "_create").css('color', 'white');
                 }
             }
         }
@@ -367,22 +454,35 @@
 
 <!-- Color Button View - New Pacer -->
 <div id="colorButtonView_create" class="contentElement advancedElement" >
-    <a id="colorButton0" class="btn colorButtonClass" otherNum="1" data-role="button" data-icon="star"></a>
-    <a id="colorButton1" class="btn colorButtonClass" otherNum="2" data-role="button" data-icon="star"></a>
-    <a id="colorButton2" class="btn colorButtonClass" otherNum="3" data-role="button" data-icon="star"></a>
-    <a id="colorButton3" class="btn colorButtonClass" otherNum="4" data-role="button" data-icon="star"></a>
-    <a id="colorButton4" class="btn colorButtonClass" otherNum="5" data-role="button" data-icon="star"></a>
-    <a id="colorButton5" class="btn colorButtonClass" otherNum="6" data-role="button" data-icon="star"></a>
-    <a id="colorButton6" class="btn colorButtonClass" otherNum="7" data-role="button" data-icon="star"></a>
+    <a id="colorButton0_create" class="btn colorButtonClass_create" otherNum="1" data-role="button" data-icon="star"></a>
+    <a id="colorButton1_create" class="btn colorButtonClass_create" otherNum="2" data-role="button" data-icon="star"></a>
+    <a id="colorButton2_create" class="btn colorButtonClass_create" otherNum="3" data-role="button" data-icon="star"></a>
+    <a id="colorButton3_create" class="btn colorButtonClass_create" otherNum="4" data-role="button" data-icon="star"></a>
+    <a id="colorButton4_create" class="btn colorButtonClass_create" otherNum="5" data-role="button" data-icon="star"></a>
+    <a id="colorButton5_create" class="btn colorButtonClass_create" otherNum="6" data-role="button" data-icon="star"></a>
+    <a id="colorButton6_create" class="btn colorButtonClass_create" otherNum="7" data-role="button" data-icon="star"></a>
 </div>
 
 <!-- Simple Pacer control buttons for first time end user - Existing Pacer -->
 <div data-role="page" id="simplePacerControl_existing" class="contentElement advancedElement">
-    <input id="clearButton" type="button" class="submitButton3" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
-    <input id="resetButton" type="button"  class="submitButton3" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
-    <input id="helpButton" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" />
+    <input id="clearButton_existing" type="button" class="pacerActionButton" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
+    <input id="resetButton_existing" type="button"  class="pacerActionButton" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
+    <input id="helpButton_existing" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" />
 </div>
 
+<!-- Simple Pacer control buttons for first time end user - New Pacer -->
+<div data-role="page" id="simplePacerControl_create" class="contentElement advancedElement">
+    <input id="clearButton_create" type="button" class="pacerActionButton" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
+    <input id="resetButton_create" type="button"  class="pacerActionButton" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
+    <input id="helpButton_create" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" />
+</div>
+
+<!-- Time Input - New Pacer -->
+<div data-role="page" id="timeInputView_create" class="contentElement timeInputView">
+	<label for="timeInput_create" class="select"><h3>Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></h3></label>
+	<input type="number" pattern="[0-9]*" name="name" id="timeInput_create" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
+    <input id="timeSubmit_create" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
+</div>
 
 
 </body>

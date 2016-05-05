@@ -154,17 +154,25 @@
                 minNum = parseFloat($("#timeMinutesInput_create").val());
                 secNum = parseFloat($("#timeSecondsInput_create").val());
 
-                alert("secNum before adding minNum: "+secNum);
+                if (isDeveloperMode == true) {
+                    alert("secNum before adding minNum: " + secNum);
+                }
                 // add the number of minutes and seconds together to create a number in terms of seconds
                 if (minNum > 0) {
                     secNum += (minNum * 60);
                 }
-                alert("secNum after adding minNum: " + secNum);
+
+                if (isDeveloperMode == true) {
+                    alert("secNum after adding minNum: " + secNum);
+                }
                 // use the distance they specified to convert their time to a laptime if necessary
                 secNum = secNum * (trackDistanceInMeters / userTimeInputDistance);
-                alertNum = (trackDistanceInMeters / userTimeInputDistance);
+                secNum = parseFloat(secNum.toFixed(2));
 
-                alert("secNum after conversion is: " + secNum + " and trackDistanceInMeters / userTimeInputDistance is " + alertNum);
+                if (isDeveloperMode == true) {
+                    alertNum = (trackDistanceInMeters / userTimeInputDistance);
+                    alert("secNum after conversion is: " + secNum + " and trackDistanceInMeters / userTimeInputDistance is " + alertNum);
+                }
 
                 if (secNum < lapTimeInputConstraints[0] || secNum > lapTimeInputConstraints[1]) {
                     if (secNum < lapTimeInputConstraints[0])

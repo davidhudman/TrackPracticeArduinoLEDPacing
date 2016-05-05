@@ -22,6 +22,7 @@
         var lapTimeInputConstraints = [1, 900];
         var trackDistanceInMeters = 400;
         var userTimeInputDistance = 400; // this allows the user to specify whether they want to input their pace as a lap pace (based on how long this track is), 400m pace, 1600m pace, or mile pace
+        var userTimeInputDistanceString = "lap";
         var isUserBackwardsPermissionEnabled = true;
         var isUserWorkoutPermissionEnabled = true;
         var isUserVisiblePermissionEnabled = true;
@@ -115,9 +116,15 @@
                 switch (newNum) {
                     case 0:
                         userTimeInputDistance = trackDistanceInMeters;
+                        userTimeInputDistanceString = toString(trackDistanceInMeters) + "m";
+                        break;
+                    case 1609.344:
+                        userTimeInputDistance = newNum;
+                        userTimeInputDistanceString = "mile";
                         break;
                     default:
                         userTimeInputDistance = newNum;
+                        userTimeInputDistanceString = toString(newNum) + "m";
                         break;
                 }
                 $(":mobile-pagecontainer").pagecontainer("change", "#timeInputView_create", {
@@ -154,7 +161,7 @@
                 minNum = parseFloat($("#timeMinutesInput_create").val());
                 secNum = parseFloat($("#timeSecondsInput_create").val());
 
-                alert("secNum before adding minNum: "+secNum);
+                alert("secNum before adding minNum: " + secNum);
                 // add the number of minutes and seconds together to create a number in terms of seconds
                 if (minNum > 0) {
                     secNum += (minNum * 60);
@@ -195,24 +202,24 @@
                 //    alert("Feature not enabled.");
                 //}
                 //else {
-                    // alert(featureEnabled);
-                    switch (commandURL) {
-                        case 6:         // light change
-                            newNum = signlessNum;
-                            break;
-                        case 8:         // speed change
-                            if (signlessNum <= 0.0) {
-                                return;
-                            }
-                            else {
-                                newNum = signlessNum * newNum;   // multiply by newNum because '$(this).attr("otherNum")' is actually the "sign" of the number
-                            }
-                            break;
-                        default:
-                            break;
-                    }
+                // alert(featureEnabled);
+                switch (commandURL) {
+                    case 6:         // light change
+                        newNum = signlessNum;
+                        break;
+                    case 8:         // speed change
+                        if (signlessNum <= 0.0) {
+                            return;
+                        }
+                        else {
+                            newNum = signlessNum * newNum;   // multiply by newNum because '$(this).attr("otherNum")' is actually the "sign" of the number
+                        }
+                        break;
+                    default:
+                        break;
+                }
 
-                    requestCommand(commandURL, pacerIndex, newNum);
+                requestCommand(commandURL, pacerIndex, newNum);
                 // }
             });
 
@@ -393,14 +400,18 @@
                             // split up the already split pieces
                             singlePacerSet = pacerGroupSet[i].split(",");
 
+                            userNumSecs = parseFloat(singlePacerSet[1]) * (trackDistanceInMeters / userTimeInputDistance);
+                            userNumMins = parseInt(userNumSecs / 60);
+                            userNumSecs = userNumSecs % 60;
+
                             // make your newPacer variable out of what you just split up
                             newPacer[i] = {
                                 index: singlePacerSet[0],
-                                lapTime: singlePacerSet[1],
+                                lapTime: parseFloat(singlePacerSet[1]) * (trackDistanceInMeters / userTimeInputDistance),
                                 color: colorArray[singlePacerSet[2] % colorArray.length],
                                 colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
                                 name: singlePacerSet[3],
-                                activeText: singlePacerSet[3] + " - " + singlePacerSet[1] + " sec lap",
+                                activeText: singlePacerSet[3] + " - " + userNumMins + ":" + userNumSecs + " per " + userTimeInputDistanceString,
                                 inactiveText: singlePacerSet[3] + " - inactive"
                             };
 

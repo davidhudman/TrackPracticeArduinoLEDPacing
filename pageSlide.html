@@ -12,6 +12,7 @@
     <script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
     <script>
         var isDeveloperMode = false;
+        var isVerificationEnabled = true;     // If false, this will allow the user to click through the app without being attached to any DB or web server
 
         // Globals specific to the client's track and desired permissions
         var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
@@ -20,6 +21,7 @@
         var numPacers = 10;
         var lapTimeInputConstraints = [1, 900];
         var trackDistanceInMeters = 400;
+        var userTimeInputDistance = 400; // this allows the user to specify whether they want to input their pace as a lap pace (based on how long this track is), 400m pace, 1600m pace, or mile pace
         var isUserBackwardsPermissionEnabled = true;
         var isUserWorkoutPermissionEnabled = true;
         var isUserVisiblePermissionEnabled = true;
@@ -103,25 +105,76 @@
             $(".colorButtonClass_create").click(function () {
                 var newNum = $(this).attr("otherNum");
                 requestCommand(5, masterPacerSelected, newNum);
+                $(":mobile-pagecontainer").pagecontainer("change", "#paceTypeInput_create", {
+                    transition: "slide"
+                });
+            });
+
+            $(".paceDistanceButton").click(function () {
+                var newNum = parseFloat($(this).attr("otherNum"));
+                switch (newNum) {
+                    case 0:
+                        userTimeInputDistance = trackDistanceInMeters;
+                        break;
+                    default:
+                        userTimeInputDistance = newNum;
+                        break;
+                }
                 $(":mobile-pagecontainer").pagecontainer("change", "#timeInputView_create", {
                     transition: "slide"
                 });
+            });
+
+            // Click handler for newPacerButton that enables / disables verifcation upon hearing the "tap hold" event
+            $("#newPacerButton").on("taphold", function () {
+                isVerificationEnabled = !isVerificationEnabled;
+                if (isVerificationEnabled == true) {
+                    alert("Verifcation mode enabled!");
+                }
+                else {
+                    alert("Verification mode disabled!");
+                }
+            });
+
+            // Click handler for existingPacerButton that enables / disables developerMode upon hearing the "tap hold" event
+            $("#existingPacerButton").on("taphold", function () {
+                isDeveloperMode = !isDeveloperMode;
+                if (isDeveloperMode == true) {
+                    alert("Developer mode enabled!");
+                }
+                else {
+                    alert("Developer mode disabled!");
+                }
             });
 
             // Handles the submission of the normal view lap time
             $("#timeSubmit_create").click(function () {
                 commandURL = parseInt($(this).attr("url"), 10);
                 pacerIndex = parseInt(masterPacerSelected, 10);
-                newNum = $("#timeInput_create").val();
-                if (newNum < lapTimeInputConstraints[0] || newNum > lapTimeInputConstraints[1]) {
-                    if (newNum < lapTimeInputConstraints[0])
-                        $("#timeInput_create").val(lapTimeInputConstraints[0]);
+                minNum = parseFloat($("#timeMinutesInput_create").val());
+                secNum = parseFloat($("#timeSecondsInput_create").val());
+
+                alert("secNum before adding minNum: "+secNum);
+                // add the number of minutes and seconds together to create a number in terms of seconds
+                if (minNum > 0) {
+                    secNum += (minNum * 60);
+                }
+                alert("secNum after adding minNum: " + secNum);
+                // use the distance they specified to convert their time to a laptime if necessary
+                secNum = secNum * (trackDistanceInMeters / userTimeInputDistance);
+                alertNum = (trackDistanceInMeters / userTimeInputDistance);
+
+                alert("secNum after conversion is: " + secNum + " and trackDistanceInMeters / userTimeInputDistance is " + alertNum);
+
+                if (secNum < lapTimeInputConstraints[0] || secNum > lapTimeInputConstraints[1]) {
+                    if (secNum < lapTimeInputConstraints[0])
+                        $("#timeSecondsInput_create").val(lapTimeInputConstraints[0]);
                     else
-                        $("#timeInput_create").val(lapTimeInputConstraints[1]);
+                        $("#timeSecondsInput_create").val(lapTimeInputConstraints[1]);
                 }
                 else {
                     alert("When you click OK, Traffic Light Countdown will start\n\nRED will appear on 3rd light\n\nYELLOW will then appear on 2nd light.");	// user alert
-                    requestCommand(commandURL, pacerIndex, newNum);
+                    requestCommand(commandURL, pacerIndex, secNum);
                     // needs to go to simple user control view for new pacers
                     $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl_create", {
                         transition: "slide"
@@ -167,33 +220,41 @@
             $("#createPinSubmit").click(function pinCreated() {
                 pinVar = $("#pinInputField").val();
                 if (isPinFormatValid(pinVar) == true) {
-                    var xhttp = new XMLHttpRequest();
-                    xhttp.onreadystatechange = function () {
-                        if (xhttp.readyState == 4 && xhttp.status == 200) {
-                            if (xhttp.responseText != "incorrect") {
-                                pinSubmitText = xhttp.responseText;
-                                masterPacerSelected = pinSubmitText;
-                                if (isDeveloperMode == true) {
-                                    alert(masterPacerSelected);
+                    if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
+                        var xhttp = new XMLHttpRequest();
+                        xhttp.onreadystatechange = function () {
+                            if (xhttp.readyState == 4 && xhttp.status == 200) {
+                                if (xhttp.responseText != "incorrect") {
+                                    pinSubmitText = xhttp.responseText;
+                                    masterPacerSelected = pinSubmitText;
+                                    if (isDeveloperMode == true) {
+                                        alert(masterPacerSelected);
+                                    }
+                                    else {
+                                        // user alert
+                                    }
+                                    // This needs to take us to the color selection view
+                                    $(":mobile-pagecontainer").pagecontainer("change", "#colorButtonView_create", {
+                                        transition: "slide"
+                                    });
                                 }
                                 else {
-                                    // user alert
+                                    alert(xhttp.responseText);  // incorrect PIN  // user alert
                                 }
-                                // This needs to take us to the color selection view
-                                $(":mobile-pagecontainer").pagecontainer("change", "#colorButtonView_create", {
-                                    transition: "slide"
-                                });
                             }
-                            else {
-                                alert(xhttp.responseText);  // incorrect PIN  // user alert
-                            }
+                        };
+                        xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
+                        if (isDeveloperMode == true) {
+                            alert("You entered the following PIN: " + pinVar);
                         }
-                    };
-                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
-                    if (isDeveloperMode == true) {
-                        alert("You entered the following PIN: " + pinVar);
+                        xhttp.send();
                     }
-                    xhttp.send();
+                    else {
+                        // If verification isn't enabled, just take the user to the next page
+                        $(":mobile-pagecontainer").pagecontainer("change", "#colorButtonView_create", {
+                            transition: "slide"
+                        });
+                    }
                 }
                 else {
                     alert("Please enter 3 digits");		// user alert
@@ -204,33 +265,40 @@
             $("#enterPinSubmit").click(function pinCreated() {
                 pinVar = $("#pinEntryField").val();
                 if (isPinFormatValid(pinVar) == true) {
-                    var xhttp = new XMLHttpRequest();
-                    xhttp.onreadystatechange = function () {
-                        if (xhttp.readyState == 4 && xhttp.status == 200) {
-                            if (xhttp.responseText != "incorrect") {
-                                pinSubmitText = xhttp.responseText;
-                                masterPacerSelected = pinSubmitText;
-                                if (isDeveloperMode == true) {
-                                    alert(masterPacerSelected);
+                    if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
+                        var xhttp = new XMLHttpRequest();
+                        xhttp.onreadystatechange = function () {
+                            if (xhttp.readyState == 4 && xhttp.status == 200) {
+                                if (xhttp.responseText != "incorrect") {
+                                    pinSubmitText = xhttp.responseText;
+                                    masterPacerSelected = pinSubmitText;
+                                    if (isDeveloperMode == true) {
+                                        alert(masterPacerSelected);
+                                    }
+                                    else {
+                                        // user alert
+                                    }
+                                    // This needs to take us to the simplePacerControlView
+                                    $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl_existing", {
+                                        transition: "slide"
+                                    });
                                 }
                                 else {
-                                    // user alert
+                                    alert(xhttp.responseText);  // incorrect PIN  // user alert
                                 }
-                                // This needs to take us to the simplePacerControlView
-                                $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl_existing", {
-                                    transition: "slide"
-                                });
                             }
-                            else {
-                                alert(xhttp.responseText);  // incorrect PIN  // user alert
-                            }
+                        };
+                        xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected, true);
+                        if (isDeveloperMode == true) {
+                            alert("You entered the following PIN: " + pinVar);
                         }
-                    };
-                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected, true);
-                    if (isDeveloperMode == true) {
-                        alert("You entered the following PIN: " + pinVar);
+                        xhttp.send();
                     }
-                    xhttp.send();
+                    else {      // If verification isn't abled, just take them to the next page automatically
+                        $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl_existing", {
+                            transition: "slide"
+                        });
+                    }
                 }
                 else {
                     alert("Please enter 3 digits");		// user alert
@@ -265,22 +333,24 @@
             if (masterPacerSelected == 99) {		// If you're in "Coach Mode" where you can control all pacers at once, as well as update the database just like below
                 y = masterPacerSelected;
             }
-            var request = new XMLHttpRequest();
-            request.onreadystatechange = function () {
-                if (request.readyState == 4 && request.status == 200) {
-                    if (isDeveloperMode == true) {
-                        alert(request.responseText);
-                    }
-                    else {
-                        if (request.responseText.substr(0, 8) == "USER MSG") {
-                            alert(request.responseText.substr(10));
+            if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4 && request.status == 200) {
+                        if (isDeveloperMode == true) {
+                            alert(request.responseText);
+                        }
+                        else {
+                            if (request.responseText.substr(0, 8) == "USER MSG") {
+                                alert(request.responseText.substr(10));
+                            }
                         }
                     }
-                }
-            };
+                };
 
-            request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
-            request.send();
+                request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
+                request.send();
+            }
         }
 
         // initialize the colorButtons with text and color
@@ -310,56 +380,58 @@
         function refreshPacerButtonData() {
             var newPacer = [];  // in order to store array objects, you must create this variable like this
 
-            // get lapTime, name, and color from PHP
-            var request = new XMLHttpRequest();
-            request.onreadystatechange = function () {
-                if (request.readyState == 4 && request.status == 200) {
+            if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
+                // get lapTime, name, and color from PHP
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4 && request.status == 200) {
 
-                    // split up the feedback
-                    pacerGroupSet = request.responseText.split("#");
+                        // split up the feedback
+                        pacerGroupSet = request.responseText.split("#");
 
-                    for (i = 0; i < pacerGroupSet.length; i++) {
-                        // split up the already split pieces
-                        singlePacerSet = pacerGroupSet[i].split(",");
+                        for (i = 0; i < pacerGroupSet.length; i++) {
+                            // split up the already split pieces
+                            singlePacerSet = pacerGroupSet[i].split(",");
 
-                        // make your newPacer variable out of what you just split up
-                        newPacer[i] = {
-                            index: singlePacerSet[0],
-                            lapTime: singlePacerSet[1],
-                            color: colorArray[singlePacerSet[2] % colorArray.length],
-                            colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
-                            name: singlePacerSet[3],
-                            activeText: singlePacerSet[3] + " - " + singlePacerSet[1] + " sec lap",
-                            inactiveText: singlePacerSet[3] + " - inactive"
-                        };
+                            // make your newPacer variable out of what you just split up
+                            newPacer[i] = {
+                                index: singlePacerSet[0],
+                                lapTime: singlePacerSet[1],
+                                color: colorArray[singlePacerSet[2] % colorArray.length],
+                                colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
+                                name: singlePacerSet[3],
+                                activeText: singlePacerSet[3] + " - " + singlePacerSet[1] + " sec lap",
+                                inactiveText: singlePacerSet[3] + " - inactive"
+                            };
 
-                        // update the buttons
-                        $("#existPacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
-                        if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
-                            $("#existPacerButton" + i).css('color', 'white');
+                            // update the buttons
+                            $("#existPacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+                            if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
+                                $("#existPacerButton" + i).css('color', 'white');
+                            }
+                            if (singlePacerSet[1] == "0") {
+                                $("#existPacerButton" + i).text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
+                            }
+
+                            // update other text fields - used in Coach Mode
+                            //if (masterPacerSelected == i) {
+                            //    if (masterPacerSelected != 99) {
+                            //        // update pacerSelect button for Coach Mode
+                            //        $("#pacerSelect").text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+                            //        if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
+                            //            $("#pacerSelect").css('color', 'white');
+                            //        }
+                            //        if (singlePacerSet[1] == "0") {
+                            //            $("#pacerSelect").text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
+                            //        }
+                            //    }
+                            //}
                         }
-                        if (singlePacerSet[1] == "0") {
-                            $("#existPacerButton" + i).text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
-                        }
-
-                        // update other text fields - used in Coach Mode
-                        //if (masterPacerSelected == i) {
-                        //    if (masterPacerSelected != 99) {
-                        //        // update pacerSelect button for Coach Mode
-                        //        $("#pacerSelect").text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
-                        //        if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
-                        //            $("#pacerSelect").css('color', 'white');
-                        //        }
-                        //        if (singlePacerSet[1] == "0") {
-                        //            $("#pacerSelect").text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
-                        //        }
-                        //    }
-                        //}
                     }
                 }
+                request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
+                request.send();
             }
-            request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
-            request.send();
         }
 
     </script>
@@ -477,11 +549,27 @@
     <input id="helpButton_create" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" />
 </div>
 
+<!-- The user can select what distance they want to enter their pace for (lap, 400, 1600, or mile) - New Pacer -->
+<div data-role="page" id="paceTypeInput_create" class="contentElement advancedElement">
+    <input id="Button1" type="button" class="paceDistanceButton" otherNum="0" value="<h3>Lap on this track</h3>" />
+    <br />
+    <input id="Button2" type="button" class="paceDistanceButton" otherNum="400" value="<h3>400 meters</h3>" />
+    <br />
+    <input id="Button3" type="button" class="paceDistanceButton" otherNum="1600" value="<h3>1600 meters</h3>" />
+    <br />
+    <input id="Button4" type="button" class="paceDistanceButton" otherNum="1609.344" value="<h3>mile</h3>" />
+</div>
+
 <!-- Time Input - New Pacer -->
 <div data-role="page" id="timeInputView_create" class="contentElement timeInputView">
-	<label for="timeInput_create" class="select"><h3>Enter Lap Time in Seconds: <a href="#" id="helpLink">Help?</a></h3></label>
-	<input type="number" pattern="[0-9]*" name="name" id="timeInput_create" value="Lap Time Input" step="0.1" min="1" max="900" url="7" />
-    <input id="timeSubmit_create" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
+    <div data-role="content" data-theme="a">
+	    <label for="timeMinutesInput_create" class="select"><h3>Enter Your Minutes:</h3></label>
+        <input type="number" pattern="[0-9]*" name="name" id="timeMinutesInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
+        <br /><br />
+        <label for="timeSecondsInput_create" class="select"><h3>Enter Your Seconds: <a href="#" id="A1">Help?</a></h3></label>
+	    <input type="number" pattern="[0-9]*" name="name" id="timeSecondsInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
+        <input id="timeSubmit_create" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
+    </div>
 </div>
 
 

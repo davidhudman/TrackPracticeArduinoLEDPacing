@@ -440,43 +440,25 @@
                 request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
                 request.send();
             }
+            else {
+                // fill the buttons with some made up data
+                for (i = 0; i < 10; i++) {
+                    if (i < 6) {
+                        $("#existPacerButton" + i).text("Pacer"+i+" - "+(i+1)+" sec lap").attr('style', "background-color:"+colorArray[i+1]);
+                        if (i+1 % colorArray.length == "2" || i+1 % colorArray.length == "6" || i+1 % colorArray.length == "7") {
+                            $("#existPacerButton" + i).css('color', 'white');
+                        }
+                    }
+                    else {
+                        $("#existPacerButton" + i).text("Pacer"+i+" - inactive").attr('style', "background-color:black").css('color', 'white');
+                    }
+                }
+            }
         }
 
     </script>
 </head>
 <body>
-
-<!--<div data-role="page" id="pageone">
-  <div data-role="header">
-    <h1>Welcome To My Homepage</h1>
-  </div>
-
-  <div data-role="main" class="ui-content">
-    <p>Click on the link to see the slide effect (slides to the next page from right to left).</p>
-    <a href="#pagetwo" data-transition="slide">Slide to Page Two</a>
-    <br /><br /><br />
-    <a href="#firstTimeUserStartDiv" data-transition="slide" >Go to Track Pacer</a>
-  </div>
-
-  <div data-role="footer">
-    <h1>Footer Text</h1>
-  </div>
-</div> 
-
-<div data-role="page" id="pagetwo">
-  <div data-role="header">
-    <h1>Welcome To My Homepage</h1>
-  </div>
-
-  <div data-role="main" class="ui-content">
-    <p>Click on the link to see the slide effect REVERSED (slides to the previous page from left to right).</p>
-    <a href="#pageone" data-transition="slide" data-direction="reverse">Slide to Page One (reversed)</a>
-  </div>
-
-  <div data-role="footer">
-    <h1>Footer Text</h1>
-  </div>
-</div>-->
 
 <!-- Start View for the first time users -->			
 <div data-role="page" id="firstTimeUserStartDiv pageone" class="contentElement advancedElement">

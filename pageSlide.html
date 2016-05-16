@@ -21,7 +21,8 @@
         var numPacers = 10;
         var lapTimeInputConstraints = [1, 900];
         var trackDistanceInMeters = 400;
-        var userTimeInputDistance = 400; // this allows the user to specify whether they want to input their pace as a lap pace (based on how long this track is), 400m pace, 1600m pace, or mile pace
+        var userTimeInputDistance = 400; 			 // this allows the user to specify whether they want to input their pace as a lap pace (based on how long this track is), 400m pace, 1600m pace, or mile pace
+        var userTimeInputDistanceString = "lap";	 // a string that will indicate to the user what they chose
         var isUserBackwardsPermissionEnabled = true;
         var isUserWorkoutPermissionEnabled = true;
         var isUserVisiblePermissionEnabled = true;
@@ -72,6 +73,11 @@
             });
         }
 
+        // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
+        function helpClicked() {
+            alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
+        }
+
         // *****************
         // End Click Handlers
         // *****************
@@ -115,11 +121,22 @@
                 switch (newNum) {
                     case 0:
                         userTimeInputDistance = trackDistanceInMeters;
+                        userTimeInputDistanceString = "lap";
                         break;
-                    default:
+                    case 400:
                         userTimeInputDistance = newNum;
+                        userTimeInputDistanceString = "400";
+                        break;
+                    case 1600:
+                        userTimeInputDistance = newNum;
+                        userTimeInputDistanceString = "1600";
+                        break;
+                    case 1609.344:
+                        userTimeInputDistance = newNum;
+                        userTimeInputDistanceString = "mile";
                         break;
                 }
+                $("#paceInputLabel").text("Enter your " + userTimeInputDistanceString + " pace:");
                 $(":mobile-pagecontainer").pagecontainer("change", "#timeInputView_create", {
                     transition: "slide"
                 });
@@ -203,24 +220,37 @@
                 //    alert("Feature not enabled.");
                 //}
                 //else {
-                    // alert(featureEnabled);
-                    switch (commandURL) {
-                        case 6:         // light change
-                            newNum = signlessNum;
-                            break;
-                        case 8:         // speed change
-                            if (signlessNum <= 0.0) {
-                                return;
-                            }
-                            else {
-                                newNum = signlessNum * newNum;   // multiply by newNum because '$(this).attr("otherNum")' is actually the "sign" of the number
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-
-                    requestCommand(commandURL, pacerIndex, newNum);
+                // alert(featureEnabled);
+                switch (commandURL) {
+                    case 0:			// clear pacer
+                        var r = confirm("Are you sure you want to stop your pacer and exit?");
+                        if (r == true) {
+                            // OK
+                            $(":mobile-pagecontainer").pagecontainer("change", "#firstTimeUserStartDiv", {
+                                transition: "slide"
+                            });
+                            requestCommand(commandURL, pacerIndex, newNum);
+                        } else {
+                            // cancel
+                        }
+                        break;
+                    case 6:         // light change
+                        newNum = signlessNum;
+                        requestCommand(commandURL, pacerIndex, newNum);
+                        break;
+                    case 8:         // speed change
+                        if (signlessNum <= 0.0) {
+                            return;
+                        }
+                        else {
+                            newNum = signlessNum * newNum;   // multiply by newNum because '$(this).attr("otherNum")' is actually the "sign" of the number
+                        }
+                        requestCommand(commandURL, pacerIndex, newNum);
+                        break;
+                    default:
+                        requestCommand(commandURL, pacerIndex, newNum);
+                        break;
+                }
                 // }
             });
 
@@ -444,13 +474,13 @@
                 // fill the buttons with some made up data
                 for (i = 0; i < 10; i++) {
                     if (i < 6) {
-                        $("#existPacerButton" + i).text("Pacer"+i+" - "+(i+1)+" sec lap").attr('style', "background-color:"+colorArray[i+1]);
-                        if (i+1 % colorArray.length == "2" || i+1 % colorArray.length == "6" || i+1 % colorArray.length == "7") {
+                        $("#existPacerButton" + i).text("Pacer" + i + " - " + (i + 1) + " sec lap").attr('style', "background-color:" + colorArray[i + 1]);
+                        if (i + 1 % colorArray.length == "2" || i + 1 % colorArray.length == "6" || i + 1 % colorArray.length == "7") {
                             $("#existPacerButton" + i).css('color', 'white');
                         }
                     }
                     else {
-                        $("#existPacerButton" + i).text("Pacer"+i+" - inactive").attr('style', "background-color:black").css('color', 'white');
+                        $("#existPacerButton" + i).text("Pacer" + i + " - inactive").attr('style', "background-color:black").css('color', 'white');
                     }
                 }
             }
@@ -461,7 +491,7 @@
 <body>
 
 <!-- Start View for the first time users -->			
-<div data-role="page" id="firstTimeUserStartDiv pageone" class="contentElement advancedElement">
+<div data-role="page" id="firstTimeUserStartDiv" class="contentElement advancedElement">
     <br /><br /><br />
     <input id="newPacerButton" type="button" class="btn btn-success" onclick="return newPacerButton_onclick()" otherNum="1" style="background-color:#00ff21" value="<h2>Let's Get Started!</h2>" />
     <br /><br /><br />
@@ -516,6 +546,8 @@
 
 <!-- Color Button View - New Pacer -->
 <div id="colorButtonView_create" class="contentElement advancedElement" >
+	<h3>Select your color:</h3>
+	<br />
     <a id="colorButton0_create" class="btn colorButtonClass_create" otherNum="1" data-role="button" data-icon="star"></a>
     <a id="colorButton1_create" class="btn colorButtonClass_create" otherNum="2" data-role="button" data-icon="star"></a>
     <a id="colorButton2_create" class="btn colorButtonClass_create" otherNum="3" data-role="button" data-icon="star"></a>
@@ -529,18 +561,40 @@
 <div data-role="page" id="simplePacerControl_existing" class="contentElement advancedElement">
     <input id="clearButton_existing" type="button" class="pacerActionButton" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
     <input id="resetButton_existing" type="button"  class="pacerActionButton" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
-    <input id="helpButton_existing" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" />
+    <input id="helpButton_existing" onclick="helpClicked()" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" />
 </div>
 
 <!-- Simple Pacer control buttons for first time end user - New Pacer -->
 <div data-role="page" id="simplePacerControl_create" class="contentElement advancedElement">
     <input id="clearButton_create" type="button" class="pacerActionButton" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
     <input id="resetButton_create" type="button"  class="pacerActionButton" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
-    <input id="helpButton_create" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" />
+    <input id="helpButton_create" onclick="helpClicked()" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" data-toggle="modal" data-target="#myModal" />
+	<!-- Modal
+	<div class="modal fade" id="myModal" role="dialog">
+		<div class="modal-dialog">
+
+			// Modal Content
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Modal Header</h4>
+				</div>
+				<div class="modal-body">
+					<p>Some text in the modal.</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		  
+		</div>
+	</div>-->
 </div>
 
 <!-- The user can select what distance they want to enter their pace for (lap, 400, 1600, or mile) - New Pacer -->
 <div data-role="page" id="paceTypeInput_create" class="contentElement advancedElement">
+	<label id="lapDistanceInputLabel" for="Button1"><h3>Select the distance that you want to enter your time for:</h3></label>
+	<br />
     <input id="Button1" type="button" class="paceDistanceButton" otherNum="0" value="<h3>Lap on this track</h3>" />
     <br />
     <input id="Button2" type="button" class="paceDistanceButton" otherNum="400" value="<h3>400 meters</h3>" />
@@ -553,10 +607,12 @@
 <!-- Time Input - New Pacer -->
 <div data-role="page" id="timeInputView_create" class="contentElement timeInputView">
     <div data-role="content" data-theme="a">
+		<h3 id="paceInputLabel">Enter your lap pace:</h3>
+		<br />
 	    <label for="timeMinutesInput_create" class="select"><h3>Enter Your Minutes:</h3></label>
         <input type="number" pattern="[0-9]*" name="name" id="timeMinutesInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
         <br /><br />
-        <label for="timeSecondsInput_create" class="select"><h3>Enter Your Seconds: <a href="#" id="A1">Help?</a></h3></label>
+        <label for="timeSecondsInput_create" class="select"><h3>Enter Your Seconds: <a href="#" onclick="helpClicked()" id="A1">Help?</a></h3></label>
 	    <input type="number" pattern="[0-9]*" name="name" id="timeSecondsInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
         <input id="timeSubmit_create" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
     </div>

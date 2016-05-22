@@ -94,7 +94,7 @@
         }
 
         // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
-        function helpClicked() {
+        function helpButton_onclick() {
             alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
         }
 
@@ -221,7 +221,7 @@
                     alert("When you click OK, Traffic Light Countdown will start\n\nRED will appear on 3rd light\n\nYELLOW will then appear on 2nd light.");	// user alert
                     requestCommand(commandURL, pacerIndex, secNum);
                     // needs to go to simple user control view for new pacers
-                    $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl_create", {
+                    $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl", {
                         transition: "slide"
                     });
                 }
@@ -337,7 +337,7 @@
                                         // user alert
                                     }
                                     // This needs to take us to the simplePacerControlView
-                                    $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl_existing", {
+                                    $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl", {
                                         transition: "slide"
                                     });
                                 }
@@ -353,7 +353,7 @@
                         xhttp.send();
                     }
                     else {      // If verification isn't abled, just take them to the next page automatically
-                        $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl_existing", {
+                        $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl", {
                             transition: "slide"
                         });
                     }
@@ -436,6 +436,16 @@
             }
         }
 
+        String.prototype.toHHMMSS = function () {
+            var sec_num = parseInt(this, 10);
+            var minutes = Math.floor((sec_num) / 60);
+            var seconds = sec_num - (minutes * 60);
+
+            if (minutes < 10) { minutes = "0" + minutes; }
+            if (seconds < 10) { seconds = "0" + seconds; }
+            return minutes + ':' + seconds;
+        }
+
         // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
         function refreshPacerButtonData() {
             var newPacer = [];  // in order to store array objects, you must create this variable like this
@@ -457,10 +467,12 @@
                             newPacer[i] = {
                                 index: singlePacerSet[0],
                                 lapTime: singlePacerSet[1],
+                                lapSecs: singlePacerSet[1] % 60,
+                                lapMins: (singlePacerSet[1] - (singlePacerSet[1] % 60)) / 60,
                                 color: colorArray[singlePacerSet[2] % colorArray.length],
                                 colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
                                 name: singlePacerSet[3],
-                                activeText: singlePacerSet[3] + " - " + singlePacerSet[1] + " sec lap",
+                                activeText: singlePacerSet[3] + " - " + (singlePacerSet[1] * 1609.344 / trackDistanceInMeters).toString().toHHMMSS() + " mile pace",
                                 inactiveText: singlePacerSet[3] + " - inactive"
                             };
 
@@ -579,18 +591,11 @@
     <a id="colorButton6_create" class="btn colorButtonClass_create" otherNum="7" data-role="button" data-icon="star"></a>
 </div>
 
-<!-- Simple Pacer control buttons for first time end user - Existing Pacer -->
-<div data-role="page" id="simplePacerControl_existing" class="contentElement advancedElement">
-    <input id="clearButton_existing" type="button" class="pacerActionButton" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
-    <input id="resetButton_existing" type="button"  class="pacerActionButton" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
-    <input id="helpButton_existing" onclick="helpClicked()" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" />
-</div>
-
-<!-- Simple Pacer control buttons for first time end user - New Pacer -->
-<div data-role="page" id="simplePacerControl_create" class="contentElement advancedElement">
-    <input id="clearButton_create" type="button" class="pacerActionButton" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
-    <input id="resetButton_create" type="button"  class="pacerActionButton" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
-    <input id="helpButton_create" onclick="helpClicked()" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" data-toggle="modal" data-target="#myModal" />
+<!-- Simple Pacer control buttons for first time end user - Existing Pacer and New Pacer -->
+<div data-role="page" id="simplePacerControl" class="contentElement advancedElement">
+    <input id="clearButton" type="button" class="pacerActionButton" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
+    <input id="resetButton" type="button"  class="pacerActionButton" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
+    <input id="helpButton" onclick="helpButton_onclick()" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" data-toggle="modal" data-target="#myModal" />
 	<!-- Modal
 	<div class="modal fade" id="myModal" role="dialog">
 		<div class="modal-dialog">
@@ -634,7 +639,7 @@
 	    <label for="timeMinutesInput_create" class="select"><h3>Enter Your Minutes:</h3></label>
         <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="timeMinutesInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
         <br /><br />
-        <label for="timeSecondsInput_create" class="select"><h3>Enter Your Seconds: <a href="#" onclick="helpClicked()" id="A1">Help?</a></h3></label>
+        <label for="timeSecondsInput_create" class="select"><h3>Enter Your Seconds: <a href="#" onclick="helpButton_onclick()" id="A1">Help?</a></h3></label>
 	    <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="timeSecondsInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
         <input id="timeSubmit_create" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
     </div>

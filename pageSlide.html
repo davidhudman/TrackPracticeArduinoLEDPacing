@@ -93,6 +93,12 @@
             });
         }
 
+        function advanced_onclick() {
+            $(":mobile-pagecontainer").pagecontainer("change", "#extraOptionsView", {
+                transition: "slide"
+            });
+        }
+
         // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
         function helpButton_onclick() {
             alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
@@ -595,7 +601,10 @@
 <div data-role="page" id="simplePacerControl" class="contentElement advancedElement">
     <input id="clearButton" type="button" class="pacerActionButton" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
     <input id="resetButton" type="button"  class="pacerActionButton" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
+    <input id="advancedButton" onclick="advanced_onclick()" type="button" data-icon="gear" style="background-color:green" data-iconpos="right" value="<h3>More Options</h3>" />
+    <input id="Button5" onclick="window.history.back()" type="button" data-icon="gear" style="background-color:green" data-iconpos="right" value="<h3>Browser Back</h3>" />
     <input id="helpButton" onclick="helpButton_onclick()" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" data-toggle="modal" data-target="#myModal" />
+    <!--<input id="advancedButton" type="button" data-icon="gear" data-iconpos="notext" url="clear" data-theme="a" />-->
 	<!-- Modal
 	<div class="modal fade" id="myModal" role="dialog">
 		<div class="modal-dialog">
@@ -643,6 +652,79 @@
 	    <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="timeSecondsInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
         <input id="timeSubmit_create" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
     </div>
+</div>
+
+<!-- Time Input - Extra Options -->
+<div data-role="page" id="timeInputView_extra" class="contentElement timeInputView">
+    <div data-role="content" data-theme="a">
+		<h3 id="paceInputLabel">Enter your <a id="paceInputLabelLink" href="#" onclick="paceTypeLabel_onclick()">mile</a> pace:</h3>
+		<br />
+	    <label for="timeMinutesInput_create" class="select"><h3>Enter Your Minutes:</h3></label>
+        <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="timeMinutesInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
+        <br /><br />
+        <label for="timeSecondsInput_create" class="select"><h3>Enter Your Seconds: <a href="#" onclick="helpButton_onclick()" id="A1">Help?</a></h3></label>
+	    <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="timeSecondsInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
+        <input id="timeSubmit_extra" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
+    </div>
+</div>
+
+
+<!--Extra Options View Buttons-->			
+<div id="extraOptionsView" class="contentElement advancedElement" >
+    <a id="changePaceExtrasButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Pace</h3></a>
+    <br />
+    <a id="changeColorExtrasButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Color</h3></a>
+    <br />
+    <a id="createWorkoutExtrasButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Create Workout</h3></a>
+	<br />
+    <a id="startWorkoutButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Start Workout</h3></a>
+	<br />
+	<a id="test00" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Pause Workout</h3></a>
+	<br />
+	<a id="changeDirectionExtrasButton" class="pacerActionButton" url="4" otherNum="-1" data-role="button"><h3>Change Direction</h3></a>
+	<br />
+	<a id="changeVisibilityExtrasButton" class="pacerActionButton" url="3" otherNum="-1" data-role="button"><h3>Change Visibility</h3></a>
+	<br />
+	<a id="changeSpeedInFlightButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Speed In Flight</h3></a>
+	<br />
+	<a id="test04" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Name</h3></a>
+</div>
+				
+<!-- Extras View Buttons in Developer Mode -->		
+<div id="advancedCoachDiv" class="contentElement advancedElement" >
+	<br /><br /><br />
+    <button id="writeFileMode" style="background-color:lightgreen">Write Mode On/Off</button>
+    <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
+    <button id="selectAllPinButton" style="background-color:#E6E6E6">Select * From Pin</button>
+    <button id="selectAllWorkoutButton" style="background-color:#E6E6E6">Select * From Workout</button>
+    <button id="setAllWorkoutsToAcitveButton" style="background-color:#E6E6E6">Make all workouts active</button>
+    <!--<button id="startWorkoutButton" style="background-color:#E6E6E6">Start Workout</button>-->
+    <a id="resetYunFromDbButton" class="btn" url="-1" otherNum="1" data-role="button">Refresh Pacers based on Yun DB</a>
+</div>
+                
+<!-- Create Workout View -->
+<div id="createWorkoutDiv" class="contentElement advancedElement" >
+    <h3 for="createWorkoutSubmit" class="">Create your workout: </h3>
+
+    <label for="workoutSetsInput" class="select">Number of Sets:</label>
+	<input type="number" pattern="[0-9]*" name="name" id="workoutSetsInput" value="Number of Sets" step="1" min="1" max="900" url="13" />
+
+    <h4 id="setNumberIndicator">Setup interval #</h4>
+
+    <label for="workoutMetersInput" class="select">Distance (meters) of Each Interval:</label>
+	<input type="number" pattern="[0-9]*" name="name" id="workoutMetersInput" value="Distance (meters) of Each Interval" step="1" min="1" max="900" url="13" />
+                    
+    <label for="workoutLapPaceInput" class="select">Enter your one-lap pace:</label>
+	<input type="number" pattern="[0-9]*" name="name" id="workoutLapPaceInput" value="Enter your one-lap pace:" step="0.1" min="1" max="900" url="13" />
+
+    <label for="workoutRestInput" class="select">Enter your rest (in seconds):</label>
+	<input type="number" pattern="[0-9]*" name="name" id="workoutRestInput" value="Enter your rest (in seconds)" step="1" min="25" max="900" url="13" />
+
+    <button id="previousWorkoutSetButton" style="background-color:#E6E6E6">Previous Interval</button>
+    <button id="nextWorkoutSetButton" style="background-color:#E6E6E6">Next Interval</button>
+
+    <br />
+    <input id="createWorkoutSubmit" type="button" class="btn" otherNum="0" data-role="button" style="background-color:#f00" value="<h2>Create!</h2>" />
 </div>
 
 

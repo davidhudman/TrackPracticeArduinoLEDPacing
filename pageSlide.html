@@ -3,23 +3,26 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>-->
-    <!--<link rel="stylesheet" href="themes/Bootstrap.css">-->
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <!-- Local files
+    <link rel="stylesheet" href="themes/Bootstrap.css">
     <link rel="stylesheet" href="jquery.mobile-1.4.5/jquery.mobile.structure-1.4.5.min.css" />
     <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
-    <!--<script src="jquery-1.8.2.min.js"></script>-->
-    <script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="jquery-1.8.2.min.js"></script>
+    <script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>-->
+    
+    <!-- External Style Sheets -->
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <!-- Include jQuery Mobile stylesheets -->
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <!-- Include the jQuery library -->
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <!-- Include the jQuery Mobile library -->
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    
+    <!-- Local numpad files -->
     <link rel="stylesheet" href="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.css">
     <script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
-    <style>
-        .carousel-inner > .item > img,
-        .carousel-inner > .item > a > img {
-            width: 70%;
-            margin: auto;
-        }
-    </style>
     <script>
         var isDeveloperMode = false;
         var isVerificationEnabled = true;     // If false, this will allow the user to click through the app without being attached to any DB or web server
@@ -31,8 +34,8 @@
         var numPacers = 10;
         var lapTimeInputConstraints = [1, 900];
         var trackDistanceInMeters = 400;
-        var userTimeInputDistance = 400; 			 // this allows the user to specify whether they want to input their pace as a lap pace (based on how long this track is), 400m pace, 1600m pace, or mile pace
-        var userTimeInputDistanceString = "lap";	 // a string that will indicate to the user what they chose
+        var userTimeInputDistance = 1609.344; 			 // this allows the user to specify whether they want to input their pace as a lap pace (based on how long this track is), 400m pace, 1600m pace, or mile pace
+        var userTimeInputDistanceString = "mile";	    // a string that will indicate to the user what they chose (or what is default)
         var isUserBackwardsPermissionEnabled = true;
         var isUserWorkoutPermissionEnabled = true;
         var isUserVisiblePermissionEnabled = true;
@@ -83,6 +86,13 @@
             });
         }
 
+        // lets the user change the default distance that they use to enter their pace
+        function paceTypeLabel_onclick() {
+            $(":mobile-pagecontainer").pagecontainer("change", "#paceTypeInput_create", {
+                transition: "slide"
+            });
+        }
+
         // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
         function helpClicked() {
             alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
@@ -94,31 +104,6 @@
 
         $(document).ready(function () {
             colorButtonInitialize();
-
-            // Activate Carousel
-            $("#myCarousel").carousel({ interval: false });
-
-            // Enable Carousel Indicators
-            $(".item1").click(function () {
-                $("#myCarousel").carousel(0);
-            });
-            $(".item2").click(function () {
-                $("#myCarousel").carousel(1);
-            });
-            $(".item3").click(function () {
-                $("#myCarousel").carousel(2);
-            });
-            $(".item4").click(function () {
-                $("#myCarousel").carousel(3);
-            });
-
-            // Enable Carousel Controls
-            $(".left").click(function () {
-                $("#myCarousel").carousel("prev");
-            });
-            $(".right").click(function () {
-                $("#myCarousel").carousel("next");
-            });
 
             // Click Handlers
             $(".existPacerButtonClass").click(function () {
@@ -146,7 +131,7 @@
             $(".colorButtonClass_create").click(function () {
                 var newNum = $(this).attr("otherNum");
                 requestCommand(5, masterPacerSelected, newNum);
-                $(":mobile-pagecontainer").pagecontainer("change", "#paceTypeInput_create", {
+                $(":mobile-pagecontainer").pagecontainer("change", "#timeInputView_create", {
                     transition: "slide"
                 });
             });
@@ -171,7 +156,7 @@
                         userTimeInputDistanceString = "mile";
                         break;
                 }
-                $("#paceInputLabel").text("Enter your " + userTimeInputDistanceString + " pace:");
+                $("#paceInputLabelLink").text(userTimeInputDistanceString);
                 $(":mobile-pagecontainer").pagecontainer("change", "#timeInputView_create", {
                     transition: "slide"
                 });
@@ -388,6 +373,8 @@
             // *****************
 
             // Add the numpad to the appropriate numeric entry fields
+
+            /*
             $("#pinInputField, #pinEntryField, #workoutMetersInput, #workoutRestInput, #workoutSetsInput").numpad({
                 hidePlusMinusButton: true,
                 hideDecimalButton: true
@@ -398,7 +385,7 @@
                 hidePlusMinusButton: true,
                 hideDecimalButton: false,
                 decimalSeparator: '.'
-            });
+            });*/
         });
 
         // sends GET request for the commands that the Yun will accept; parameters: x - command, y - pacerIndex, z - value
@@ -506,7 +493,7 @@
                 request.send();
             }
             else {
-                // fill the buttons with some made up data
+                // if verification is off, fill the buttons with some made up data
                 for (i = 0; i < 10; i++) {
                     if (i < 6) {
                         $("#existPacerButton" + i).text("Pacer" + i + " - " + (i + 1) + " sec lap").attr('style', "background-color:" + colorArray[i + 1]);
@@ -531,45 +518,6 @@
     <input id="newPacerButton" type="button" class="btn btn-success" onclick="return newPacerButton_onclick()" otherNum="1" style="background-color:#00ff21" value="<h2>Let's Get Started!</h2>" />
     <br /><br /><br />
     <input id="existingPacerButton" type="button" class="btn btn-danger" onclick="return existingPacerButton_onclick()" otherNum="2" style="background-color:#f00" value="<h3>Wait, my light is running.</h3>" />
-    <!-- Carousel page -->
-    <div style="height: 150px; background-color: red;" id="myCarousel" class="carousel slide">
-        <!-- Indicators -->
-        <ol class="carousel-indicators">
-            <li class="item1 active"></li>
-            <li class="item2"></li>
-            <li class="item3"></li>
-            <li class="item4"></li>
-        </ol>
-
-        <!-- Wrapper for slides -->
-        <div class="carousel-inner" role="listbox">
-            <div class="item active">
-                <p>Option 1</p>
-            </div>
-
-            <div class="item">
-            <p>Option 2</p>
-            </div>
-    
-            <div class="item">
-            <p>Option 3</p>
-            </div>
-
-            <div class="item">
-            <p>Option 4</p>
-            </div>
-        </div>
-
-        <!-- Left and right controls -->
-        <a class="left carousel-control" href="#myCarousel" role="button">
-            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
-        </a>
-        <a class="right carousel-control" href="#myCarousel" role="button">
-            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
-        </a>
-    </div>
 </div>
 
 <!-- Pacer Button View - Existing -->	
@@ -604,7 +552,7 @@
 <div data-role="page" id="pinView_create" class="contentElement advancedElement" >
     <br /><br /><br />
     <h3 for="createPinSubmit" class="">Create your 3 digit passcode: </h3>
-    <input type="text" pattern="[0-9]*" name="name" id="pinInputField" value="3 Digit Passcode Input" step="1" min="0" max="999" url="" />
+    <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinInputField" value="3 Digit Passcode Input" step="1" min="0" max="999" url="" />
     <br /><br /><br />
     <input id="createPinSubmit" type="button" class="btn" otherNum="2" data-role="button" style="background-color:#f00" value="<h2>Create!</h2>" />
 </div>
@@ -613,13 +561,13 @@
 <div data-role="page" id="pinView_existing" class="contentElement advancedElement" >
     <br /><br /><br />
     <h3 for="enterPinSubmit" class="">Enter your 3 digit passcode: </h3>
-    <input type="text" pattern="[0-9]*" name="name" id="pinEntryField" value="3 Digit Passcode Input" step="1" min="0" max="999" url="" />
+    <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinEntryField" value="3 Digit Passcode Input" step="1" min="0" max="999" url="" />
     <br /><br /><br />
     <input id="enterPinSubmit" type="button" class="btn" otherNum="2" data-role="button" style="background-color:#f00" value="<h2>Enter!</h2>" />
 </div>
 
 <!-- Color Button View - New Pacer -->
-<div data-role="page" id="colorButtonView_create" class="contentElement advancedElement" >
+<div id="colorButtonView_create" class="contentElement advancedElement" >
 	<h3>Select your color:</h3>
 	<br />
     <a id="colorButton0_create" class="btn colorButtonClass_create" otherNum="1" data-role="button" data-icon="star"></a>
@@ -643,7 +591,6 @@
     <input id="clearButton_create" type="button" class="pacerActionButton" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
     <input id="resetButton_create" type="button"  class="pacerActionButton" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
     <input id="helpButton_create" onclick="helpClicked()" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" data-toggle="modal" data-target="#myModal" />
-
 	<!-- Modal
 	<div class="modal fade" id="myModal" role="dialog">
 		<div class="modal-dialog">
@@ -682,16 +629,17 @@
 <!-- Time Input - New Pacer -->
 <div data-role="page" id="timeInputView_create" class="contentElement timeInputView">
     <div data-role="content" data-theme="a">
-		<h3 id="paceInputLabel">Enter your lap pace:</h3>
+		<h3 id="paceInputLabel">Enter your <a id="paceInputLabelLink" href="#" onclick="paceTypeLabel_onclick()">mile</a> pace:</h3>
 		<br />
 	    <label for="timeMinutesInput_create" class="select"><h3>Enter Your Minutes:</h3></label>
-        <input type="number" pattern="[0-9]*" name="name" id="timeMinutesInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
+        <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="timeMinutesInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
         <br /><br />
         <label for="timeSecondsInput_create" class="select"><h3>Enter Your Seconds: <a href="#" onclick="helpClicked()" id="A1">Help?</a></h3></label>
-	    <input type="number" pattern="[0-9]*" name="name" id="timeSecondsInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
+	    <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="timeSecondsInput_create" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
         <input id="timeSubmit_create" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
     </div>
 </div>
+
 
 </body>
 </html>

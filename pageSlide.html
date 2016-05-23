@@ -56,8 +56,10 @@
         var onExistingPacerSequence = false;
         var onCoachSequence = false;
         var extrasMode = false;
-        var masterPacerSelected = 99;
+        var masterPacerSelected = -1;
+        var masterColorIndex = 1;
         var pinVar = 111;
+        var newPacer = [];
 
         colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 
@@ -99,6 +101,30 @@
             });
         }
 
+        function colorIterateButton_onclick() {
+            // get the initial value associated with the button's color and the user's pacer color
+            var newNum = $(this).attr("otherNum");
+
+            // increment the color value to a valid value that is not black
+            if (newNum == colorArray.length) {  // because we can't let the pacer color be "black" for this
+                newNum += 2;
+            }
+            else {
+                newNum++;
+            }
+
+            // change the value
+            $(this).attr("otherNum", newNum);
+
+            // send the command to Yun
+            requestCommand(5, masterPacerSelected, newNum);
+
+            // change the color of the button
+            $(this).attr("style", "background-color:"+colorArray[newNum]);
+            $(this).attr("value", "<h3>Color " + colorArray[newNum] + ": tap to change</h3>");
+
+        }
+
         // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
         function helpButton_onclick() {
             alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
@@ -111,12 +137,55 @@
         $(document).ready(function () {
             colorButtonInitialize();
 
+            $("#colorIterateButton").click(function () {
+                // get the initial value associated with the button's color and the user's pacer color
+                var newNum = $(this).attr("otherNum");
+
+                // increment the color value to a valid value that is not black
+                if (newNum == colorArray.length-1) {  // because we can't let the pacer color be "black" for this
+                    newNum += 2 % colorArray.length;
+                }
+                else {
+                    newNum++;
+                    newNum = newNum % colorArray.length;
+                }
+
+                // change the value
+                $(this).attr("otherNum", newNum);
+
+                // send the command to Yun
+                requestCommand(5, masterPacerSelected, newNum);
+
+                // change the color of the button
+                $(this).attr("style", "background-color:" + colorArray[newNum]);
+                $(this).text("Tap to change color: " + colorArray[newNum]);
+            });
+
             // Click Handlers
             $(".existPacerButtonClass").click(function () {
                 masterPacerSelected = $(this).attr("otherNum");
                 $(":mobile-pagecontainer").pagecontainer("change", "#pinView_existing", {
                     transition: "slide"
                 });
+
+                masterColorIndex = $(this).attr("colorIndex");
+                alert("The button you selected is: " + colorArray[masterColorIndex]);
+                
+                //alert($(this).attr("style").substring(32));
+                //var i = 0;
+                //while ($(this).attr("style").substring(32) != colorArray[i] && i < colorArray.length) {
+                //    i++;
+                //}
+                //if (i == colorArray.length) {
+                //    i = colorArray.length - 1;
+                //}
+                //alert("The button you selected is : " + $(this).attr("style").substring(32));
+
+                $("#colorIterateButton").attr({
+                    "style": "background-color:"+colorArray[masterColorIndex], // set it's color button to the correct background color
+                    "otherNum": masterColorIndex // set it's "otherNum" to the correct value
+                })
+
             });
 
             // Determines view after a coachPacerButton is clicked
@@ -226,10 +295,20 @@
                 else {
                     alert("When you click OK, Traffic Light Countdown will start\n\nRED will appear on 3rd light\n\nYELLOW will then appear on 2nd light.");	// user alert
                     requestCommand(commandURL, pacerIndex, secNum);
+                    refreshPacerButtonData();
                     // needs to go to simple user control view for new pacers
                     $(":mobile-pagecontainer").pagecontainer("change", "#simplePacerControl", {
                         transition: "slide"
                     });
+
+                    $("#colorIterateButton").attr("style", "background-color:" + newPacer[masterPacerSelected].color);
+                    
+                    var i=0;
+                    while (colorArray[i] != newPacer[masterPacerSelected].color) {
+                        i++;
+                    }
+
+                    $("#colorIterateButton").text("Tap to change color: " + colorArray[i]);
                 }
             });
 
@@ -454,7 +533,7 @@
 
         // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
         function refreshPacerButtonData() {
-            var newPacer = [];  // in order to store array objects, you must create this variable like this
+            newPacer = [];  // in order to store array objects, you must create this variable like this
 
             if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
                 // get lapTime, name, and color from PHP
@@ -476,6 +555,7 @@
                                 lapSecs: singlePacerSet[1] % 60,
                                 lapMins: (singlePacerSet[1] - (singlePacerSet[1] % 60)) / 60,
                                 color: colorArray[singlePacerSet[2] % colorArray.length],
+                                colorNum: singlePacerSet[2],
                                 colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
                                 name: singlePacerSet[3],
                                 activeText: singlePacerSet[3] + " - " + (singlePacerSet[1] * 1609.344 / trackDistanceInMeters).toString().toHHMMSS() + " mile pace",
@@ -483,7 +563,8 @@
                             };
 
                             // update the buttons
-                            $("#existPacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+                            $("#existPacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText).attr('colorIndex', newPacer[i].colorNum);
+
                             if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
                                 $("#existPacerButton" + i).css('color', 'white');
                             }
@@ -540,30 +621,30 @@
 
 <!-- Pacer Button View - Existing -->	
 <div data-role="page" id="pacerButtonView_existing" class="contentElement advancedElement" >
-    <a href="#" id="existPacerButton0" class="btn existPacerButtonClass" otherNum="0" data-role="button" data-icon="star"></a>
-    <a href="#" id="existPacerButton1" class="btn existPacerButtonClass" otherNum="1" data-role="button" data-icon="star"></a>
-    <a href="#" id="existPacerButton2" class="btn existPacerButtonClass" otherNum="2" data-role="button" data-icon="star"></a>
-    <a href="#" id="existPacerButton3" class="btn existPacerButtonClass" otherNum="3" data-role="button" data-icon="star"></a>
-    <a href="#" id="existPacerButton4" class="btn existPacerButtonClass" otherNum="4" data-role="button" data-icon="star"></a>
-    <a href="#" id="existPacerButton5" class="btn existPacerButtonClass" otherNum="5" data-role="button" data-icon="star"></a>
-    <a href="#" id="existPacerButton6" class="btn existPacerButtonClass" otherNum="6" data-role="button" data-icon="star"></a>
-    <a href="#" id="existPacerButton7" class="btn existPacerButtonClass" otherNum="7" data-role="button" data-icon="star"></a>
-    <a href="#" id="existPacerButton8" class="btn existPacerButtonClass" otherNum="8" data-role="button" data-icon="star"></a>
-    <a href="#" id="existPacerButton9" class="btn existPacerButtonClass" otherNum="9" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton0" class="btn existPacerButtonClass" colorIndex="0" otherNum="0" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton1" class="btn existPacerButtonClass" colorIndex="0" otherNum="1" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton2" class="btn existPacerButtonClass" colorIndex="0" otherNum="2" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton3" class="btn existPacerButtonClass" colorIndex="0" otherNum="3" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton4" class="btn existPacerButtonClass" colorIndex="0" otherNum="4" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton5" class="btn existPacerButtonClass" colorIndex="0" otherNum="5" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton6" class="btn existPacerButtonClass" colorIndex="0" otherNum="6" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton7" class="btn existPacerButtonClass" colorIndex="0" otherNum="7" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton8" class="btn existPacerButtonClass" colorIndex="0" otherNum="8" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton9" class="btn existPacerButtonClass" colorIndex="0" otherNum="9" data-role="button" data-icon="star"></a>
 </div>
 
 <!-- Pacer Button View - Coach -->	
 <div data-role="page" id="pacerButtonView_coach" class="contentElement advancedElement" >
-    <a href="#" id="coachPacerButton0" class="btn coachPacerButtonClass" otherNum="0" data-role="button" data-icon="star"></a>
-    <a href="#" id="coachPacerButton1" class="btn coachPacerButtonClass" otherNum="1" data-role="button" data-icon="star"></a>
-    <a href="#" id="coachPacerButton2" class="btn coachPacerButtonClass" otherNum="2" data-role="button" data-icon="star"></a>
-    <a href="#" id="coachPacerButton3" class="btn coachPacerButtonClass" otherNum="3" data-role="button" data-icon="star"></a>
-    <a href="#" id="coachPacerButton4" class="btn coachPacerButtonClass" otherNum="4" data-role="button" data-icon="star"></a>
-    <a href="#" id="coachPacerButton5" class="btn coachPacerButtonClass" otherNum="5" data-role="button" data-icon="star"></a>
-    <a href="#" id="coachPacerButton6" class="btn coachPacerButtonClass" otherNum="6" data-role="button" data-icon="star"></a>
-    <a href="#" id="coachPacerButton7" class="btn coachPacerButtonClass" otherNum="7" data-role="button" data-icon="star"></a>
-    <a href="#" id="coachPacerButton8" class="btn coachPacerButtonClass" otherNum="8" data-role="button" data-icon="star"></a>
-    <a href="#" id="coachPacerButton9" class="btn coachPacerButtonClass" otherNum="9" data-role="button" data-icon="star"></a>
+    <a href="#" id="coachPacerButton0" class="btn coachPacerButtonClass" otherNum="0" colorIndex="0" data-role="button" data-icon="star"></a>
+    <a href="#" id="coachPacerButton1" class="btn coachPacerButtonClass" otherNum="1" colorIndex="0" data-role="button" data-icon="star"></a>
+    <a href="#" id="coachPacerButton2" class="btn coachPacerButtonClass" otherNum="2" colorIndex="0" data-role="button" data-icon="star"></a>
+    <a href="#" id="coachPacerButton3" class="btn coachPacerButtonClass" otherNum="3" colorIndex="0" data-role="button" data-icon="star"></a>
+    <a href="#" id="coachPacerButton4" class="btn coachPacerButtonClass" otherNum="4" colorIndex="0" data-role="button" data-icon="star"></a>
+    <a href="#" id="coachPacerButton5" class="btn coachPacerButtonClass" otherNum="5" colorIndex="0" data-role="button" data-icon="star"></a>
+    <a href="#" id="coachPacerButton6" class="btn coachPacerButtonClass" otherNum="6" colorIndex="0" data-role="button" data-icon="star"></a>
+    <a href="#" id="coachPacerButton7" class="btn coachPacerButtonClass" otherNum="7" colorIndex="0" data-role="button" data-icon="star"></a>
+    <a href="#" id="coachPacerButton8" class="btn coachPacerButtonClass" otherNum="8" colorIndex="0" data-role="button" data-icon="star"></a>
+    <a href="#" id="coachPacerButton9" class="btn coachPacerButtonClass" otherNum="9" colorIndex="0" data-role="button" data-icon="star"></a>
 </div>
 
 <!-- Create PIN View - New Pacer -->
@@ -585,7 +666,7 @@
 </div>
 
 <!-- Color Button View - New Pacer -->
-<div id="colorButtonView_create" class="contentElement advancedElement" >
+<div data-role="page" id="colorButtonView_create" class="contentElement advancedElement" >
 	<h3>Select your color:</h3>
 	<br />
     <a id="colorButton0_create" class="btn colorButtonClass_create" otherNum="1" data-role="button" data-icon="star"></a>
@@ -599,6 +680,7 @@
 
 <!-- Simple Pacer control buttons for first time end user - Existing Pacer and New Pacer -->
 <div data-role="page" id="simplePacerControl" class="contentElement advancedElement">
+    <a id="colorIterateButton" class="btn" data-role="button" url="-1" otherNum="0" data-icon="star" style="background-color:white" data-iconpos="right">Tap to change color</a>
     <input id="clearButton" type="button" class="pacerActionButton" url="0" otherNum="0" data-icon="delete" style="background-color:#f53434" data-iconpos="right" value="<h3>Quit</h3>" />
     <input id="resetButton" type="button"  class="pacerActionButton" url="2" otherNum="0" data-icon="clock" style="background-color:yellow" data-iconpos="right" value="<h3>Reset Countdown</h3>" />
     <input id="advancedButton" onclick="advanced_onclick()" type="button" data-icon="gear" style="background-color:green" data-iconpos="right" value="<h3>More Options</h3>" />
@@ -670,7 +752,7 @@
 
 
 <!--Extra Options View Buttons-->			
-<div id="extraOptionsView" class="contentElement advancedElement" >
+<div data-role="page" id="extraOptionsView" class="contentElement advancedElement" >
     <a id="changePaceExtrasButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Pace</h3></a>
     <br />
     <a id="changeColorExtrasButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Color</h3></a>
@@ -691,7 +773,7 @@
 </div>
 				
 <!-- Extras View Buttons in Developer Mode -->		
-<div id="advancedCoachDiv" class="contentElement advancedElement" >
+<div data-role="page" id="advancedCoachDiv" class="contentElement advancedElement" >
 	<br /><br /><br />
     <button id="writeFileMode" style="background-color:lightgreen">Write Mode On/Off</button>
     <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
@@ -703,7 +785,7 @@
 </div>
                 
 <!-- Create Workout View -->
-<div id="createWorkoutDiv" class="contentElement advancedElement" >
+<div data-role="page" id="createWorkoutDiv" class="contentElement advancedElement" >
     <h3 for="createWorkoutSubmit" class="">Create your workout: </h3>
 
     <label for="workoutSetsInput" class="select">Number of Sets:</label>

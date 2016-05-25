@@ -20,9 +20,9 @@
     <!-- Include the jQuery Mobile library -->
     <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 
-    <!--<script src="http://cdn.jtsage.com/jtsage-datebox/latest/jtsage-datebox.jqm.min.css"></script>
+    <script src="http://cdn.jtsage.com/jtsage-datebox/latest/jtsage-datebox.jqm.min.css"></script>
     <script src="http://cdn.jtsage.com/jtsage-datebox/latest/jtsage-datebox.jqm.min.js"></script>
-    <script src="http://cdn.jtsage.com/jtsage-datebox/latest/jtsage-datebox.jqm.min.js.map"></script>-->
+    <script src="http://cdn.jtsage.com/jtsage-datebox/latest/jtsage-datebox.jqm.min.js.map"></script>
     
     <!-- Local numpad files -->
     <link rel="stylesheet" href="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.css">
@@ -110,12 +110,40 @@
             alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
         }
 
+        (function ($) {
+            window.spf = function (text, repl) {
+                if (!$.isArray(repl) && !$.isPlainObject(repl)) { return text; }
+                return text.replace(/{(.+?)}/g, function (match, oper) {
+                    return repl[oper];
+                });
+            }
+            window.clogall = function (listarg) {
+                var key, fulllist = [];
+                for (key in listarg) {
+                    fulllist.push(key + ": " + listarg[key]);
+                }
+                console.log(fulllist.join("   "));
+
+            };
+            window.timetext = function (x, func) {
+                var y, outTime, inTime = new Date();
+                for (y = 0; y < x; y++) {
+                    func.apply();
+                }
+                outTime = new Date();
+                console.log(outTime.getTime() - inTime.getTime());
+            };
+        })(jQuery);
+
         // *****************
         // End Click Handlers
         // *****************
 
         $(document).ready(function () {
             colorButtonInitialize();
+
+            // bind JTSageDateBox (duration time flipper input) to it's inputs
+            $("#pinInputField, #mode5").date('jtsage-datebox');
 
             // Click Handlers
             $(".existPacerButtonClass").click(function () {
@@ -542,6 +570,8 @@
     <input id="newPacerButton" type="button" class="btn btn-success" onclick="return newPacerButton_onclick()" otherNum="1" style="background-color:#00ff21" value="<h2>Let's Get Started!</h2>" />
     <br /><br /><br />
     <input id="existingPacerButton" type="button" class="btn btn-danger" onclick="return existingPacerButton_onclick()" otherNum="2" style="background-color:#f00" value="<h3>Wait, my light is running.</h3>" />
+    <label for="mode5">DurationBox</label>
+    <input name="mode5" class="form-control" id="mode5" type="text" data-role="datebox" data-options='{"mode":"durationbox"}' />
 </div>
 
 <!-- Pacer Button View - Existing -->	

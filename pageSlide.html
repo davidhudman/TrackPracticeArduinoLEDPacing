@@ -11,8 +11,8 @@
     <script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>-->
     
     <!-- External Style Sheets -->
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <!--<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>-->
     <!-- Include jQuery Mobile stylesheets -->
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
     <!-- Include the jQuery library -->
@@ -20,9 +20,14 @@
     <!-- Include the jQuery Mobile library -->
     <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 
-    <script src="http://cdn.jtsage.com/jtsage-datebox/latest/jtsage-datebox.jqm.min.css"></script>
-    <script src="http://cdn.jtsage.com/jtsage-datebox/latest/jtsage-datebox.jqm.min.js"></script>
-    <script src="http://cdn.jtsage.com/jtsage-datebox/latest/jtsage-datebox.jqm.min.js.map"></script>
+    <link rel="stylesheet" href="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.min.css">
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.core.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.calbox.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.datebox.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.flipbox.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.durationbox.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.slidebox.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.js"></script>
     
     <!-- Local numpad files -->
     <link rel="stylesheet" href="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.css">
@@ -110,31 +115,6 @@
             alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
         }
 
-        (function ($) {
-            window.spf = function (text, repl) {
-                if (!$.isArray(repl) && !$.isPlainObject(repl)) { return text; }
-                return text.replace(/{(.+?)}/g, function (match, oper) {
-                    return repl[oper];
-                });
-            }
-            window.clogall = function (listarg) {
-                var key, fulllist = [];
-                for (key in listarg) {
-                    fulllist.push(key + ": " + listarg[key]);
-                }
-                console.log(fulllist.join("   "));
-
-            };
-            window.timetext = function (x, func) {
-                var y, outTime, inTime = new Date();
-                for (y = 0; y < x; y++) {
-                    func.apply();
-                }
-                outTime = new Date();
-                console.log(outTime.getTime() - inTime.getTime());
-            };
-        })(jQuery);
-
         // *****************
         // End Click Handlers
         // *****************
@@ -142,8 +122,15 @@
         $(document).ready(function () {
             colorButtonInitialize();
 
-            // bind JTSageDateBox (duration time flipper input) to it's inputs
-            $("#pinInputField, #mode5").date('jtsage-datebox');
+            $('#timeInput').hide();
+            $("#colorText").hide();
+
+            $("#mode6Link").click(function () {
+                $('#mode6').datebox('open');
+            });
+
+            // $(".ui-slider-input").hide();
+            // $(".input.ui-slider-input").css('display', 'none !important');
 
             // Click Handlers
             $(".existPacerButtonClass").click(function () {
@@ -428,6 +415,28 @@
             });*/
         });
 
+        // change the button text whenever the user enters new text
+        function timeInputChanged(val) {
+            $("#mode6Link").text(val);
+        }
+
+        function colorChanged(val) {
+            if (val == -1) {
+                val = $("#colorRange").val();
+
+                if (val == colorArray.length)
+                    val = 1;
+                else
+                    val++;
+
+                $("#colorRange").val(val);
+            }
+            $("#colorText").text("Pacer color: " + colorArray[val]);
+            $("#colorText").css("background-color", colorArray[val]);
+            $("#colorDiv").css("background-color", colorArray[val]);
+            // $(".ui-slider").css("background-color", colorArray[val]);
+        }
+
         // sends GET request for the commands that the Yun will accept; parameters: x - command, y - pacerIndex, z - value
         function requestCommand(x, y, z) {
             if (masterPacerSelected == 99) {		// If you're in "Coach Mode" where you can control all pacers at once, as well as update the database just like below
@@ -570,8 +579,8 @@
     <input id="newPacerButton" type="button" class="btn btn-success" onclick="return newPacerButton_onclick()" otherNum="1" style="background-color:#00ff21" value="<h2>Let's Get Started!</h2>" />
     <br /><br /><br />
     <input id="existingPacerButton" type="button" class="btn btn-danger" onclick="return existingPacerButton_onclick()" otherNum="2" style="background-color:#f00" value="<h3>Wait, my light is running.</h3>" />
-    <label for="mode5">DurationBox</label>
-    <input name="mode5" class="form-control" id="mode5" type="text" data-role="datebox" data-options='{"mode":"durationbox"}' />
+    <br /><br /><br />
+    <a data-role="button" href="#testingSimplePacerControl">Testing Control View</a>
 </div>
 
 <!-- Pacer Button View - Existing -->	
@@ -640,6 +649,7 @@
     <input id="advancedButton" onclick="advanced_onclick()" type="button" data-icon="gear" style="background-color:green" data-iconpos="right" value="<h3>More Options</h3>" />
     <!--<input id="Button5" onclick="window.history.back()" type="button" data-icon="gear" style="background-color:green" data-iconpos="right" value="<h3>Browser Back</h3>" />-->
     <input id="helpButton" onclick="helpButton_onclick()" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" data-toggle="modal" data-target="#myModal" />
+    <a data-role="button" href="#testingSimplePacerControl">Testing Control View</a>
     <!--<input id="advancedButton" type="button" data-icon="gear" data-iconpos="notext" url="clear" data-theme="a" />-->
 	<!-- Modal
 	<div class="modal fade" id="myModal" role="dialog">
@@ -661,6 +671,44 @@
 		  
 		</div>
 	</div>-->
+</div>
+
+<!-- Testing Simple Pacer Control View -->
+<div data-role="page" id="testingSimplePacerControl" class="contentElement advancedElement">
+    <!-- Time input stuff -->
+    <div id="timeInput">
+        <input name="mode6" id="mode6" type="text" data-role="datebox" onchange="timeInputChanged(this.value)" data-options='{
+				    "noButton": true, 
+				    "mode":"durationflipbox", 
+				    "overrideDurationFormat":"%DM:%DS", 
+				    "minDur":"5", 
+				    "maxDur":"900", 
+				    "overrideDurationOrder":["i","s"], 
+				    "popupPosition": "window" 
+			    }' readonly="readonly" class="">
+    </div>
+    <a href="#" id="mode6Link" data-role="button" style="font-size: 24px">Click to Enter Time</a>
+	<br />
+
+    <!-- Distance input stuff -->
+    <select name="select-native-3" id="select-native-3" data-iconpos="none">
+        <option value="1">per mile</option>
+        <option value="2">per 1600</option>
+        <option value="3">per 400</option>
+        <option value="4">per lap</option>
+    </select>
+    <br />
+
+    <!-- Color input stuff -->
+    <div id="colorDiv" style="background-color: orange">
+	    <br />
+        <input type="range" class="ui-hidden-accessible" name="colorRange" id="colorRange" onchange="colorChanged(this.value)" value="3" min="1" max="7">
+	    <a data-role="button" href="#colorRangePopup" id="colorText">Pacer color: orange</a>
+        <br />
+    </div>
+    <br />
+
+    <a href="#" style="background-color:green; font-size: 24px" data-role="button">Start</a>
 </div>
 
 <!-- The user can select what distance they want to enter their pace for (lap, 400, 1600, or mile) - New Pacer -->

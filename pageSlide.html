@@ -82,6 +82,13 @@
         // *****************
         // Click Handlers
         // *****************
+
+        function testingSimplePacerControlViewCalled() {
+            $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
+                transition: "slide"
+            });
+        }
+
         function existingPacerButton_onclick() {
             $(":mobile-pagecontainer").pagecontainer("change", "#pacerButtonView_existing", {
                 transition: "slide"
@@ -112,7 +119,18 @@
 
         // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
         function helpButton_onclick() {
-            alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
+            // alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
+            $("#timePopup").popup("open", { positionTo: "#mode6Link", tolerance: "80, 15, 30, 15" });
+            
+            setTimeout(function () {
+                $("#timePopup").popup("close");
+                setTimeout(function () {
+                    $("#colorPopup").popup("open", { positionTo: "#spaceBreak", tolerance: "0, 15, 30, 15" });
+                    setTimeout(function () {
+                        $("#colorPopup").popup("close");
+                    }, 3000);
+                }, 500);
+            }, 3000);
         }
 
         // *****************
@@ -415,6 +433,24 @@
             });*/
         });
 
+        function distanceChanged(val) {
+            val = Number(val);  // cast it from a string to a number
+            switch (val) {
+                case 1:
+                    // alert("Your new distance is: mile");
+                    break;
+                case 2:
+                    // alert("Your new distance is: 1600");
+                    break;
+                case 3:
+                    // alert("Your new distance is: 400");
+                    break;
+                case 4:
+                    // alert("Your new distance is: lap");
+                    break;
+            }
+        }
+
         // change the button text whenever the user enters new text
         function timeInputChanged(val) {
             $("#mode6Link").text(val);
@@ -580,7 +616,7 @@
     <br /><br /><br />
     <input id="existingPacerButton" type="button" class="btn btn-danger" onclick="return existingPacerButton_onclick()" otherNum="2" style="background-color:#f00" value="<h3>Wait, my light is running.</h3>" />
     <br /><br /><br />
-    <a data-role="button" href="#testingSimplePacerControl">Testing Control View</a>
+    <a data-role="button" onclick="testingSimplePacerControlViewCalled()">Testing Control View</a>
 </div>
 
 <!-- Pacer Button View - Existing -->	
@@ -649,7 +685,7 @@
     <input id="advancedButton" onclick="advanced_onclick()" type="button" data-icon="gear" style="background-color:green" data-iconpos="right" value="<h3>More Options</h3>" />
     <!--<input id="Button5" onclick="window.history.back()" type="button" data-icon="gear" style="background-color:green" data-iconpos="right" value="<h3>Browser Back</h3>" />-->
     <input id="helpButton" onclick="helpButton_onclick()" type="button" data-icon="info" style="background-color:blue" data-iconpos="right" value="<h3>Help</h3>" data-toggle="modal" data-target="#myModal" />
-    <a data-role="button" href="#testingSimplePacerControl">Testing Control View</a>
+    <a data-role="button" onclick="testingSimplePacerControlViewCalled()">Testing Control View</a>
     <!--<input id="advancedButton" type="button" data-icon="gear" data-iconpos="notext" url="clear" data-theme="a" />-->
 	<!-- Modal
 	<div class="modal fade" id="myModal" role="dialog">
@@ -675,6 +711,16 @@
 
 <!-- Testing Simple Pacer Control View -->
 <div data-role="page" id="testingSimplePacerControl" class="contentElement advancedElement">
+    
+    <!-- Popups -->
+    <div data-role="popup" id="timePopup" data-tolerance="80,15,30,15" data-position-to="#mode6Link" data-arrow="t" data-overlay-theme="b" data-transition="fade">
+		<p>Enter your time here.</p>
+	</div>
+
+    <div data-role="popup" id="colorPopup" data-tolerance="0,15,30,15" data-position-to="#spaceBreak" data-arrow="b" data-overlay-theme="b" data-transition="fade">
+		<p>Slide to adjust your pacer's color</p>
+	</div>
+    
     <!-- Time input stuff -->
     <div id="timeInput">
         <input name="mode6" id="mode6" type="text" data-role="datebox" onchange="timeInputChanged(this.value)" data-options='{
@@ -691,7 +737,7 @@
 	<br />
 
     <!-- Distance input stuff -->
-    <select name="select-native-3" id="select-native-3" data-iconpos="none">
+    <select onchange="distanceChanged(this.value)" name="select-native-3" id="distanceSelect" data-iconpos="none">
         <option value="1">per mile</option>
         <option value="2">per 1600</option>
         <option value="3">per 400</option>
@@ -701,14 +747,18 @@
 
     <!-- Color input stuff -->
     <div id="colorDiv" style="background-color: orange">
-	    <br />
+	    <br id="spaceBreak" />
         <input type="range" class="ui-hidden-accessible" name="colorRange" id="colorRange" onchange="colorChanged(this.value)" value="3" min="1" max="7">
 	    <a data-role="button" href="#colorRangePopup" id="colorText">Pacer color: orange</a>
         <br />
     </div>
     <br />
 
+    <a href="#" onclick="helpButton_onclick()" style="background-color:white; font-size: 24px" data-role="button">Help</a>
     <a href="#" style="background-color:green; font-size: 24px" data-role="button">Start</a>
+    <a data-role="link" href="#" onclick="existingPacerButton_onclick()">Pacer already running?</a>
+    <a href="#" style="background-color:red; font-size: 24px" data-role="button">Exit</a>
+    <br /><br />
 </div>
 
 <!-- The user can select what distance they want to enter their pace for (lap, 400, 1600, or mile) - New Pacer -->

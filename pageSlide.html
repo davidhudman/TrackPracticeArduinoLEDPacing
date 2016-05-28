@@ -40,6 +40,7 @@
         var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
         // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
         // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
+        // var ipAddress = "http://192.168.1.244";      // IP address for Yun on Aaron's apt network
         var numPacers = 10;
         var lapTimeInputConstraints = [1, 900];
         var trackDistanceInMeters = 400;
@@ -120,12 +121,12 @@
         // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
         function helpButton_onclick() {
             // alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
-            $("#timePopup").popup("open", { positionTo: "#mode6Link", tolerance: "80, 15, 30, 15" });
+            $("#timePopup").popup("open", { positionTo: "#timeInputLink", tolerance: "80, 15, 30, 15" });
             
             setTimeout(function () {
                 $("#timePopup").popup("close");
                 setTimeout(function () {
-                    $("#colorPopup").popup("open", { positionTo: "#spaceBreak", tolerance: "0, 15, 30, 15" });
+                    $("#colorPopup").popup("open", { positionTo: "#colorSelect", tolerance: "80, 15, 30, 15" });
                     setTimeout(function () {
                         $("#colorPopup").popup("close");
                     }, 3000);
@@ -133,18 +134,31 @@
             }, 3000);
         }
 
+        function testPopupTrigger_onclick() {
+            $("#isExistingPacerPopup").popup("open", { positionTo: "window" });
+        }
+
         // *****************
         // End Click Handlers
         // *****************
 
+        $(document).on('pageshow', '#testingSimplePacerControl', function () {
+            if (getValue() == null) {
+                setTimeout(function () {
+                    $.mobile.changePage('#isExistingPacerPopup');
+                }, 100); // delay above zero
+            }
+        });
+
         $(document).ready(function () {
             colorButtonInitialize();
+            // testPopupTrigger_onclick();
 
             $('#timeInput').hide();
             $("#colorText").hide();
 
-            $("#mode6Link").click(function () {
-                $('#mode6').datebox('open');
+            $("#timeInputLink").click(function () {
+                $('#timeInputFlipBox').datebox('open');
             });
 
             // $(".ui-slider-input").hide();
@@ -451,9 +465,15 @@
             }
         }
 
+        // ColorSelect dropdown was changed
+        function colorChanged(val) {
+            val = Number(val);  // cast it from a string to a number and it will represent the index of the color in the colorArray
+            alert("Your color is now: "+colorArray[val]);
+        }
+
         // change the button text whenever the user enters new text
         function timeInputChanged(val) {
-            $("#mode6Link").text(val);
+            $("#timeInputLink").text(val);
         }
 
         function colorChanged(val) {
@@ -713,17 +733,30 @@
 <div data-role="page" id="testingSimplePacerControl" class="contentElement advancedElement">
     
     <!-- Popups -->
-    <div data-role="popup" id="timePopup" data-tolerance="80,15,30,15" data-position-to="#mode6Link" data-arrow="t" data-overlay-theme="b" data-transition="fade">
+    <div data-role="popup" id="timePopup" data-tolerance="80,15,30,15" data-position-to="#timeInputLink" data-arrow="t" data-overlay-theme="b" data-transition="fade">
 		<p>Enter your time here.</p>
 	</div>
 
-    <div data-role="popup" id="colorPopup" data-tolerance="0,15,30,15" data-position-to="#spaceBreak" data-arrow="b" data-overlay-theme="b" data-transition="fade">
-		<p>Slide to adjust your pacer's color</p>
+    <div data-role="popup" id="colorPopup" data-tolerance="80,15,30,15" data-position-to="#colorSelect" data-arrow="t" data-overlay-theme="b" data-transition="fade">
+		<p>Choose your pacer's color</p>
+	</div>
+    
+    <div data-role="popup" id="isExistingPacerPopup" data-position-to="window" data-overlay-theme="b" data-transition="fade">
+		<div data-role="header" data-theme="b" role="banner" class="ui-header ui-bar-b"><a href="#" class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-notext ui-btn-left" data-rel="back">Close</a>
+		    <h1 class="ui-title" role="heading" aria-level="1">Dialog</h1>
+		</div>
+
+		<div role="main" class="ui-content">
+		<h1>Delete page?</h1>
+		<p>This is a regular page, styled as a dialog. To create a dialog, just link to a normal page and include a transition and <code>data-rel="dialog"</code> attribute.</p>
+			<a href="index.html" data-rel="back" class="ui-btn ui-shadow ui-corner-all ui-btn-a">Sounds good</a>
+			<a href="index.html" data-rel="back" class="ui-btn ui-shadow ui-corner-all ui-btn-a">Cancel</a>
+		</div>
 	</div>
     
     <!-- Time input stuff -->
     <div id="timeInput">
-        <input name="mode6" id="mode6" type="text" data-role="datebox" onchange="timeInputChanged(this.value)" data-options='{
+        <input name="timeInputFlipBox" id="timeInputFlipBox" type="text" data-role="datebox" onchange="timeInputChanged(this.value)" data-options='{
 				    "noButton": true, 
 				    "mode":"durationflipbox", 
 				    "overrideDurationFormat":"%DM:%DS", 
@@ -733,7 +766,7 @@
 				    "popupPosition": "window" 
 			    }' readonly="readonly" class="">
     </div>
-    <a href="#" id="mode6Link" data-role="button" style="font-size: 24px">Click to Enter Time</a>
+    <a href="#" id="timeInputLink" data-role="button" style="font-size: 24px">Click to Enter Time</a>
 	<br />
 
     <!-- Distance input stuff -->
@@ -743,17 +776,27 @@
         <option value="3">per 400</option>
         <option value="4">per lap</option>
     </select>
-    <br />
+    <br id="timeToColorBreak"/>
 
     <!-- Color input stuff -->
-    <div id="colorDiv" style="background-color: orange">
+    <!--<div id="colorDiv" style="background-color: orange">
 	    <br id="spaceBreak" />
         <input type="range" class="ui-hidden-accessible" name="colorRange" id="colorRange" onchange="colorChanged(this.value)" value="3" min="1" max="7">
 	    <a data-role="button" href="#colorRangePopup" id="colorText">Pacer color: orange</a>
         <br />
-    </div>
+    </div>-->
+    <select onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect" data-iconpos="none">
+        <option value="1">Pacer color: White</option>
+        <option value="2">Pacer color: Red</option>
+        <option value="3">Pacer color: Orange</option>
+        <option value="4">Pacer color: Yellow</option>
+        <option value="5">Pacer color: Green</option>
+        <option value="6">Pacer color: Blue</option>
+        <option value="7">Pacer color: Purple</option>
+    </select>
     <br />
 
+    <a href="#" onclick="testPopupTrigger_onclick()" font-size: 24px" data-role="button">Popup Trigger</a>
     <a href="#" onclick="helpButton_onclick()" style="background-color:white; font-size: 24px" data-role="button">Help</a>
     <a href="#" style="background-color:green; font-size: 24px" data-role="button">Start</a>
     <a data-role="link" href="#" onclick="existingPacerButton_onclick()">Pacer already running?</a>

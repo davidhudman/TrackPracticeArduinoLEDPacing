@@ -1,278 +1,568 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width,initial-scale=1">
-		<title>jQuery Mobile Bootstrap Theme</title>
-		<link rel="stylesheet" href="themes/Bootstrap.css">
-		<link rel="stylesheet" href="jquery.mobile-1.4.5/jquery.mobile.structure-1.4.5.min.css" />
-		<link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
-		<script src="jquery-1.8.2.min.js"></script>
-		<script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>
-        <link rel="stylesheet" href="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.css">
-		<script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
-		<script>
-		    var isDeveloperMode = false;
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>-->
+    <!-- Local files
+    <link rel="stylesheet" href="themes/Bootstrap.css">
+    <link rel="stylesheet" href="jquery.mobile-1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+    <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+    <script src="jquery-1.8.2.min.js"></script>
+    <script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>-->
+    
+    <!-- External Style Sheets -->
+    <!--<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>-->
+    <!-- Include jQuery Mobile stylesheets -->
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <!-- Include the jQuery library -->
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <!-- Include the jQuery Mobile library -->
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 
-		    // Globals specific to the client's track and desired permissions
-		    var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
-		    // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
-		    // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
-		    var numPacers = 10;
-		    var lapTimeInputConstraints = [1, 900];
-		    var trackDistanceInMeters = 400;
-		    var isUserBackwardsPermissionEnabled = true;
-		    var isUserWorkoutPermissionEnabled = true;
-		    var isUserVisiblePermissionEnabled = true;
-		    var isUserSpeedChangePermissionEnabled = true;
-		    var isUserNameChangePermissionEnabled = true;
+    <link rel="stylesheet" href="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.min.css">
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.core.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.calbox.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.datebox.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.flipbox.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.durationbox.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/datebox/latest/jqm-datebox.mode.slidebox.min.js"></script>
+	<script src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.js"></script>
+    
+    <!-- Local numpad files -->
+    <link rel="stylesheet" href="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.css">
+    <script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
+    <script>
+        var isDeveloperMode = false;
+        var isVerificationEnabled = true;     // If false, this will allow the user to click through the app without being attached to any DB or web server
 
-		    var pacerButton = [];
-		    var advancedButtonPressed = false;
-		    var onCreateNewPacerViewSequence = false;
-		    var onExistingPacerSequence = false;
-		    var onCoachSequence = false;
-		    var extrasMode = false;
-		    var masterPacerSelected = 99;
-		    var pinVar = 111;
+        // Globals specific to the client's track and desired permissions
+        var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
+        // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
+        // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
+        // var ipAddress = "http://192.168.1.244";      // IP address for Yun on Aaron's apt network
+        var numPacers = 10;
+        var lapTimeInputConstraints = [1, 900];
+        var trackDistanceInMeters = 400;
+        var userTimeInputDistance = 1609.344; 			 // this allows the user to specify whether they want to input their pace as a lap pace (based on how long this track is), 400m pace, 1600m pace, or mile pace
+        var userTimeInputDistanceString = "mile";	    // a string that will indicate to the user what they chose (or what is default)
+        var isUserBackwardsPermissionEnabled = true;
+        var isUserWorkoutPermissionEnabled = true;
+        var isUserVisiblePermissionEnabled = true;
+        var isUserSpeedChangePermissionEnabled = true;
+        var isUserNameChangePermissionEnabled = true;
 
-		    colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
+        // Numpad global variable stuff
+        $.fn.numpad.defaults.gridTpl = '<table class="ui-bar-a"></table>';
+        $.fn.numpad.defaults.backgroundTpl = '<div class="ui-popup-screen ui-overlay-a"></div>';
+        $.fn.numpad.defaults.displayTpl = '<input data-theme="b" type="text" />';
+        $.fn.numpad.defaults.buttonNumberTpl = '<a data-role="button" data-theme="b"></a>';
+        $.fn.numpad.defaults.buttonFunctionTpl = '<a data-role="button" data-theme="a"></a>';
+        $.fn.numpad.defaults.onKeypadCreate = function () { $(this).enhanceWithin(); };
 
-		    //$(document).on("pagecontainerbeforeload", function () {
-		    //    refreshPacerButtonData();
+        var pacerButton = [];
+        var advancedButtonPressed = false;
+        var onCreateNewPacerViewSequence = false;
+        var onExistingPacerSequence = false;
+        var onCoachSequence = false;
+        var extrasMode = false;
+        var masterPacerSelected = -1;
+        var masterColorIndex = 1;
+        var masterUserPaceTime = -1;
+        var pinVar = 111;
+        var newPacer = [];
 
-		    //});
+        colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 
-		    $(document).ready(ready);
-
-		    // Do all this stuff as soon as the page loads
-		    function ready() {
-		        setInterval(refreshPacerButtonData, 2000);
-		        
-		        // Determines view after a pacerButton is clicked
-		        $(".pacerButtonClass").click(function () {
-		            // showCreatePinView();
-		            alert(getCookie("username"));
-		            alert(getCookie("PIN"));
-		        });
-
-		        /*
-                // Determines view after a pacerButton is clicked
-		        $(".pacerButtonClass").click(function () {
-		            if (onExistingPacerSequence == true) {
-		                masterPacerSelected = $(this).attr("otherNum");
-		                showCreatePinView();
-		            }
-		            else {
-		                if (onCreateNewPacerViewSequence == true) {
-		                    showCreatePinView();
-		                }
-		                else {
-		                    showNormalView();
-		                    masterPacerSelected = $(this).attr("otherNum");
-		                    if (masterPacerSelected != 99) {
-		                        $("#pacerSelect").text($(this).text());
-		                        $("#pacerSelect").attr('style', "background-color:" + $(this).css("background-color")).css('color', $(this).css("color"));
-		                        refreshPacerButtonData(); // readFeedbackFile();
-		                    }
-		                    else {  // we're in coach mode and the user selected all pacers
-		                        $("#pacerSelect").text("Select Pacer: All Pacers");
-		                    }
-		                }
-		            }
-		        });
-                */
-
-		        
-		    };
+        // workout creation
+        numMetersArray = [];
+        secondsLapPaceArray = [];
+        secondsRestArray = [];
+        currentInterval = 0;
 
 
-		    // $("#pacerButtonView").on('pageinit', ready);
+        // *****************
+        // Click Handlers
+        // *****************
 
-		    // $(document).on('pageinit pageshow', ready);
-		    /*
-            if (document.readyState == 'complete') {
-		        ready();
-		    }
+        function testingSimplePacerControlViewCalled() {
+            $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
+                transition: "slide"
+            });
+        }
 
-		    $(window).bind("load", ready);
-            */
-		    /*$(document).ready(function () {
-		        if (!window.location.hash) {
-		            window.location = window.location + '#loaded';
-		            window.location.reload();
-		        } else {
-		            ready();
-		        }
-		    });*/
-		    // $(document).ready(ready);
-		    // $(document).on('page:load', ready);
-		    // $(document).on('page:change', ready);
-		    // $(window).load(ready);
-		    // $(window).bind('page:change', ready);
+        function existingPacerButton_onclick() {
+            $(":mobile-pagecontainer").pagecontainer("change", "#pacerButtonView_existing", {
+                transition: "slide"
+            });
 
-		    /* Functions for cookies */
-		    var createCookie = function (name, value, days) {
-		        var expires;
-		        if (days) {
-		            var date = new Date();
-		            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-		            expires = "; expires=" + date.toGMTString();
-		        }
-		        else {
-		            expires = "";
-		        }
-		        document.cookie = name + "=" + value + expires + "; path=/";
-		    }
+            // call the function that loads the button data
+            refreshPacerButtonData();
+        }
 
-		    function getCookie(c_name) {
-		        if (document.cookie.length > 0) {
-		            c_start = document.cookie.indexOf(c_name + "=");
-		            if (c_start != -1) {
-		                c_start = c_start + c_name.length + 1;
-		                c_end = document.cookie.indexOf(";", c_start);
-		                if (c_end == -1) {
-		                    c_end = document.cookie.length;
-		                }
-		                return unescape(document.cookie.substring(c_start, c_end));
-		            }
-		        }
-		        return "";
-		    }
+        function newPacerButton_onclick() {
+            $(":mobile-pagecontainer").pagecontainer("change", "#pinView_create", {
+                transition: "slide"
+            });
+        }
 
-		    function setCookie(cname, cvalue, exdays) {
-		        var d = new Date();
-		        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-		        var expires = "expires=" + d.toUTCString();
-		        document.cookie = cname + "=" + cvalue + "; " + expires;
-		    }
+        // lets the user change the default distance that they use to enter their pace
+        function paceTypeLabel_onclick() {
+            $(":mobile-pagecontainer").pagecontainer("change", "#paceTypeInput_create", {
+                transition: "slide"
+            });
+        }
 
-		    // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
-		    function refreshPacerButtonData() {
-		        var newPacer = [];  // in order to store array objects, you must create this variable like this
+        function advanced_onclick() {
+            $(":mobile-pagecontainer").pagecontainer("change", "#extraOptionsView", {
+                transition: "slide"
+            });
+        }
 
-		        // get lapTime, name, and color from PHP
-		        var request = new XMLHttpRequest();
-		        request.onreadystatechange = function () {
-		            if (request.readyState == 4 && request.status == 200) {
-		                // split up the feedback
-		                pacerGroupSet = request.responseText.split("#");
+        // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
+        function helpButton_onclick() {
+            // alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
+            $("#timePopup").popup("open", { positionTo: "#timeInputLink", tolerance: "80, 15, 30, 15" });
 
-		                for (i = 0; i < pacerGroupSet.length; i++) {
-		                    // split up the already split pieces
-		                    singlePacerSet = pacerGroupSet[i].split(",");
+            setTimeout(function () {
+                $("#timePopup").popup("close");
+                setTimeout(function () {
+                    $("#colorPopup").popup("open", { positionTo: "#colorSelect", tolerance: "80, 15, 30, 15" });
+                    setTimeout(function () {
+                        $("#colorPopup").popup("close");
+                    }, 3000);
+                }, 500);
+            }, 3000);
+        }
 
-		                    // make your newPacer variable out of what you just split up
-		                    newPacer[i] = {
-		                        index: singlePacerSet[0],
-		                        lapTime: singlePacerSet[1],
-		                        color: colorArray[singlePacerSet[2] % colorArray.length],
-		                        colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
-		                        name: singlePacerSet[3],
-		                        activeText: singlePacerSet[3] + " - " + singlePacerSet[1] + " sec lap",
-		                        inactiveText: singlePacerSet[3] + " - inactive"
-		                    };
+        function testPopupTrigger_onclick() {
+            $("#isExistingPacerPopup").popup("open", { positionTo: "window" });
+        }
 
-		                    // update the buttons
-		                    $("#pacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
-		                    if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
-		                        $("#pacerButton" + i).css('color', 'white');
-		                    }
-		                    if (singlePacerSet[1] == "0") {
-		                        $("#pacerButton" + i).text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
-		                    }
+        // *****************
+        // End Click Handlers
+        // *****************
 
-		                    // update other text fields - used in Coach Mode
-		                    if (masterPacerSelected == i) {
-		                        // update some text fields with pacer data
+        $(document).ready(function () {
+            colorButtonInitialize();
+            // testPopupTrigger_onclick();
 
-		                        $("#newFeedBack2").text("newPacer[i] text: " + newPacer[i].text);
-		                        document.getElementById("description").innerHTML = newPacer[i].lapTime + " | " + newPacer[i].color;
-		                        document.getElementById("feedbackData").innerHTML = "Name: " + newPacer[i].name + ", LapTime: " + newPacer[i].lapTime + ", Color: " + newPacer[i].color;
+            $('#timeInput').hide();
+            $("#colorText").hide();
 
-		                        if (masterPacerSelected != 99) {
-		                            // update pacerSelect button for Coach Mode
-		                            $("#pacerSelect").text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
-		                            if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
-		                                $("#pacerSelect").css('color', 'white');
-		                            }
-		                            if (singlePacerSet[1] == "0") {
-		                                $("#pacerSelect").text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
-		                            }
-		                        }
-		                    }
-		                    /*
-		                    if (masterPacerSelected == 99) {
-                                // update some text fields with the number of lights
-		                        document.getElementById("description").innerHTML = "Lights: " + lights;
-		                        document.getElementById("feedbackData").innerHTML = "Lights: " + lights;
-		                    }*/
-		                }
-		            }
-		        }
-		        request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
-		        request.send();
-		    }
+            $("#timeInputLink").click(function () {
+                $('#timeInputFlipBox').datebox('open');
+            });
 
-		    // show Pacer Buttons View "page"
-		    function showPacerButtonsView() {
-		        hideEverything();
-		        refreshPacerButtonData();
-		        $("#pacerButtonView").show();
-		        // $("#viewEscape").show();
-		    }
+            // $(".ui-slider-input").hide();
+            // $(".input.ui-slider-input").css('display', 'none !important');
 
-		    // show all the advanced elements and hide the advanced button
-		    function showAdvancedElements() {
-		        $(".advancedElement").show()
-		    }
+            // Click Handlers
+            $(".existPacerButtonClass").click(function () {
+                masterPacerSelected = $(this).attr("otherNum");
+                $(":mobile-pagecontainer").pagecontainer("change", "#pinView_existing", {
+                    transition: "slide"
+                });
+            });
 
-		    // hide all the advanced elements and show the advanced button
-		    function hideAdvancedElements() {
-		        $(".advancedElement").hide()
-		    }
+            // Click Handler for colorButtonClass to take User to time input - New Pacer
+            $(".colorButtonClass_create").click(function () {
+                // get the value of the color desired which will correspond to the correct element in colorArray
+                var newNum = $(this).attr("otherNum");
 
-		    // hide everything except the top header
-		    function hideEverything() {
-		        $(".contentElement").hide();
-		    }
+                // assign this value to a global variable
+                masterColorIndex = newNum;
 
-		    // show everything - all contentElement class
-		    function showEverything() {
-		        onCoachSequence = true;
-		        massesCurrentView = coachSequence[3];
-		        $(".contentElement").show();
-		    }
+                // set the selectColor dropdown
+                $("div#colorSelect select").val(newNum);
 
-		    // End of JavaScript
-		</script>
-	</head>
-	<body>
-		<div id="pageWrapper" data-role="page" data-theme="a">
-			<div data-role="header" data-position="inline">
-				<h1 id="tpHeader"><a href="index.html">Track Practice</a></h1>
-			</div>
-			<div data-role="content" data-theme="a">
+                // prompt for the PIN
+                var pin = prompt("Create a 3 digit passcode so no one else can access your pacer");
+
+                // PIN verfiy - incomplete
+                if (isPinFormatValid(pin)) {
+                    // do something
+                }
+
+                // if PIN verify passes ... send this command to Arduino / DB - incomplete
+                // requestCommand(5, masterPacerSelected, newNum);
+
+                // transition to the next page
+                $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
+                    transition: "slide"
+                });
+                $('#timeInput_controlView').hide();
+            });
+
+            $(".paceDistanceButton").click(function () {
+                var newNum = parseFloat($(this).attr("otherNum"));
+                switch (newNum) {
+                    case 0:
+                        userTimeInputDistance = trackDistanceInMeters;
+                        userTimeInputDistanceString = "lap";
+                        break;
+                    case 400:
+                        userTimeInputDistance = newNum;
+                        userTimeInputDistanceString = "400";
+                        break;
+                    case 1600:
+                        userTimeInputDistance = newNum;
+                        userTimeInputDistanceString = "1600";
+                        break;
+                    case 1609.344:
+                        userTimeInputDistance = newNum;
+                        userTimeInputDistanceString = "mile";
+                        break;
+                }
+                $("#paceInputLabelLink").text(userTimeInputDistanceString);
+                $(":mobile-pagecontainer").pagecontainer("change", "#timeInputView_create", {
+                    transition: "slide"
+                });
+            });
+
+            // Click handler for newPacerButton that enables / disables verifcation upon hearing the "tap hold" event
+            $("#newPacerButton").on("taphold", function () {
+                isVerificationEnabled = !isVerificationEnabled;
+                if (isVerificationEnabled == true) {
+                    alert("Verifcation mode enabled!");
+                }
+                else {
+                    alert("Verification mode disabled!");
+                }
+            });
+
+            // Click handler for existingPacerButton that enables / disables developerMode upon hearing the "tap hold" event
+            $("#existingPacerButton").on("taphold", function () {
+                isDeveloperMode = !isDeveloperMode;
+                if (isDeveloperMode == true) {
+                    alert("Developer mode enabled!");
+                }
+                else {
+                    alert("Developer mode disabled!");
+                }
+            });
+        });
+
+        function timeAndDistanceSubmitted(val1, val2) {
+            // save this value to some global variable
+            masterUserPaceTime = Number(val1);
+
+            // save the distance value to some global variable is already done whenever that select box changes in the distanceChanged() function
+
+            // transition to the color choice page
+            $(":mobile-pagecontainer").pagecontainer("change", "#colorButtonView_create", {
+                transition: "slide"
+            });
+        }
+
+        function distanceChanged(val) {
+            val = Number(val);  // cast it from a string to a number
+            switch (val) {
+                case 1:
+                    userTimeInputDistance = 1609.344;
+                    userTimeInputDistanceString = "mile";
+                    break;
+                case 2:
+                    userTimeInputDistance = 1600;
+                    userTimeInputDistanceString = "1600";
+                    break;
+                case 3:
+                    userTimeInputDistance = 400
+                    userTimeInputDistanceString = "400";
+                    break;
+                case 4:
+                    userTimeInputDistance = trackDistanceInMeters;
+                    userTimeInputDistanceString = "lap";
+                    break;
+            }
+        }
+
+        // ColorSelect dropdown was changed
+        function colorChanged(val) {
+            val = Number(val);  // cast it from a string to a number and it will represent the index of the color in the colorArray
+            alert("Your color is now: " + colorArray[val]);
+        }
+
+        // change the button text whenever the user enters new text
+        function timeInputChanged(val) {
+            // change the value of the button
+            $("#timeInputLink").text(val);
+        }
+
+        function colorChanged(val) {
+            if (val == -1) {
+                val = $("#colorRange").val();
+
+                if (val == colorArray.length)
+                    val = 1;
+                else
+                    val++;
+
+                $("#colorRange").val(val);
+            }
+            $("#colorText").text("Pacer color: " + colorArray[val]);
+            $("#colorText").css("background-color", colorArray[val]);
+            $("#colorDiv").css("background-color", colorArray[val]);
+            // $(".ui-slider").css("background-color", colorArray[val]);
+        }
+
+        // sends GET request for the commands that the Yun will accept; parameters: x - command, y - pacerIndex, z - value
+        function requestCommand(x, y, z) {
+            if (masterPacerSelected == 99) {		// If you're in "Coach Mode" where you can control all pacers at once, as well as update the database just like below
+                y = masterPacerSelected;
+            }
+            if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4 && request.status == 200) {
+                        if (isDeveloperMode == true) {
+                            alert(request.responseText);
+                        }
+                        else {
+                            if (request.responseText.substr(0, 8) == "USER MSG") {
+                                alert(request.responseText.substr(10));
+                            }
+                        }
+                    }
+                };
+
+                request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
+                request.send();
+            }
+        }
+
+        // initialize the colorButtons with text and color
+        function colorButtonInitialize() {
+            for (var i = 0; i < colorArray.length - 1; i++) {
+                j = i + 1;
+                $("#colorButton" + i + "_create").attr('otherNum', j).text(colorArray[j]).attr('style', 'background-color:' + colorArray[j]);
+                if (i == 1 || i == 5 || i == 6) {
+                    $("#colorButton" + i + "_create").css('color', 'white');
+                }
+            }
+        }
+
+        // Determines if the PIN that the user entered is in a valid format
+        function isPinFormatValid(new_pinVar) {
+            var str = "";
+            str = new_pinVar.split("");
+            if (str.length == 3) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+
+    </script>
+</head>
+<body>
+
+<!-- Start View for the first time users -->			
+<div data-role="page" id="firstTimeUserStartDiv" class="contentElement advancedElement">
+    <br /><br /><br />
+    <input id="newPacerButton" type="button" class="btn btn-success" onclick="return newPacerButton_onclick()" otherNum="1" style="background-color:#00ff21" value="<h2>Let's Get Started!</h2>" />
+    <br /><br /><br />
+    <input id="existingPacerButton" type="button" class="btn btn-danger" onclick="return existingPacerButton_onclick()" otherNum="2" style="background-color:#f00" value="<h3>Wait, my light is running.</h3>" />
+    <br /><br /><br />
+    <a data-role="button" href="#timeInputView_create">Testing Control Sequence</a>
+</div>
+
+<!-- Pacer Button View - Existing -->	
+<div data-role="page" id="pacerButtonView_existing" class="contentElement advancedElement" >
+    <a href="#" id="existPacerButton0" class="btn existPacerButtonClass" colorIndex="0" otherNum="0" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton1" class="btn existPacerButtonClass" colorIndex="0" otherNum="1" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton2" class="btn existPacerButtonClass" colorIndex="0" otherNum="2" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton3" class="btn existPacerButtonClass" colorIndex="0" otherNum="3" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton4" class="btn existPacerButtonClass" colorIndex="0" otherNum="4" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton5" class="btn existPacerButtonClass" colorIndex="0" otherNum="5" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton6" class="btn existPacerButtonClass" colorIndex="0" otherNum="6" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton7" class="btn existPacerButtonClass" colorIndex="0" otherNum="7" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton8" class="btn existPacerButtonClass" colorIndex="0" otherNum="8" data-role="button" data-icon="star"></a>
+    <a href="#" id="existPacerButton9" class="btn existPacerButtonClass" colorIndex="0" otherNum="9" data-role="button" data-icon="star"></a>
+</div>
+
+<!-- Enter PIN View - Existing Pacer -->
+<div data-role="page" id="pinView_existing" class="contentElement advancedElement" >
+    <br /><br /><br />
+    <h3 for="enterPinSubmit" class="">Enter your 3 digit passcode: </h3>
+    <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinEntryField" value="3 Digit Passcode Input" step="1" min="0" max="999" url="" />
+    <br /><br /><br />
+    <input id="enterPinSubmit" type="button" class="btn" otherNum="2" data-role="button" style="background-color:#f00" value="<h2>Enter!</h2>" />
+</div>
+
+<!-- Color Button View - New Pacer -->
+<div data-role="page" id="colorButtonView_create" class="contentElement advancedElement" >
+	<h3>Select your color:</h3>
+	<br />
+    <a id="colorButton0_create" class="btn colorButtonClass_create" otherNum="1" data-role="button" data-icon="star"></a>
+    <a id="colorButton1_create" class="btn colorButtonClass_create" otherNum="2" data-role="button" data-icon="star"></a>
+    <a id="colorButton2_create" class="btn colorButtonClass_create" otherNum="3" data-role="button" data-icon="star"></a>
+    <a id="colorButton3_create" class="btn colorButtonClass_create" otherNum="4" data-role="button" data-icon="star"></a>
+    <a id="colorButton4_create" class="btn colorButtonClass_create" otherNum="5" data-role="button" data-icon="star"></a>
+    <a id="colorButton5_create" class="btn colorButtonClass_create" otherNum="6" data-role="button" data-icon="star"></a>
+    <a id="colorButton6_create" class="btn colorButtonClass_create" otherNum="7" data-role="button" data-icon="star"></a>
+</div>
+
+<!-- Testing Simple Pacer Control View -->
+<div data-role="page" id="testingSimplePacerControl" class="contentElement advancedElement">
+    
+    <!-- Time input stuff -->
+    <div id="timeInput_controlView">
+        <input name="timeInputFlipBox" class="timeInputFlipBox" type="text" data-role="datebox" onchange="timeInputChanged(this.value)" data-options='{
+				    "noButton": true, 
+				    "mode":"durationflipbox", 
+				    "overrideDurationFormat":"%DM:%DS", 
+				    "minDur":"5", 
+				    "maxDur":"900", 
+				    "overrideDurationOrder":["i","s"], 
+				    "popupPosition": "window" 
+			    }' readonly="readonly" class="">
+    </div>
+    <a href="#" class="timeInputLink_controlView" data-role="button" style="font-size: 24px">Click to Enter Time</a>
+	<br />
+
+    <!-- Distance input stuff -->
+    <select onchange="distanceChanged(this.value)" name="select-native-3" class="distanceSelect_controlView" data-iconpos="none">
+        <option value="1">per mile</option>
+        <option value="2">per 1600</option>
+        <option value="3">per 400</option>
+        <option value="4">per lap</option>
+    </select>
+    <br id="timeToColorBreak"/>
+    
+    <div id="colorSelectDiv_controlView">
+        <select onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect_controlView" data-iconpos="none">
+            <option value="1">Pacer color: White</option>
+            <option value="2">Pacer color: Red</option>
+            <option value="3">Pacer color: Orange</option>
+            <option value="4">Pacer color: Yellow</option>
+            <option value="5">Pacer color: Green</option>
+            <option value="6">Pacer color: Blue</option>
+            <option value="7">Pacer color: Purple</option>
+        </select>
+        <br />
+    </div>
+
+    <a href="#" onclick="helpButton_onclick()" style="background-color:white; font-size: 24px" data-role="button">Help</a>
+    <a href="#" style="background-color:green; font-size: 24px" data-role="button">Restart</a>
+    <a href="#" style="background-color:red; font-size: 24px" data-role="button">Exit</a>
+    <br /><br />
+</div>
+
+<!-- The user can select what distance they want to enter their pace for (lap, 400, 1600, or mile) - New Pacer -->
+<div data-role="page" id="paceTypeInput_create" class="contentElement advancedElement">
+	<label id="lapDistanceInputLabel" for="Button1"><h3>Select the distance that you want to enter your time for:</h3></label>
+	<br />
+    <input id="Button1" type="button" class="paceDistanceButton" otherNum="0" value="<h3>Lap on this track</h3>" />
+    <br />
+    <input id="Button2" type="button" class="paceDistanceButton" otherNum="400" value="<h3>400 meters</h3>" />
+    <br />
+    <input id="Button3" type="button" class="paceDistanceButton" otherNum="1600" value="<h3>1600 meters</h3>" />
+    <br />
+    <input id="Button4" type="button" class="paceDistanceButton" otherNum="1609.344" value="<h3>mile</h3>" />
+</div>
+
+<!-- Time Input - New Pacer -->
+<div data-role="page" id="timeInputView_create" class="contentElement timeInputView">
+        <!-- Time input stuff onchange="timeInputChanged(this.value)" -->
+        <div id="timeInput">
+            <input onchange="timeInputChanged(this.value)" name="timeInputFlipBox" id="timeInputFlipBox" type="text" data-role="datebox" data-options='{
+				        "noButton": true, 
+				        "mode":"durationflipbox", 
+				        "overrideDurationFormat":"%DM:%DS", 
+				        "minDur":"5", 
+				        "maxDur":"900", 
+				        "overrideDurationOrder":["i","s"], 
+				        "popupPosition": "window" 
+			        }' readonly="readonly" class="">
+        </div>
+        <a href="#" id="timeInputLink" data-role="button" style="font-size: 24px">Click to Enter Time</a>
+        <br />
+        <!-- Distance input stuff onchange="distanceChanged(this.value)" -->
+        <select name="select-native-3" id="distanceSelect" data-iconpos="none">
+            <option value="1">per mile</option>
+            <option value="2">per 1600</option>
+            <option value="3">per 400</option>
+            <option value="4">per lap</option>
+        </select>
+        <br /><br />
+        <a href="#" onclick="timeAndDistanceSubmitted(timeInputFlipBox, distanceSelect)" style="font-size: 24px; background-color:red" type="submit" data-role="button" >Next</a>
+</div>
+
+<!-- Time Input - Extra Options -->
+<div data-role="page" id="timeInputView_extra" class="contentElement timeInputView">
+    <div data-role="content" data-theme="a">
+		<h3 id="H1">Enter your <a id="A2" href="#" onclick="paceTypeLabel_onclick()">mile</a> pace:</h3>
+		<br />
+	    <label for="timeMinutesInput_create" class="select"><h3>Enter Your Minutes:</h3></label>
+        <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="Number1" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
+        <br /><br />
+        <label for="timeSecondsInput_create" class="select"><h3>Enter Your Seconds: <a href="#" onclick="helpButton_onclick()" id="A3">Help?</a></h3></label>
+	    <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="Number2" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
+        <input id="timeSubmit_extra" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
+    </div>
+</div>
+
+
+<!--Extra Options View Buttons-->			
+<div data-role="page" id="extraOptionsView" class="contentElement advancedElement" >
+    <a id="changePaceExtrasButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Pace</h3></a>
+    <br />
+    <a id="changeColorExtrasButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Color</h3></a>
+    <br />
+    <a id="createWorkoutExtrasButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Create Workout</h3></a>
+	<br />
+    <a id="startWorkoutButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Start Workout</h3></a>
+	<br />
+	<a id="test00" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Pause Workout</h3></a>
+	<br />
+	<a id="changeDirectionExtrasButton" class="pacerActionButton" url="4" otherNum="-1" data-role="button"><h3>Change Direction</h3></a>
+	<br />
+	<a id="changeVisibilityExtrasButton" class="pacerActionButton" url="3" otherNum="-1" data-role="button"><h3>Change Visibility</h3></a>
+	<br />
+	<a id="changeSpeedInFlightButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Speed In Flight</h3></a>
+	<br />
+	<a id="test04" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Name</h3></a>
+</div>
 				
-                <!-- Pacer Button View -->
+<!-- Extras View Buttons in Developer Mode -->		
+<div data-role="page" id="advancedCoachDiv" class="contentElement advancedElement" >
+	<br /><br /><br />
+    <button id="writeFileMode" style="background-color:lightgreen">Write Mode On/Off</button>
+    <button id="lightStripMode" style="background-color:#E6E6E6">Light Strip Mode Toggle</button>
+    <button id="selectAllPinButton" style="background-color:#E6E6E6">Select * From Pin</button>
+    <button id="selectAllWorkoutButton" style="background-color:#E6E6E6">Select * From Workout</button>
+    <button id="setAllWorkoutsToAcitveButton" style="background-color:#E6E6E6">Make all workouts active</button>
+    <!--<button id="startWorkoutButton" style="background-color:#E6E6E6">Start Workout</button>-->
+    <a id="resetYunFromDbButton" class="btn" url="-1" otherNum="1" data-role="button">Refresh Pacers based on Yun DB</a>
+</div>
                 
-                <div id="pacerButtonView" class="contentElement advancedElement" >
-                    <!--<a id="allPacersButton" class="pacerButtonClass" otherNum="99" data-role="button" style="background-color:#E6E6E6" data-icon="star">Select Pacers: All Pacers</a>-->
-                    <a href="#" id="pacerButton0" class="btn pacerButtonClass" otherNum="0" data-role="button" data-icon="star">Pacer0</a>
-                    <a href="#" id="pacerButton1" class="btn pacerButtonClass" otherNum="1" data-role="button" data-icon="star">Pacer1</a>
-                    <a href="#" id="pacerButton2" class="btn pacerButtonClass" otherNum="2" data-role="button" data-icon="star">Pacer2</a>
-                    <a href="#" id="pacerButton3" class="btn pacerButtonClass" otherNum="3" data-role="button" data-icon="star">Pacer3</a>
-                    <a href="#" id="pacerButton4" class="btn pacerButtonClass" otherNum="4" data-role="button" data-icon="star">Pacer4</a>
-                    <a href="#" id="pacerButton5" class="btn pacerButtonClass" otherNum="5" data-role="button" data-icon="star">Pacer5</a>
-                    <a href="#" id="pacerButton6" class="btn pacerButtonClass" otherNum="6" data-role="button" data-icon="star">Pacer6</a>
-                    <a href="#" id="pacerButton7" class="btn pacerButtonClass" otherNum="7" data-role="button" data-icon="star">Pacer7</a>
-                    <a href="#" id="pacerButton8" class="btn pacerButtonClass" otherNum="8" data-role="button" data-icon="star">Pacer8</a>
-                    <a href="#" id="pacerButton9" class="btn pacerButtonClass" otherNum="9" data-role="button" data-icon="star">Pacer9</a>
-                </div>
+<!-- Create Workout View -->
+<div data-role="page" id="createWorkoutDiv" class="contentElement advancedElement" >
+    <h3 for="createWorkoutSubmit" class="">Create your workout: </h3>
 
-			</div>
-		</div>
-		
-		<a href="https://github.com/commadelimited/jQuery-Mobile-Bootstrap-Theme" data-role="button" data-icon="star">Get the code</a>
-	</body>
+    <label for="workoutSetsInput" class="select">Number of Sets:</label>
+	<input type="number" pattern="[0-9]*" name="name" id="workoutSetsInput" value="Number of Sets" step="1" min="1" max="900" url="13" />
+
+    <h4 id="setNumberIndicator">Setup interval #</h4>
+
+    <label for="workoutMetersInput" class="select">Distance (meters) of Each Interval:</label>
+	<input type="number" pattern="[0-9]*" name="name" id="workoutMetersInput" value="Distance (meters) of Each Interval" step="1" min="1" max="900" url="13" />
+                    
+    <label for="workoutLapPaceInput" class="select">Enter your one-lap pace:</label>
+	<input type="number" pattern="[0-9]*" name="name" id="workoutLapPaceInput" value="Enter your one-lap pace:" step="0.1" min="1" max="900" url="13" />
+
+    <label for="workoutRestInput" class="select">Enter your rest (in seconds):</label>
+	<input type="number" pattern="[0-9]*" name="name" id="workoutRestInput" value="Enter your rest (in seconds)" step="1" min="25" max="900" url="13" />
+
+    <button id="previousWorkoutSetButton" style="background-color:#E6E6E6">Previous Interval</button>
+    <button id="nextWorkoutSetButton" style="background-color:#E6E6E6">Next Interval</button>
+
+    <br />
+    <input id="createWorkoutSubmit" type="button" class="btn" otherNum="0" data-role="button" style="background-color:#f00" value="<h2>Create!</h2>" />
+</div>
+
+
+</body>
 </html>

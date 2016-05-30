@@ -61,7 +61,7 @@
         var masterPacerSelected = -1;
         var masterColorIndex = 1;
         var masterUserPaceTime = "-1";
-        var pinVar = 111;
+        var pinVar = -1;
         var newPacer = [];
 
         colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
@@ -237,18 +237,28 @@
 
             // Click Handlers
             $(".existPacerButtonClass").click(function () {
-                masterPacerSelected = $(this).attr("otherNum");
+                if (this.text.substring(9, 17) != "inactive") {     // if the pacer is active
+                    // alert("made it to Pacertext: " + this.text.substring(9,17));
+                    masterPacerSelected = $(this).attr("otherNum");
 
-                // prompt - enter your PIN for your pacer
+                    // prompt - enter your PIN for your pacer
+                    pinVar = prompt("Enter the 3-digit passcode:", "123");
 
+                    if (true) {         // if the PIN is correct, change to the page
+                        $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
+                            transition: "slide"
+                        });
 
-                // if the PIN is correct, change to the page
-                $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
-                    transition: "slide"
-                });
-
-                $('#startButton').text("Restart");  // change "Start" button to "Restart"
-                $('#loginButton').hide();           // hide the Login button
+                        $('#startButton').text("Restart");  // change "Start" button to "Restart"
+                        $('#loginButton').hide();           // hide the Login button
+                    }
+                    else {
+                        alert("The passcode that you entered was incorrect.");
+                    }
+                }
+                else {  // if the pacer is inactive
+                    alert("Please choose an active pacer or navigate back to the previous screen to create one.");
+                }
 
             });
 
@@ -301,6 +311,10 @@
                     case 400:
                         userTimeInputDistance = newNum;
                         userTimeInputDistanceString = "400";
+                        break;
+                    case 1000:
+                        userTimeInputDistance = newNum;
+                        userTimeInputDistanceString = "1000";
                         break;
                     case 1600:
                         userTimeInputDistance = newNum;
@@ -364,21 +378,26 @@
             switch (val) {
                 case 1:
                     userTimeInputDistance = 1609.344;
-                    userTimeInputDistanceString = "mile";
+                    userTimeInputDistanceString = "Mile";
                     break;
                 case 2:
                     userTimeInputDistance = 1600;
-                    userTimeInputDistanceString = "1600";
+                    userTimeInputDistanceString = "1600m";
                     break;
                 case 3:
-                    userTimeInputDistance = 400
-                    userTimeInputDistanceString = "400";
+                    userTimeInputDistance = 1000;
+                    userTimeInputDistanceString = "km";
                     break;
                 case 4:
+                    userTimeInputDistance = 400
+                    userTimeInputDistanceString = "400m";
+                    break;
+                case 5:
                     userTimeInputDistance = trackDistanceInMeters;
                     userTimeInputDistanceString = "lap";
                     break;
             }
+            $("#timeInputLink_controlView").text("Enter your " + userTimeInputDistanceString + " time:");
         }
 
         // change the button text whenever the user enters new text
@@ -464,14 +483,57 @@
 </head>
 <body>
 
-<!-- Start View for the first time users -->			
-<div data-role="page" id="firstTimeUserStartDiv" class="contentElement advancedElement">
-    <br /><br /><br />
-    <input id="newPacerButton" type="button" class="btn btn-success" onclick="return newPacerButton_onclick()" otherNum="1" style="background-color:#00ff21" value="<h2>Let's Get Started!</h2>" />
-    <br /><br /><br />
-    <input id="existingPacerButton" type="button" class="btn btn-danger" onclick="return existingPacerButton_onclick()" otherNum="2" style="background-color:#f00" value="<h3>Wait, my light is running.</h3>" />
-    <br /><br /><br />
-    <a data-role="button" href="#timeInputView_create">Testing Control Sequence</a>
+<!-- Testing Simple Pacer Control View -->
+<div data-role="page" id="testingSimplePacerControl" class="contentElement advancedElement">
+    
+    <!-- Time input stuff -->
+    <div id="timeInput_controlView">
+        <input name="timeInputFlipBox" id="timeInputFlipBox_controlView" type="text" data-role="datebox" onchange="timeInputChanged(this.value)" data-options='{
+				    "noButton": true, 
+				    "mode":"durationflipbox", 
+				    "overrideDurationFormat":"%DM:%DS", 
+				    "minDur":"5", 
+				    "maxDur":"900", 
+				    "overrideDurationOrder":["i","s"], 
+				    "popupPosition": "window" 
+			    }' readonly="readonly" class="">
+    </div>
+    <a href="#" id="timeInputLink_controlView" data-theme="b" data-role="button" style="font-size: 24px">Enter Mile Time</a>
+    <select onchange="distanceChanged(this.value)" data-theme="a" name="select-native-3" class="distanceSelect_controlView" data-iconpos="none">
+        <option value="1">distance: mile</option>
+        <option value="2">distance: 1600</option>
+        <option value="3">distance: km</option>
+        <option value="4">distance: 400</option>
+        <option value="5">distance: lap</option>
+    </select>
+	<br /><br />
+    
+    <div id="colorSelectDiv_controlView">
+        <!--<a href="#" data-inline="true" font-size: 24px" data-role="content">Test Button</a>-->
+        <!--<label data-inline="true" for="colorSelect_controlView" class="btn">Color:</label>-->
+        <!--<span class="ui-block-a" style="font-size: 24px">Pacer color:</span>-->
+        <select data-role="button" data-theme="b" onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect_controlView" data-iconpos="none">
+            <option value="1">Pacer color: White</option>
+            <option value="2">Pacer color: Red</option>
+            <option value="3">Pacer color: Orange</option>
+            <option value="4">Pacer color: Yellow</option>
+            <option value="5">Pacer color: Green</option>
+            <option value="6">Pacer color: Blue</option>
+            <option value="7">Pacer color: Purple</option>
+        </select>
+        <br />
+    </div>
+
+    <div class="ui-grid-b">
+        <div class="ui-block-a"><button data-mini="true" data-theme="b" style="background-color:blue; font-size: 16px" data-role="button" onclick="helpButton_onclick()" >Help</button></div>
+        <div class="ui-block-b"><button id="startButton" data-mini="true" data-theme="b" style="background-color:green; font-size: 16px" data-role="button">Start</button></div>
+        <div class="ui-block-c"><button data-mini="true" data-theme="b" style="background-color:red; font-size: 16px" data-role="button">Exit</button></div>
+    </div>
+    <br /><br />
+
+    <div>
+        <a id="loginButton" onclick="login()" data-theme="b" style="font-size: 16px" data-role="button">Already created a pacer? Login.</a>
+    </div>
 </div>
 
 <!-- Pacer Button View - Existing -->	
@@ -510,119 +572,8 @@
     <a id="colorButton6_create" class="btn colorButtonClass_create" otherNum="7" data-role="button" data-icon="star"></a>
 </div>
 
-<!-- Testing Simple Pacer Control View -->
-<div data-role="page" id="testingSimplePacerControl" class="contentElement advancedElement">
-    
-    <!-- Time input stuff -->
-    <div id="timeInput_controlView">
-        <input name="timeInputFlipBox" id="timeInputFlipBox_controlView" type="text" data-role="datebox" onchange="timeInputChanged(this.value)" data-options='{
-				    "noButton": true, 
-				    "mode":"durationflipbox", 
-				    "overrideDurationFormat":"%DM:%DS", 
-				    "minDur":"5", 
-				    "maxDur":"900", 
-				    "overrideDurationOrder":["i","s"], 
-				    "popupPosition": "window" 
-			    }' readonly="readonly" class="">
-    </div>
-    <a href="#" id="timeInputLink_controlView" data-theme="b" data-role="button" style="font-size: 24px">Click to Enter Time</a>
-    <select onchange="distanceChanged(this.value)" data-theme="a" name="select-native-3" class="distanceSelect_controlView" data-iconpos="none">
-        <option value="1">per mile</option>
-        <option value="2">per 1600</option>
-        <option value="3">per 400</option>
-        <option value="4">per lap</option>
-    </select>
-	<br /><br />
-    
-    <div id="colorSelectDiv_controlView">
-        <!--<a href="#" data-inline="true" font-size: 24px" data-role="content">Test Button</a>-->
-        <!--<label data-inline="true" for="colorSelect_controlView" class="btn">Color:</label>-->
-        <!--<span class="ui-block-a" style="font-size: 24px">Pacer color:</span>-->
-        <select data-role="button" data-theme="b" onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect_controlView" data-iconpos="none">
-            <option value="1">Pacer color: White</option>
-            <option value="2">Pacer color: Red</option>
-            <option value="3">Pacer color: Orange</option>
-            <option value="4">Pacer color: Yellow</option>
-            <option value="5">Pacer color: Green</option>
-            <option value="6">Pacer color: Blue</option>
-            <option value="7">Pacer color: Purple</option>
-        </select>
-        <br />
-    </div>
-
-    <div class="ui-grid-b">
-        <div class="ui-block-a"><button data-mini="true" data-theme="b" style="background-color:blue; font-size: 16px" data-role="button" onclick="helpButton_onclick()" >Help</button></div>
-        <div class="ui-block-b"><button id="startButton" data-mini="true" data-theme="b" style="background-color:green; font-size: 16px" data-role="button">Start</button></div>
-        <div class="ui-block-c"><button data-mini="true" data-theme="b" style="background-color:red; font-size: 16px" data-role="button">Exit</button></div>
-    </div>
-    <br /><br />
-
-    <div>
-        <a id="loginButton" onclick="login()" data-theme="b" style="font-size: 16px" data-role="button">Already created a pacer? Login.</a>
-    </div>
-</div>
-
-<!-- The user can select what distance they want to enter their pace for (lap, 400, 1600, or mile) - New Pacer -->
-<div data-role="page" id="paceTypeInput_create" class="contentElement advancedElement">
-	<label id="lapDistanceInputLabel" for="Button1"><h3>Select the distance that you want to enter your time for:</h3></label>
-	<br />
-    <input id="Button1" type="button" class="paceDistanceButton" otherNum="0" value="<h3>Lap on this track</h3>" />
-    <br />
-    <input id="Button2" type="button" class="paceDistanceButton" otherNum="400" value="<h3>400 meters</h3>" />
-    <br />
-    <input id="Button3" type="button" class="paceDistanceButton" otherNum="1600" value="<h3>1600 meters</h3>" />
-    <br />
-    <input id="Button4" type="button" class="paceDistanceButton" otherNum="1609.344" value="<h3>mile</h3>" />
-</div>
-
-<!-- Time Input - New Pacer -->
-<div data-role="page" id="timeInputView_create" class="contentElement timeInputView">
-        <!-- Time input stuff onchange="timeInputChanged(this.value)" -->
-        <div id="timeInput">
-            <input onchange="timeInputChanged(this.value)" name="timeInputFlipBox" id="timeInputFlipBox" type="text" data-role="datebox" data-options='{
-				        "noButton": true, 
-				        "mode":"durationflipbox", 
-				        "overrideDurationFormat":"%DM:%DS", 
-				        "minDur":"5", 
-				        "maxDur":"900", 
-				        "overrideDurationOrder":["i","s"], 
-				        "popupPosition": "window" 
-			        }' readonly="readonly" class="">
-        </div>
-        <a href="#" id="timeInputLink" data-role="button" style="font-size: 24px">Click to Enter Time</a>
-        <br />
-        <!-- Distance input stuff onchange="distanceChanged(this.value)" -->
-        <select name="select-native-3" id="distanceSelect" data-iconpos="none">
-            <option value="1">per mile</option>
-            <option value="2">per 1600</option>
-            <option value="3">per 400</option>
-            <option value="4">per lap</option>
-        </select>
-        <br /><br />
-        <a href="#" onclick="timeAndDistanceSubmitted(timeInputFlipBox.value, distanceSelect.value)" style="font-size: 24px; background-color:red" type="submit" data-role="button" >Next</a>
-</div>
-
-<!-- Time Input - Extra Options -->
-<div data-role="page" id="timeInputView_extra" class="contentElement timeInputView">
-    <div data-role="content" data-theme="a">
-		<h3 id="H1">Enter your <a id="A2" href="#" onclick="paceTypeLabel_onclick()">mile</a> pace:</h3>
-		<br />
-	    <label for="timeMinutesInput_create" class="select"><h3>Enter Your Minutes:</h3></label>
-        <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="Number1" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
-        <br /><br />
-        <label for="timeSecondsInput_create" class="select"><h3>Enter Your Seconds: <a href="#" onclick="helpButton_onclick()" id="A3">Help?</a></h3></label>
-	    <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="Number2" value="Lap Time Input" step="0.1" min="0" max="900" url="7" />
-        <input id="timeSubmit_extra" type="button" url="7" otherNum="1" data-icon="arrow-r" data-iconpos="right" style="background-color:#00ff21" value="<h3>Go!</h3>" />
-    </div>
-</div>
-
-
 <!--Extra Options View Buttons-->			
 <div data-role="page" id="extraOptionsView" class="contentElement advancedElement" >
-    <a id="changePaceExtrasButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Pace</h3></a>
-    <br />
-    <a id="changeColorExtrasButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Change Color</h3></a>
-    <br />
     <a id="createWorkoutExtrasButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Create Workout</h3></a>
 	<br />
     <a id="startWorkoutButton" class="pacerActionButton" url="-1" otherNum="1" data-role="button"><h3>Start Workout</h3></a>

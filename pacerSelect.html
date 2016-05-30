@@ -37,10 +37,10 @@
         var isVerificationEnabled = true;     // If false, this will allow the user to click through the app without being attached to any DB or web server
 
         // Globals specific to the client's track and desired permissions
-        // var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
+        var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
         // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
         // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
-        var ipAddress = "http://192.168.1.244";      // IP address for Yun on Aaron's apt network
+        // var ipAddress = "http://192.168.1.244";      // IP address for Yun on Aaron's apt network
         var numPacers = 10;
         var lapTimeInputConstraints = [1, 900];
         var trackDistanceInMeters = 400;
@@ -83,15 +83,6 @@
             });
         }
 
-        function existingPacerButton_onclick() {
-            $(":mobile-pagecontainer").pagecontainer("change", "#pacerButtonView_existing", {
-                transition: "slide"
-            });
-
-            // call the function that loads the button data
-            refreshPacerButtonData();
-        }
-
         function newPacerButton_onclick() {
             $(":mobile-pagecontainer").pagecontainer("change", "#pinView_create", {
                 transition: "slide"
@@ -131,6 +122,96 @@
             $("#isExistingPacerPopup").popup("open", { positionTo: "window" });
         }
 
+        // Take the user to the view with the existing pacer buttons so they can choose theirs
+        function login() {
+            $(":mobile-pagecontainer").pagecontainer("change", "#pacerButtonView_existing", {
+                transition: "slide"
+            });
+            refreshPacerButtonData();
+        }
+
+        // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
+        function refreshPacerButtonData() {
+            // alert("made it to refreshpacerbuttondata function");
+            var newPacer = [];  // in order to store array objects, you must create this variable like this
+
+            if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
+                // get lapTime, name, and color from PHP
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function () {
+                    // alert("made it to refreshpacerbuttondata response.");
+                    if (request.readyState == 4 && request.status == 200) {
+                        // split up the feedback
+                        pacerGroupSet = request.responseText.split("#");
+                        // alert(pacerGroupSet);
+                        // alert(pacerGroupSet[0] + "<br>" + pacerGroupSet[1] + "<br>" + pacerGroupSet[2] + "<br>");
+                        
+                        for (i = 0; i < pacerGroupSet.length; i++) {
+                            // split up the already split pieces
+                            singlePacerSet = pacerGroupSet[i].split(",");
+
+                            // make your newPacer variable out of what you just split up
+                            newPacer[i] = {
+                                index: singlePacerSet[0],
+                                lapTime: singlePacerSet[1],
+                                lapSecs: singlePacerSet[1] % 60,
+                                lapMins: (singlePacerSet[1] - (singlePacerSet[1] % 60)) / 60,
+                                color: colorArray[singlePacerSet[2] % colorArray.length],
+                                colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
+                                name: singlePacerSet[3],
+                                activeText: singlePacerSet[3] + " - " + (singlePacerSet[1] * 1609.344 / trackDistanceInMeters).toString().toHHMMSS() + " mile pace",
+                                inactiveText: singlePacerSet[3] + " - inactive"
+                            };
+
+                            // alert("NewPacer0: " + newPacer[0].activeText);
+
+                            
+                            // update the buttons
+                            $("#existPacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+                            if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
+                                $("#existPacerButton" + i).css('color', 'white');
+                            }
+                            if (singlePacerSet[1] == "0") {
+                                $("#existPacerButton" + i).text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
+                            }
+                            
+
+                            // update other text fields - used in Coach Mode
+                            //if (masterPacerSelected == i) {
+                            //    if (masterPacerSelected != 99) {
+                            //        // update pacerSelect button for Coach Mode
+                            //        $("#pacerSelect").text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+                            //        if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
+                            //            $("#pacerSelect").css('color', 'white');
+                            //        }
+                            //        if (singlePacerSet[1] == "0") {
+                            //            $("#pacerSelect").text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
+                            //        }
+                            //    }
+                            //}
+                        }
+                    }
+                }
+                request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
+                request.send();
+                // alert("made it to refreshpacerbuttondata request.");
+            }
+            else {
+                // if verification is off, fill the buttons with some made up data
+                for (i = 0; i < 10; i++) {
+                    if (i < 6) {
+                        $("#existPacerButton" + i).text("Pacer" + i + " - " + (i + 1) + " sec lap").attr('style', "background-color:" + colorArray[i + 1]);
+                        if (i + 1 % colorArray.length == "2" || i + 1 % colorArray.length == "6" || i + 1 % colorArray.length == "7") {
+                            $("#existPacerButton" + i).css('color', 'white');
+                        }
+                    }
+                    else {
+                        $("#existPacerButton" + i).text("Pacer" + i + " - inactive").attr('style', "background-color:black").css('color', 'white');
+                    }
+                }
+            }
+        }
+
         // *****************
         // End Click Handlers
         // *****************
@@ -154,15 +235,21 @@
                 $('#timeInputFlipBox_controlView').datebox('open');
             });
 
-            // $(".ui-slider-input").hide();
-            // $(".input.ui-slider-input").css('display', 'none !important');
-
             // Click Handlers
             $(".existPacerButtonClass").click(function () {
                 masterPacerSelected = $(this).attr("otherNum");
-                $(":mobile-pagecontainer").pagecontainer("change", "#pinView_existing", {
+
+                // prompt - enter your PIN for your pacer
+
+
+                // if the PIN is correct, change to the page
+                $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
                     transition: "slide"
                 });
+
+                $('#startButton').text("Restart");  // change "Start" button to "Restart"
+                $('#loginButton').hide();           // hide the Login button
+
             });
 
             // Click Handler for colorButtonClass to take User to time input - New Pacer
@@ -252,6 +339,17 @@
                 }
             });
         });
+
+        // converts seconds to a properly formatted minutes and seconds - mm:ss
+        String.prototype.toHHMMSS = function () {
+            var sec_num = parseInt(this, 10);
+            var minutes = Math.floor((sec_num) / 60);
+            var seconds = sec_num - (minutes * 60);
+
+            if (minutes < 10) { minutes = "0" + minutes; }
+            if (seconds < 10) { seconds = "0" + seconds; }
+            return minutes + ':' + seconds;
+        }
 
         function timeAndDistanceSubmitted(val1, val2) {
             alert("Time: " + val1 + ", Distance: " + val2);
@@ -428,23 +526,19 @@
 			    }' readonly="readonly" class="">
     </div>
     <a href="#" id="timeInputLink_controlView" data-theme="b" data-role="button" style="font-size: 24px">Click to Enter Time</a>
-    <select onchange="distanceChanged(this.value)" data-theme="b" name="select-native-3" class="distanceSelect_controlView" data-iconpos="none">
+    <select onchange="distanceChanged(this.value)" data-theme="a" name="select-native-3" class="distanceSelect_controlView" data-iconpos="none">
         <option value="1">per mile</option>
         <option value="2">per 1600</option>
         <option value="3">per 400</option>
         <option value="4">per lap</option>
     </select>
-	<br />
-
-    <!-- Distance input stuff -->
-    
-    <br id="timeToColorBreak"/>
+	<br /><br />
     
     <div id="colorSelectDiv_controlView">
         <!--<a href="#" data-inline="true" font-size: 24px" data-role="content">Test Button</a>-->
         <!--<label data-inline="true" for="colorSelect_controlView" class="btn">Color:</label>-->
         <!--<span class="ui-block-a" style="font-size: 24px">Pacer color:</span>-->
-        <select data-role="button" onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect_controlView" data-iconpos="none">
+        <select data-role="button" data-theme="b" onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect_controlView" data-iconpos="none">
             <option value="1">Pacer color: White</option>
             <option value="2">Pacer color: Red</option>
             <option value="3">Pacer color: Orange</option>
@@ -458,10 +552,14 @@
 
     <div class="ui-grid-b">
         <div class="ui-block-a"><button data-mini="true" data-theme="b" style="background-color:blue; font-size: 16px" data-role="button" onclick="helpButton_onclick()" >Help</button></div>
-        <div class="ui-block-b"><button data-mini="true" data-theme="b" style="background-color:green; font-size: 16px" data-role="button">Restart</button></div>
+        <div class="ui-block-b"><button id="startButton" data-mini="true" data-theme="b" style="background-color:green; font-size: 16px" data-role="button">Start</button></div>
         <div class="ui-block-c"><button data-mini="true" data-theme="b" style="background-color:red; font-size: 16px" data-role="button">Exit</button></div>
     </div>
     <br /><br />
+
+    <div>
+        <a id="loginButton" onclick="login()" data-theme="b" style="font-size: 16px" data-role="button">Already created a pacer? Login.</a>
+    </div>
 </div>
 
 <!-- The user can select what distance they want to enter their pace for (lap, 400, 1600, or mile) - New Pacer -->

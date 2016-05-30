@@ -37,10 +37,10 @@
         var isVerificationEnabled = true;     // If false, this will allow the user to click through the app without being attached to any DB or web server
 
         // Globals specific to the client's track and desired permissions
-        var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
+        // var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
         // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
         // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
-        // var ipAddress = "http://192.168.1.244";      // IP address for Yun on Aaron's apt network
+        var ipAddress = "http://192.168.1.244";      // IP address for Yun on Aaron's apt network
         var numPacers = 10;
         var lapTimeInputConstraints = [1, 900];
         var trackDistanceInMeters = 400;
@@ -52,14 +52,6 @@
         var isUserSpeedChangePermissionEnabled = true;
         var isUserNameChangePermissionEnabled = true;
 
-        // Numpad global variable stuff
-        $.fn.numpad.defaults.gridTpl = '<table class="ui-bar-a"></table>';
-        $.fn.numpad.defaults.backgroundTpl = '<div class="ui-popup-screen ui-overlay-a"></div>';
-        $.fn.numpad.defaults.displayTpl = '<input data-theme="b" type="text" />';
-        $.fn.numpad.defaults.buttonNumberTpl = '<a data-role="button" data-theme="b"></a>';
-        $.fn.numpad.defaults.buttonFunctionTpl = '<a data-role="button" data-theme="a"></a>';
-        $.fn.numpad.defaults.onKeypadCreate = function () { $(this).enhanceWithin(); };
-
         var pacerButton = [];
         var advancedButtonPressed = false;
         var onCreateNewPacerViewSequence = false;
@@ -68,7 +60,7 @@
         var extrasMode = false;
         var masterPacerSelected = -1;
         var masterColorIndex = 1;
-        var masterUserPaceTime = -1;
+        var masterUserPaceTime = "-1";
         var pinVar = 111;
         var newPacer = [];
 
@@ -150,8 +142,14 @@
             $('#timeInput').hide();
             $("#colorText").hide();
 
+            // After clicking the "Click to enter time" button or the button that has the time on it, this will open the flip box
             $("#timeInputLink").click(function () {
                 $('#timeInputFlipBox').datebox('open');
+            });
+
+            // After clicking the "Click to enter time" button or the button that has the time on it, this will open the flip box
+            $("#timeInputLink_controlView").click(function () {
+                $('#timeInputFlipBox_controlView').datebox('open');
             });
 
             // $(".ui-slider-input").hide();
@@ -170,11 +168,13 @@
                 // get the value of the color desired which will correspond to the correct element in colorArray
                 var newNum = $(this).attr("otherNum");
 
+                // colorChanged(newNum);
+
                 // assign this value to a global variable
                 masterColorIndex = newNum;
-
+                alert("This value was put into masterColorIndex: " + masterColorIndex);
                 // set the selectColor dropdown
-                $("div#colorSelect select").val(newNum);
+                // $("div#colorSelect select").val(newNum);
 
                 // prompt for the PIN
                 var pin = prompt("Create a 3 digit passcode so no one else can access your pacer");
@@ -191,7 +191,15 @@
                 $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
                     transition: "slide"
                 });
+
+                $("#colorSelect_controlView").val(masterColorIndex);
+                alert("yada yada Your color is: " + colorArray[Number(masterColorIndex)]);
+                $('#colorSelect_controlView').css("background-color", "red");
+                // $("#colorSelect_controlView").style("color", colorArray[Number(masterColorIndex)]);
+                $("#colorSelect_controlView").selectmenu('refresh');
+
                 $('#timeInput_controlView').hide();
+                // $('#timeInput_controlView').trigger('datebox', {'method':'set', 'value':'90' });
             });
 
             $(".paceDistanceButton").click(function () {
@@ -244,11 +252,7 @@
         });
 
         function timeAndDistanceSubmitted(val1, val2) {
-            // save this value to some global variable
-            masterUserPaceTime = Number(val1);
-
-            // save the distance value to some global variable is already done whenever that select box changes in the distanceChanged() function
-
+            alert("Time: " + val1 + ", Distance: " + val2);
             // transition to the color choice page
             $(":mobile-pagecontainer").pagecontainer("change", "#colorButtonView_create", {
                 transition: "slide"
@@ -277,19 +281,21 @@
             }
         }
 
-        // ColorSelect dropdown was changed
+        // change the button text whenever the user enters new text
+        function timeInputChanged(val) {
+            // split the string "x:yy" and save it as a single digit = "x*60 + y"
+            timeArray = val.split(":");
+            masterUserPaceTime = (Number(timeArray[0]) * 60) + Number(timeArray[1]);    // This ensures that a correctly formatted number goes into the global variable masterUserPaceTime
+
+            // change the value of the buttons
+            $("#timeInputLink").text(val);
+            $("#timeInputLink_controlView").text(val);
+        }
+
         function colorChanged(val) {
             val = Number(val);  // cast it from a string to a number and it will represent the index of the color in the colorArray
             alert("Your color is now: " + colorArray[val]);
-        }
 
-        // change the button text whenever the user enters new text
-        function timeInputChanged(val) {
-            // change the value of the button
-            $("#timeInputLink").text(val);
-        }
-
-        function colorChanged(val) {
             if (val == -1) {
                 val = $("#colorRange").val();
 
@@ -409,7 +415,7 @@
     
     <!-- Time input stuff -->
     <div id="timeInput_controlView">
-        <input name="timeInputFlipBox" class="timeInputFlipBox" type="text" data-role="datebox" onchange="timeInputChanged(this.value)" data-options='{
+        <input name="timeInputFlipBox" id="timeInputFlipBox_controlView" type="text" data-role="datebox" onchange="timeInputChanged(this.value)" data-options='{
 				    "noButton": true, 
 				    "mode":"durationflipbox", 
 				    "overrideDurationFormat":"%DM:%DS", 
@@ -419,7 +425,7 @@
 				    "popupPosition": "window" 
 			    }' readonly="readonly" class="">
     </div>
-    <a href="#" class="timeInputLink_controlView" data-role="button" style="font-size: 24px">Click to Enter Time</a>
+    <a href="#" id="timeInputLink_controlView" data-role="button" style="font-size: 24px">Click to Enter Time</a>
 	<br />
 
     <!-- Distance input stuff -->
@@ -444,9 +450,11 @@
         <br />
     </div>
 
-    <a href="#" onclick="helpButton_onclick()" style="background-color:white; font-size: 24px" data-role="button">Help</a>
-    <a href="#" style="background-color:green; font-size: 24px" data-role="button">Restart</a>
-    <a href="#" style="background-color:red; font-size: 24px" data-role="button">Exit</a>
+    <fieldset data-role="controlgroup" data-type="horizontal">
+        <a href="#" onclick="helpButton_onclick()" style="background-color:white; font-size: 24px" data-role="button">Help</a>
+        <a href="#" style="background-color:green; font-size: 24px" data-role="button">Restart</a>
+        <a href="#" style="background-color:red; font-size: 24px" data-role="button">Exit</a>
+    </fieldset>
     <br /><br />
 </div>
 
@@ -487,7 +495,7 @@
             <option value="4">per lap</option>
         </select>
         <br /><br />
-        <a href="#" onclick="timeAndDistanceSubmitted(timeInputFlipBox, distanceSelect)" style="font-size: 24px; background-color:red" type="submit" data-role="button" >Next</a>
+        <a href="#" onclick="timeAndDistanceSubmitted(timeInputFlipBox.value, distanceSelect.value)" style="font-size: 24px; background-color:red" type="submit" data-role="button" >Next</a>
 </div>
 
 <!-- Time Input - Extra Options -->

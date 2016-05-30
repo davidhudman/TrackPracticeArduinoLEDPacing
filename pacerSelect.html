@@ -51,6 +51,7 @@
         var isUserVisiblePermissionEnabled = true;
         var isUserSpeedChangePermissionEnabled = true;
         var isUserNameChangePermissionEnabled = true;
+        var isDistanceChangePermissionEnabled = false;
 
         var pacerButton = [];
         var advancedButtonPressed = false;
@@ -129,7 +130,7 @@
             });
             refreshPacerButtonData();
         }
-
+        
         // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
         function refreshPacerButtonData() {
             // alert("made it to refreshpacerbuttondata function");
@@ -163,7 +164,7 @@
                                 inactiveText: singlePacerSet[3] + " - inactive"
                             };
 
-                            // alert("NewPacer0: " + newPacer[0].activeText);
+                            // newPacer[masterPacerSelected].color, (newPacer[masterPacerSelected].lapTime * 1609.344 / trackDistanceInMeters).toString(), .toHHMMSS()
 
                             
                             // update the buttons
@@ -223,6 +224,11 @@
             $('#timeInput').hide();
             $("#colorText").hide();
             $('#timeInput_controlView').hide();
+
+            if (isDistanceChangePermissionEnabled == false) {
+                // hide that button
+                $('#distanceSelect_controlView').hide();
+            }
             
 
             // After clicking the "Click to enter time" button or the button that has the time on it, this will open the flip box
@@ -234,12 +240,14 @@
             $("#timeInputLink_controlView").click(function () {
                 $('#timeInputFlipBox_controlView').datebox('open');
             });
-
+            
             // Click Handlers
             $(".existPacerButtonClass").click(function () {
                 if (this.text.substring(9, 17) != "inactive") {     // if the pacer is active
                     // alert("made it to Pacertext: " + this.text.substring(9,17));
-                    masterPacerSelected = $(this).attr("otherNum");
+                    masterPacerSelected = Number($(this).attr("otherNum"));
+                    masterColorIndex = colorArray.indexOf(this.style.backgroundColor);
+                    // masterUserPaceTime = this.text.substring(9, 14);
 
                     // prompt - enter your PIN for your pacer
                     pinVar = prompt("Enter the 3-digit passcode:", "123");
@@ -249,8 +257,10 @@
                             transition: "slide"
                         });
 
-                        $('#startButton').text("Restart");  // change "Start" button to "Restart"
-                        $('#loginButton').hide();           // hide the Login button
+                        $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
+                        $('#timeInputLink_controlView').text(this.text.substring(9, 14));               // change time input button to whatever the time is
+                        $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
+                        $('#loginButton').hide();                                                       // hide the Login button
                     }
                     else {
                         alert("The passcode that you entered was incorrect.");
@@ -499,13 +509,15 @@
 			    }' readonly="readonly" class="">
     </div>
     <a href="#" id="timeInputLink_controlView" data-theme="b" data-role="button" style="font-size: 24px">Enter Mile Time</a>
-    <select onchange="distanceChanged(this.value)" data-theme="a" name="select-native-3" class="distanceSelect_controlView" data-iconpos="none">
-        <option value="1">distance: mile</option>
-        <option value="2">distance: 1600</option>
-        <option value="3">distance: km</option>
-        <option value="4">distance: 400</option>
-        <option value="5">distance: lap</option>
-    </select>
+    <div id="distanceSelect_controlView" >
+        <select onchange="distanceChanged(this.value)" data-theme="a" name="select-native-3" data-iconpos="none">
+            <option value="1">distance: mile</option>
+            <option value="2">distance: 1600</option>
+            <option value="3">distance: km</option>
+            <option value="4">distance: 400</option>
+            <option value="5">distance: lap</option>
+        </select>
+    </div>
 	<br /><br />
     
     <div id="colorSelectDiv_controlView">
@@ -521,8 +533,8 @@
             <option value="6">Pacer color: Blue</option>
             <option value="7">Pacer color: Purple</option>
         </select>
-        <br />
     </div>
+    <br /><br />
 
     <div class="ui-grid-b">
         <div class="ui-block-a"><button data-mini="true" data-theme="b" style="background-color:blue; font-size: 16px" data-role="button" onclick="helpButton_onclick()" >Help</button></div>

@@ -427,34 +427,41 @@
 				    "popupPosition": "window" 
 			    }' readonly="readonly" class="">
     </div>
-    <a href="#" id="timeInputLink_controlView" data-role="button" style="font-size: 24px">Click to Enter Time</a>
+    <div class="ui-grid-a">
+        <div class="ui-block-a"><button id="timeInputLink_controlView" data-inline="true" data-theme="b" data-role="button" style="font-size: 16px">Click to Enter Time</button></div>
+        <div class="ui-block-b">
+            <select data-role="button" data-inline="true" onchange="distanceChanged(this.value)" data-theme="b" name="select-native-3" class="distanceSelect_controlView" data-iconpos="none">
+                <option value="1">per mile</option>
+                <option value="2">per 1600</option>
+                <option value="3">per 400</option>
+                <option value="4">per lap</option>
+            </select>
+        </div>
+    </div>
 	<br />
 
     <!-- Distance input stuff -->
-    <select onchange="distanceChanged(this.value)" name="select-native-3" class="distanceSelect_controlView" data-iconpos="none">
-        <option value="1">per mile</option>
-        <option value="2">per 1600</option>
-        <option value="3">per 400</option>
-        <option value="4">per lap</option>
-    </select>
+    
     <br id="timeToColorBreak"/>
     
     <div id="colorSelectDiv_controlView">
-        <a href="#" data-inline="true" data-theme="b" font-size: 24px" data-role="button">Test Button</a>
+        <!--<a href="#" data-inline="true" font-size: 24px" data-role="content">Test Button</a>-->
+        <!--<label data-inline="true" for="colorSelect_controlView" class="btn">Color:</label>-->
+        <span data-inline="true" style="font-size: 24px">Pacer color:</span>
         <select data-inline="true" onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect_controlView" data-iconpos="none">
-            <option value="1">Pacer color: White</option>
-            <option value="2">Pacer color: Red</option>
-            <option value="3">Pacer color: Orange</option>
-            <option value="4">Pacer color: Yellow</option>
-            <option value="5">Pacer color: Green</option>
-            <option value="6">Pacer color: Blue</option>
-            <option value="7">Pacer color: Purple</option>
+            <option value="1">White</option>
+            <option value="2">Red</option>
+            <option value="3">Orange</option>
+            <option value="4">Yellow</option>
+            <option value="5">Green</option>
+            <option value="6">Blue</option>
+            <option value="7">Purple</option>
         </select>
         <br />
     </div>
 
     <fieldset data-role="controlgroup" class="ui-grid-b">
-        <div class="ui-block-a"><a href="#" data-inline="true" data-mini="true" data-theme="b" onclick="helpButton_onclick()" style="background-color:blue; font-size: 24px" data-role="button">Help</a></div>
+        <div class="ui-block-a"><a href="#" data-inline="true" data-mini="true" data-theme="b" style="background-color:blue; font-size: 24px" data-role="button" onclick="helpButton_onclick()" >Help</a></div>
         <div class="ui-block-b"><a href="#" data-inline="true" data-mini="true" data-theme="b" style="background-color:green; font-size: 24px" data-role="button">Restart</a></div>
         <div class="ui-block-c"><a href="#" data-inline="true" data-mini="true" data-theme="b" style="background-color:red; font-size: 24px" data-role="button">Exit</a></div>
     </fieldset>

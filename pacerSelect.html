@@ -438,7 +438,8 @@
     <br id="timeToColorBreak"/>
     
     <div id="colorSelectDiv_controlView">
-        <select onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect_controlView" data-iconpos="none">
+        <a href="#" data-inline="true" data-theme="b" font-size: 24px" data-role="button">Test Button</a>
+        <select data-inline="true" onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect_controlView" data-iconpos="none">
             <option value="1">Pacer color: White</option>
             <option value="2">Pacer color: Red</option>
             <option value="3">Pacer color: Orange</option>
@@ -450,10 +451,10 @@
         <br />
     </div>
 
-    <fieldset data-role="controlgroup" data-type="horizontal">
-        <a href="#" onclick="helpButton_onclick()" style="background-color:white; font-size: 24px" data-role="button">Help</a>
-        <a href="#" style="background-color:green; font-size: 24px" data-role="button">Restart</a>
-        <a href="#" style="background-color:red; font-size: 24px" data-role="button">Exit</a>
+    <fieldset data-role="controlgroup" class="ui-grid-b">
+        <div class="ui-block-a"><a href="#" data-inline="true" data-mini="true" data-theme="b" onclick="helpButton_onclick()" style="background-color:blue; font-size: 24px" data-role="button">Help</a></div>
+        <div class="ui-block-b"><a href="#" data-inline="true" data-mini="true" data-theme="b" style="background-color:green; font-size: 24px" data-role="button">Restart</a></div>
+        <div class="ui-block-c"><a href="#" data-inline="true" data-mini="true" data-theme="b" style="background-color:red; font-size: 24px" data-role="button">Exit</a></div>
     </fieldset>
     <br /><br />
 </div>

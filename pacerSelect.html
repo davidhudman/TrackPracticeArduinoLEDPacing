@@ -103,10 +103,16 @@
             });
         }
 
+        function start() {
+            $("#startPopup").popup("open");
+        }
+
         // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
-        function helpButton_onclick() {
+        function help() {
             // alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
-            $("#timePopup").popup("open", { positionTo: "#timeInputLink", tolerance: "80, 15, 30, 15" });
+            $("#helpPopup").popup("open");
+
+            /*$("#timePopup").popup("open", { positionTo: "#timeInputLink", tolerance: "80, 15, 30, 15" });
 
             setTimeout(function () {
                 $("#timePopup").popup("close");
@@ -116,7 +122,7 @@
                         $("#colorPopup").popup("close");
                     }, 3000);
                 }, 500);
-            }, 3000);
+            }, 3000);*/
         }
 
         function testPopupTrigger_onclick() {
@@ -224,6 +230,7 @@
             $('#timeInput').hide();
             $("#colorText").hide();
             $('#timeInput_controlView').hide();
+            $('#optionsButton').hide();
 
             if (isDistanceChangePermissionEnabled == false) {
                 // hide that button
@@ -261,6 +268,7 @@
                         $('#timeInputLink_controlView').text(this.text.substring(9, 14));               // change time input button to whatever the time is
                         $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
                         $('#loginButton').hide();                                                       // hide the Login button
+                        $('#optionsButton').show();                                                     // show the options button
                     }
                     else {
                         alert("The passcode that you entered was incorrect.");
@@ -537,15 +545,47 @@
     <br /><br />
 
     <div class="ui-grid-b">
-        <div class="ui-block-a"><button data-mini="true" data-theme="b" style="background-color:blue; font-size: 16px" data-role="button" onclick="helpButton_onclick()" >Help</button></div>
-        <div class="ui-block-b"><button id="startButton" data-mini="true" data-theme="b" style="background-color:green; font-size: 16px" data-role="button">Start</button></div>
+        <div class="ui-block-a"><button data-mini="true" data-theme="b" style="background-color:blue; font-size: 16px" data-role="button" onclick="help()" >Help</button></div>
+        <div class="ui-block-b"><button id="startButton" data-mini="true" data-theme="b" style="background-color:green; font-size: 16px" data-role="button" onclick="start()">Start</button></div>
         <div class="ui-block-c"><button data-mini="true" data-theme="b" style="background-color:red; font-size: 16px" data-role="button">Exit</button></div>
     </div>
     <br /><br />
 
     <div>
+        <a id="optionsButton" onclick="" data-theme="b" style="font-size: 16px" data-role="button">Options</a>
         <a id="loginButton" onclick="login()" data-theme="b" style="font-size: 16px" data-role="button">Already created a pacer? Login.</a>
     </div>
+
+    <!-- Help Popup/Modal-->
+	<div data-role="popup" id="helpPopup" data-overlay-theme="a" data-theme="a" style="max-width:400px;" class="ui-corner-all">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Help Page</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">Enter your time and hit the start button.</h3>
+			<p>If you already created a pacer and it's still running, hit the button titled "Already created a pacer? Login."</p>
+			<a href="#" data-role="button" data-rel="back" data-transition="flow" data-theme="b">Close</a>
+		</div>
+	</div>
+
+    <div data-role="popup" id="startPopup" data-overlay-theme="a" data-theme="a" style="max-width:400px;" class="ui-corner-all">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Begin?</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">Are you ready to start running?</h3>
+			<p>After you click OK, you will see a traffic light countdown: 
+                <ul>
+                    <li>The 3rd light turns RED</li>
+                    <li>The 2nd light turns YELLOW</li>
+                    <li>When the 1st light turns on with your color, you can start running.</li>
+                </ul>
+
+			</p>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">OK</a>
+		</div>
+	</div>
 </div>
 
 <!-- Pacer Button View - Existing -->	

@@ -103,9 +103,46 @@
                 transition: "slide"
             });
         }
+        
+        function startRequested() {
+            if (masterUserPaceTime > 0) {
+                $("#startPopup").popup("open");
+            }
+            else {
+                alert("Please enter your mile time by clicking the box at the top.");
+            }
+        }
+
+        function quitRequested() {
+            $("#quitPopup").popup("open");
+        }
 
         function start() {
-            $("#startPopup").popup("open");
+            // request function to start a pacer
+            $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
+            $('#loginButton').hide();                                                       // hide the Login button
+            $('#optionsButton').show();                                                     // show the options button
+        }
+
+        function quit() {
+            // request function to exit a pacer
+
+            // Reset master variables to original values
+            masterColorIndex = 1;
+            masterUserPaceTime = "-1";
+            userTimeInputDistance = 1609.344;
+            userTimeInputDistanceString = "mile";
+
+            // Reset buttons to normal
+            $('#startButton').text("Start");                                                // change "Start" button to "Restart"
+            $('#loginButton').show();                                                       // hide the Login button
+            $('#optionsButton').hide();                                                     // show the options button
+
+            // Reset fields to normal
+            $("#distanceSelect_controlView").val("1").selectmenu('refresh');
+            $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
+            $('#timeInputLink_controlView').text("Enter Mile Time");                        // change time input button to whatever the time is
+            
         }
 
         // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
@@ -261,7 +298,7 @@
 
             if (isDistanceChangePermissionEnabled == false) {
                 // hide that button
-                $('#distanceSelect_controlView').hide();
+                $('#distanceSelectDiv_controlView').hide();
             }
             
 
@@ -440,10 +477,10 @@
             $("#timeInputLink").text(val);
             $("#timeInputLink_controlView").text(val);
         }
-
+        
         function colorChanged(val) {
             val = Number(val);  // cast it from a string to a number and it will represent the index of the color in the colorArray
-            alert("Your color is now: " + colorArray[val]);
+            masterColorIndex = val;
 
             if (val == -1) {
                 val = $("#colorRange").val();
@@ -529,8 +566,8 @@
 			    }' readonly="readonly" class="">
     </div>
     <a href="#" id="timeInputLink_controlView" data-role="button" style="font-size: 24px">Enter Mile Time</a>
-    <div id="distanceSelect_controlView" >
-        <select onchange="distanceChanged(this.value)" name="select-native-3" data-iconpos="none">
+    <div id="distanceSelectDiv_controlView" >
+        <select id="distanceSelect_controlView" onchange="distanceChanged(this.value)" name="select-native-3" data-iconpos="none">
             <option value="1">distance: mile</option>
             <option value="2">distance: 1600</option>
             <option value="3">distance: km</option>
@@ -558,8 +595,8 @@
 
     <div class="ui-grid-b">
         <div class="ui-block-a"><button data-mini="true" style="background-color:blue; font-size: 16px" data-role="button" onclick="help()" >Help</button></div>
-        <div class="ui-block-b"><button id="startButton" data-mini="true" style="background-color:green; font-size: 16px" data-role="button" onclick="start()">Start</button></div>
-        <div class="ui-block-c"><button data-mini="true" style="background-color:red; font-size: 16px" data-role="button">Exit</button></div>
+        <div class="ui-block-b"><button id="startButton" data-mini="true" style="background-color:green; font-size: 16px" data-role="button" onclick="startRequested()">Start</button></div>
+        <div class="ui-block-c"><button data-mini="true" style="background-color:red; font-size: 16px" onclick="quitRequested()" data-role="button">Exit</button></div>
     </div>
     <br /><br />
 
@@ -580,6 +617,7 @@
 		</div>
 	</div>
 
+    <!-- Start Popup/Modal-->
     <div data-role="popup" id="startPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
 			<h1>Begin?</h1>
@@ -595,7 +633,20 @@
 
 			</p>
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">OK</a>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="start()">OK</a>
+		</div>
+	</div>
+
+    <!-- Exit Popup/Modal-->
+    <div data-role="popup" id="quitPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Exit?</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">Are you sure you want to quit?</h3>
+			<p>If your pacer is running, this will stop it from running and allow someone else to use it.</p>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="quit()">OK</a>
 		</div>
 	</div>
 </div>

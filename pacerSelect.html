@@ -62,6 +62,7 @@
         var masterPacerSelected = -1;
         var masterColorIndex = 1;
         var masterUserPaceTime = "-1";
+        var masterUserTimeEnteredString = "-1";
         var pinVar = -1;
         var newPacer = [];
 
@@ -218,6 +219,32 @@
                 }
             }
         }
+        
+        function pinSubmitted() {
+            pinVar = $("#pinVerifyInput").val();
+
+            if (isPinFormatValid(pinVar)) {     // if the PIN is formatted correctly, proceed
+                if (true) {                     // if the PIN matches the database, change to the page - PHP call
+                    $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
+                        transition: "slide"
+                    });
+
+                    $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
+                    $('#timeInputLink_controlView').text(masterUserTimeEnteredString);              // change time input button to whatever the time is
+                    $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
+                    $('#loginButton').hide();                                                       // hide the Login button
+                    $('#optionsButton').show();                                                     // show the options button
+                }
+                else {
+                    alert("The passcode that you entered does not match our records.");
+                    // This should just be a message below the textbox, not an alert
+                }
+            }
+            else {
+                alert("The passcode that you entered was not 3 digits.");
+                // This should just be a message below the textbox, not an alert
+            }
+        }
 
         // *****************
         // End Click Handlers
@@ -254,28 +281,13 @@
                     // alert("made it to Pacertext: " + this.text.substring(9,17));
                     masterPacerSelected = Number($(this).attr("otherNum"));
                     masterColorIndex = colorArray.indexOf(this.style.backgroundColor);
-                    // masterUserPaceTime = this.text.substring(9, 14);
+                    masterUserTimeEnteredString = this.text.substring(9, 14);
 
-                    // prompt - enter your PIN for your pacer
-                    pinVar = prompt("Enter the 3-digit passcode:", "123");
+                    $("#enterPasscodePopup").popup("open");
 
-                    if (true) {         // if the PIN is correct, change to the page
-                        $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
-                            transition: "slide"
-                        });
-
-                        $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
-                        $('#timeInputLink_controlView').text(this.text.substring(9, 14));               // change time input button to whatever the time is
-                        $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
-                        $('#loginButton').hide();                                                       // hide the Login button
-                        $('#optionsButton').show();                                                     // show the options button
-                    }
-                    else {
-                        alert("The passcode that you entered was incorrect.");
-                    }
                 }
                 else {  // if the pacer is inactive
-                    alert("Please choose an active pacer or navigate back to the previous screen to create one.");
+                    $("#chooseActivePacerPopup").popup("open");
                 }
 
             });
@@ -502,10 +514,10 @@
 <body>
 
 <!-- Testing Simple Pacer Control View -->
-<div data-role="page" id="testingSimplePacerControl" class="contentElement advancedElement">
+<div data-role="page" id="testingSimplePacerControl" class="contentElement advancedElement" data-theme="b" >
     
     <!-- Time input stuff -->
-    <div id="timeInput_controlView">
+    <div id="timeInput_controlView" >
         <input name="timeInputFlipBox" id="timeInputFlipBox_controlView" type="text" data-role="datebox" onchange="timeInputChanged(this.value)" data-options='{
 				    "noButton": true, 
 				    "mode":"durationflipbox", 
@@ -516,9 +528,9 @@
 				    "popupPosition": "window" 
 			    }' readonly="readonly" class="">
     </div>
-    <a href="#" id="timeInputLink_controlView" data-theme="b" data-role="button" style="font-size: 24px">Enter Mile Time</a>
+    <a href="#" id="timeInputLink_controlView" data-role="button" style="font-size: 24px">Enter Mile Time</a>
     <div id="distanceSelect_controlView" >
-        <select onchange="distanceChanged(this.value)" data-theme="a" name="select-native-3" data-iconpos="none">
+        <select onchange="distanceChanged(this.value)" name="select-native-3" data-iconpos="none">
             <option value="1">distance: mile</option>
             <option value="2">distance: 1600</option>
             <option value="3">distance: km</option>
@@ -528,11 +540,11 @@
     </div>
 	<br /><br />
     
-    <div id="colorSelectDiv_controlView">
+    <div id="colorSelectDiv_controlView" >
         <!--<a href="#" data-inline="true" font-size: 24px" data-role="content">Test Button</a>-->
         <!--<label data-inline="true" for="colorSelect_controlView" class="btn">Color:</label>-->
         <!--<span class="ui-block-a" style="font-size: 24px">Pacer color:</span>-->
-        <select data-role="button" data-theme="b" onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect_controlView" data-iconpos="none">
+        <select data-role="button" onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect_controlView" data-iconpos="none">
             <option value="1">Pacer color: White</option>
             <option value="2">Pacer color: Red</option>
             <option value="3">Pacer color: Orange</option>
@@ -545,19 +557,19 @@
     <br /><br />
 
     <div class="ui-grid-b">
-        <div class="ui-block-a"><button data-mini="true" data-theme="b" style="background-color:blue; font-size: 16px" data-role="button" onclick="help()" >Help</button></div>
-        <div class="ui-block-b"><button id="startButton" data-mini="true" data-theme="b" style="background-color:green; font-size: 16px" data-role="button" onclick="start()">Start</button></div>
-        <div class="ui-block-c"><button data-mini="true" data-theme="b" style="background-color:red; font-size: 16px" data-role="button">Exit</button></div>
+        <div class="ui-block-a"><button data-mini="true" style="background-color:blue; font-size: 16px" data-role="button" onclick="help()" >Help</button></div>
+        <div class="ui-block-b"><button id="startButton" data-mini="true" style="background-color:green; font-size: 16px" data-role="button" onclick="start()">Start</button></div>
+        <div class="ui-block-c"><button data-mini="true" style="background-color:red; font-size: 16px" data-role="button">Exit</button></div>
     </div>
     <br /><br />
 
     <div>
-        <a id="optionsButton" onclick="" data-theme="b" style="font-size: 16px" data-role="button">Options</a>
-        <a id="loginButton" onclick="login()" data-theme="b" style="font-size: 16px" data-role="button">Already created a pacer? Login.</a>
+        <a id="optionsButton" onclick="" style="font-size: 16px" data-role="button">Options</a>
+        <a id="loginButton" onclick="login()" style="font-size: 16px" data-role="button">Already created a pacer? Login.</a>
     </div>
 
     <!-- Help Popup/Modal-->
-	<div data-role="popup" id="helpPopup" data-overlay-theme="a" data-theme="a" style="max-width:400px;" class="ui-corner-all">
+	<div data-role="popup" id="helpPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
 			<h1>Help Page</h1>
 		</div>
@@ -568,7 +580,7 @@
 		</div>
 	</div>
 
-    <div data-role="popup" id="startPopup" data-overlay-theme="a" data-theme="a" style="max-width:400px;" class="ui-corner-all">
+    <div data-role="popup" id="startPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
 			<h1>Begin?</h1>
 		</div>
@@ -589,7 +601,7 @@
 </div>
 
 <!-- Pacer Button View - Existing -->	
-<div data-role="page" id="pacerButtonView_existing" class="contentElement advancedElement" >
+<div data-role="page" id="pacerButtonView_existing" class="contentElement advancedElement" data-theme="b">
     <a href="#" id="existPacerButton0" class="btn existPacerButtonClass" colorIndex="0" otherNum="0" data-role="button" data-icon="star"></a>
     <a href="#" id="existPacerButton1" class="btn existPacerButtonClass" colorIndex="0" otherNum="1" data-role="button" data-icon="star"></a>
     <a href="#" id="existPacerButton2" class="btn existPacerButtonClass" colorIndex="0" otherNum="2" data-role="button" data-icon="star"></a>
@@ -600,6 +612,30 @@
     <a href="#" id="existPacerButton7" class="btn existPacerButtonClass" colorIndex="0" otherNum="7" data-role="button" data-icon="star"></a>
     <a href="#" id="existPacerButton8" class="btn existPacerButtonClass" colorIndex="0" otherNum="8" data-role="button" data-icon="star"></a>
     <a href="#" id="existPacerButton9" class="btn existPacerButtonClass" colorIndex="0" otherNum="9" data-role="button" data-icon="star"></a>
+
+    <div data-role="popup" id="enterPasscodePopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Login</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">Enter your 3 digit passcode below:</h3>
+			<input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinVerifyInput" value="3 Digit Passcode Input" step="1" min="0" max="999" url="" />
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
+			<a href="#" data-role="button" data-inline="true" onclick="pinSubmitted()" data-transition="flow" data-theme="b">OK</a>
+		</div>
+	</div>
+
+    <!-- Please choose an active pacer or navigate back to the previous screen to create one-->
+    <div data-role="popup" id="chooseActivePacerPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Alert</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">You cannot choose an inactive pacer.</h3>
+			<p>You must choose an active pacer or navigate to the previous screen to create one.</p>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">OK</a>
+		</div>
+	</div>
 </div>
 
 <!-- Enter PIN View - Existing Pacer -->

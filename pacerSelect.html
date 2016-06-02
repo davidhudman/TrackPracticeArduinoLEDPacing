@@ -33,8 +33,8 @@
     <link rel="stylesheet" href="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.css">
     <script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
     <script>
-        var isDeveloperMode = false;
-        var isVerificationEnabled = true;     // If false, this will allow the user to click through the app without being attached to any DB or web server
+        var isDeveloperMode = true;
+        var isVerificationEnabled = false;     // If false, this will allow the user to click through the app without being attached to any DB or web server
 
         // Globals specific to the client's track and desired permissions
         var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
@@ -106,7 +106,8 @@
         
         function startRequested() {
             if (masterUserPaceTime > 0) {
-                $("#startPopup").popup("open");
+                $("#createPasscodePopup").popup("open");
+                $("#incorrectFormatMessage_create").hide();
             }
             else {
                 alert("Please enter your mile time by clicking the box at the top.");
@@ -118,10 +119,29 @@
         }
 
         function start() {
-            // request function to start a pacer
-            $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
-            $('#loginButton').hide();                                                       // hide the Login button
-            $('#optionsButton').show();                                                     // show the options button
+            // if ($('#startButton').val() == "Start") { - don't do this because you've already reset it to "Restart" by this point
+                if (isDeveloperMode == true) {
+                    alert("About to send the command to start the pacer.");
+                }
+                requestCommand(7, masterPacerSelected, masterUserPaceTime);
+                if (isDeveloperMode == true) {
+                    alert("Sent the command to start the pacer.");
+                }
+                // $("#startPopup").popup("close");
+                if (isDeveloperMode == true) {
+                    alert("Closed the start popup.");
+                }
+                $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
+                $('#loginButton').hide();                                                       // hide the Login button
+                $('#optionsButton').show();                                                     // show the options button
+            // }
+        }
+        // masterPacerSelected, masterUserPaceTime, pinVar
+        function startTest() {
+            if (isDeveloperMode == true) {
+                alert("MasterPacerSelected: " + masterPacerSelected + " masterUserPaceTime: " + masterUserPaceTime  + " pinVar: " + pinVar);
+            }
+            requestCommand("7", masterPacerSelected.toString(), masterUserPaceTime.toString());
         }
 
         function quit() {
@@ -175,6 +195,15 @@
             refreshPacerButtonData();
         }
         
+        function requestPacer() {
+            if (isDeveloperMode == true) {
+                alert("");
+            }
+            pinVar = prompt("Enter your passcode:", "");
+            pinCreateAndAuthenticate(pinVar, 1);
+            // if you got the alert, then both the masterPacerSelected and the pinVar should be set.
+        }
+        
         // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
         function refreshPacerButtonData() {
             // alert("made it to refreshpacerbuttondata function");
@@ -213,8 +242,8 @@
                             
                             // update the buttons
                             $("#existPacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
-                            if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
-                                $("#existPacerButton" + i).css('color', 'white');
+                            if (singlePacerSet[2] % colorArray.length == "1" || singlePacerSet[2] % colorArray.length == "4") {
+                                $("#existPacerButton" + i).css('color', 'black');
                             }
                             if (singlePacerSet[1] == "0") {
                                 $("#existPacerButton" + i).text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
@@ -245,9 +274,9 @@
                 // if verification is off, fill the buttons with some made up data
                 for (i = 0; i < 10; i++) {
                     if (i < 6) {
-                        $("#existPacerButton" + i).text("Pacer" + i + " - " + (i + 1) + " sec lap").attr('style', "background-color:" + colorArray[i + 1]);
-                        if (i + 1 % colorArray.length == "2" || i + 1 % colorArray.length == "6" || i + 1 % colorArray.length == "7") {
-                            $("#existPacerButton" + i).css('color', 'white');
+                        $("#existPacerButton" + i).text("Pacer" + i + " - " + "0" + (i + 1) + ":00 mile pace").attr('style', "background-color:" + colorArray[i + 1]);
+                        if (i + 1 % colorArray.length == "1" || i + 1 % colorArray.length == "4") {
+                            $("#existPacerButton" + i).css('color', 'black');
                         }
                     }
                     else {
@@ -257,29 +286,173 @@
             }
         }
         
-        function pinSubmitted() {
-            pinVar = $("#pinVerifyInput").val();
+        function pinSubmitted(isNewPacer) {
+            // isNewPacer == 0 : authenticate
+            // isNewPacer == 1 : create
+            if (isNewPacer == 1) {      // new pacer
+                pinVar = $("#pinVerifyInput").val();
 
-            if (isPinFormatValid(pinVar)) {     // if the PIN is formatted correctly, proceed
-                if (true) {                     // if the PIN matches the database, change to the page - PHP call
-                    $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
-                        transition: "slide"
-                    });
+                if (isPinFormatValid(pinVar)) {                 // if the PIN is formatted correctly
+                    // loading screen
 
-                    $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
-                    $('#timeInputLink_controlView').text(masterUserTimeEnteredString);              // change time input button to whatever the time is
-                    $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
-                    $('#loginButton').hide();                                                       // hide the Login button
-                    $('#optionsButton').show();                                                     // show the options button
+                    // submit for approval
+                    if (pinCreateAndAuthenticate(pinVar, isNewPacer) != "-1") {                     // if the PIN matches the database, change to the page - PHP call
+                        if (isDeveloperMode == true) {
+                            alert("the function pinCreateAndAuthenticate defintely returned something other than -1");
+                        }
+                        $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
+                        $('#loginButton').hide();                                                       // hide the Login button
+                        $('#optionsButton').show();                                                     // show the options button
+
+                        if (isDeveloperMode == true) {
+                            alert("about to call start popup");
+                        }
+                        // now we need to show the start popup
+                        $("#createPasscodePopup").popup("close");
+                        $("#startPopup").popup("open");
+                        if (isDeveloperMode == true) {
+                            alert("Called start popup");
+                        }
+                        start();
+                    }
+                    else {
+                        // Error / bug: Technically, there may not be any pacers available, but the user will take over the last pacer index
+                        alert("No pacers available");
+                    }
                 }
-                else {
-                    alert("The passcode that you entered does not match our records.");
-                    // This should just be a message below the textbox, not an alert
+                else { // if the PIN isn't formatted correctly
+                    $("#incorrectFormatMessage_create").show();
                 }
             }
+            /*else { // isNewPacer = 0    // authenticate existing pacer
+                pinVar = $("#pinAuthenticateInput").val();
+
+                if (isPinFormatValid(pinVar)) {                 // if the PIN is formatted correctly
+                    $("#enterPasscodePopup").popup("close");
+                    
+                    // probably need a loading screen here
+                    
+                    // show testingSimplePacerControl
+                }
+                else { // if the PIN isn't formatted correctly
+                    $("#incorrectFormatMessage_authenticate").show();
+                }
+
+
+                //-----------------
+                if (isPinFormatValid(pinVar)) {     // if the PIN is formatted correctly, proceed
+                    if (pinCreateAndAuthenticate(pinVar, isNewPacer) != "incorrect") {                     // if the PIN matches the database, change to the page - PHP call
+                        $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
+                            transition: "slide"
+                        });
+
+                        $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
+                        $('#timeInputLink_controlView').text(masterUserTimeEnteredString);              // change time input button to whatever the time is
+                        $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
+                        $('#loginButton').hide();                                                       // hide the Login button
+                        $('#optionsButton').show();                                                     // show the options button
+                    }
+                    else {
+                        // alert("The passcode that you entered does not match our records.");
+                        // This should just be a message below the textbox, not an alert
+                        $("#failedToAuthenticate_authenticate").show();
+                    }
+                }
+                else {
+                    // alert("The passcode that you entered was not 3 digits.");
+                    // This should just be a message below the textbox, not an alert
+                    $("#incorrectFormatMessage_authenticate").show();
+                }
+            }*/
+        }
+
+        // Resets the Yun to whatever pacers are currently in the database (useful after a reboot)
+        function resetYunFromDb() {
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (request.readyState == 4 && request.status == 200) {
+                    // do nothing
+                }
+            };
+
+            request.open("GET", "updatePacers.php?needYunSyncWithDB=1", true);
+            request.send();
+        };
+
+        // Takes you a view where the user can edit their new pacer
+        function pinCreateAndAuthenticate(pinVar, isNewPacer) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    if (xhttp.responseText != "incorrect") {
+                        if (xhttp.responseText != "-1") {
+                            masterPacerSelected = Number(xhttp.responseText);
+                            if (isDeveloperMode == true) {
+                                alert(masterPacerSelected);
+                            }
+                            else {
+                                // user alert
+                            }
+                            if (isDeveloperMode == true) {
+                                alert("VerifyPIN.php sent you the pacer number: " + masterPacerSelected);
+                            }
+                            return masterPacerSelected;
+
+                        }
+                        else {
+                            if (isDeveloperMode == true) {
+                                alert("verifyPIN.php sent you a -1...that means there's no pacers available");
+                            }
+                            return xhttp.responseText;
+                        }
+                    }
+                    else {
+                        if (isDeveloperMode == true) {
+                            alert("verifyPIN.php sent you the string - incorrect");
+                        }
+                        return xhttp.responseText;  // This should be "incorrect"
+                    }
+                }
+            };
+            // Authenticate Existing PIN
+            if (isNewPacer == 0) {
+                xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected, true);
+                if (isDeveloperMode == true) {
+                    alert("You entered the following PIN: " + pinVar);
+                }
+            }
+            // Create New PIN
             else {
-                alert("The passcode that you entered was not 3 digits.");
-                // This should just be a message below the textbox, not an alert
+                xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
+                if (isDeveloperMode == true) {
+                    alert("You entered the following PIN: " + pinVar);
+                }
+            }
+            xhttp.send();
+        }
+
+        // sends GET request for the commands that the Yun will accept; parameters: x - command, y - pacerIndex, z - value
+        function requestCommand(x, y, z) {
+            if (masterPacerSelected == 99) {		// If you're in "Coach Mode" where you can control all pacers at once, as well as update the database just like below
+                y = masterPacerSelected;
+            }
+            if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4 && request.status == 200) {
+                        if (isDeveloperMode == true) {
+                            alert(request.responseText);
+                        }
+                        else {
+                            if (request.responseText.substr(0, 8) == "USER MSG") {
+                                alert(request.responseText.substr(10));
+                            }
+                        }
+                    }
+                };
+
+                request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
+                request.send();
             }
         }
 
@@ -311,6 +484,19 @@
             $("#timeInputLink_controlView").click(function () {
                 $('#timeInputFlipBox_controlView').datebox('open');
             });
+
+            // Hide Alert messages and remove any pre-existing text when the field is clicked
+            $("#pinAuthenticateInput").click(function () {
+                $("#incorrectFormatMessage_authenticate").hide();
+                $("#failedToAuthenticate_authenticate").hide();
+                $("#pinAuthenticateInput").val("");
+            });
+
+            // Hide Alert messages and remove any pre-existing text when the field is clicked
+            $("#pinVerifyInput").click(function () {
+                $("#incorrectFormatMessage_create").hide();
+                $("#pinVerifyInput").val("");
+            });
             
             // Click Handlers
             $(".existPacerButtonClass").click(function () {
@@ -319,8 +505,15 @@
                     masterPacerSelected = Number($(this).attr("otherNum"));
                     masterColorIndex = colorArray.indexOf(this.style.backgroundColor);
                     masterUserTimeEnteredString = this.text.substring(9, 14);
+                    masterUserPaceTime = (Number(this.text.substring(9, 11)) * 60) + Number(this.text.substring(12, 14));
+
+                    if (isDeveloperMode == true) {
+                        alert("Your mile time in seconds is: " + masterUserPaceTime + ", 9,10: " + this.text.substring(9, 10) + ", 10,11: " + this.text.substring(10, 11) + ", 11,12: " + this.text.substring(11, 12) + ", 12,13: " + this.text.substring(12, 13) + ", 13,14: " + this.text.substring(13, 14));
+                    }
 
                     $("#enterPasscodePopup").popup("open");
+                    $("#incorrectFormatMessage_authenticate").hide();
+                    $("#failedToAuthenticate_authenticate").hide();
 
                 }
                 else {  // if the pacer is inactive
@@ -338,7 +531,9 @@
 
                 // assign this value to a global variable
                 masterColorIndex = newNum;
-                alert("This value was put into masterColorIndex: " + masterColorIndex);
+                if (isDeveloperMode == true) {
+                    alert("This value was put into masterColorIndex: " + masterColorIndex);
+                }
                 // set the selectColor dropdown
                 // $("div#colorSelect select").val(newNum);
 
@@ -399,7 +594,7 @@
             });
 
             // Click handler for newPacerButton that enables / disables verifcation upon hearing the "tap hold" event
-            $("#newPacerButton").on("taphold", function () {
+            $("#timeInputLink_controlView").on("taphold", function () {
                 isVerificationEnabled = !isVerificationEnabled;
                 if (isVerificationEnabled == true) {
                     alert("Verifcation mode enabled!");
@@ -410,7 +605,7 @@
             });
 
             // Click handler for existingPacerButton that enables / disables developerMode upon hearing the "tap hold" event
-            $("#existingPacerButton").on("taphold", function () {
+            $("#colorSelect_controlView").on("taphold", function () {
                 isDeveloperMode = !isDeveloperMode;
                 if (isDeveloperMode == true) {
                     alert("Developer mode enabled!");
@@ -433,7 +628,9 @@
         }
 
         function timeAndDistanceSubmitted(val1, val2) {
-            alert("Time: " + val1 + ", Distance: " + val2);
+            if (isDeveloperMode == true) {
+                alert("Time: " + val1 + ", Distance: " + val2);
+            }
             // transition to the color choice page
             $(":mobile-pagecontainer").pagecontainer("change", "#colorButtonView_create", {
                 transition: "slide"
@@ -498,31 +695,6 @@
             // $(".ui-slider").css("background-color", colorArray[val]);
         }
 
-        // sends GET request for the commands that the Yun will accept; parameters: x - command, y - pacerIndex, z - value
-        function requestCommand(x, y, z) {
-            if (masterPacerSelected == 99) {		// If you're in "Coach Mode" where you can control all pacers at once, as well as update the database just like below
-                y = masterPacerSelected;
-            }
-            if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
-                var request = new XMLHttpRequest();
-                request.onreadystatechange = function () {
-                    if (request.readyState == 4 && request.status == 200) {
-                        if (isDeveloperMode == true) {
-                            alert(request.responseText);
-                        }
-                        else {
-                            if (request.responseText.substr(0, 8) == "USER MSG") {
-                                alert(request.responseText.substr(10));
-                            }
-                        }
-                    }
-                };
-
-                request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
-                request.send();
-            }
-        }
-
         // initialize the colorButtons with text and color
         function colorButtonInitialize() {
             for (var i = 0; i < colorArray.length - 1; i++) {
@@ -565,6 +737,7 @@
 				    "popupPosition": "window" 
 			    }' readonly="readonly" class="">
     </div>
+    
     <a href="#" id="timeInputLink_controlView" data-role="button" style="font-size: 24px">Enter Mile Time</a>
     <div id="distanceSelectDiv_controlView" >
         <select id="distanceSelect_controlView" onchange="distanceChanged(this.value)" name="select-native-3" data-iconpos="none">
@@ -595,10 +768,12 @@
 
     <div class="ui-grid-b">
         <div class="ui-block-a"><button data-mini="true" style="background-color:blue; font-size: 16px" data-role="button" onclick="help()" >Help</button></div>
-        <div class="ui-block-b"><button id="startButton" data-mini="true" style="background-color:green; font-size: 16px" data-role="button" onclick="startRequested()">Start</button></div>
+        <div class="ui-block-b"><button id="startButton" data-mini="true" style="background-color:green; font-size: 16px" data-role="button" onclick="startTest()">Start</button></div>
         <div class="ui-block-c"><button data-mini="true" style="background-color:red; font-size: 16px" onclick="quitRequested()" data-role="button">Exit</button></div>
     </div>
     <br /><br />
+
+    <a id="requestPacerButton" onclick="requestPacer()" style="font-size: 16px" data-role="button">Request Pacer</a>
 
     <div>
         <a id="optionsButton" onclick="" style="font-size: 16px" data-role="button">Options</a>
@@ -633,7 +808,7 @@
 
 			</p>
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="start()">OK</a>
+			<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="start()">OK</a>
 		</div>
 	</div>
 
@@ -647,6 +822,20 @@
 			<p>If your pacer is running, this will stop it from running and allow someone else to use it.</p>
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="quit()">OK</a>
+		</div>
+	</div>
+
+    <!-- Create new PIN Popup -->
+    <div data-role="popup" id="createPasscodePopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Create Login</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">Create your 3 digit passcode below:</h3>
+            <p id="incorrectFormatMessage_create" style="color:red">Your passcode was not 3 digits.</p>
+			<input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinVerifyInput" value="" step="1" min="0" max="999" url="" />
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
+			<a href="#" data-role="button" data-inline="true" onclick="pinSubmitted(1)" data-transition="flow" data-theme="b">OK</a>
 		</div>
 	</div>
 </div>
@@ -663,16 +852,19 @@
     <a href="#" id="existPacerButton7" class="btn existPacerButtonClass" colorIndex="0" otherNum="7" data-role="button" data-icon="star"></a>
     <a href="#" id="existPacerButton8" class="btn existPacerButtonClass" colorIndex="0" otherNum="8" data-role="button" data-icon="star"></a>
     <a href="#" id="existPacerButton9" class="btn existPacerButtonClass" colorIndex="0" otherNum="9" data-role="button" data-icon="star"></a>
-
+    
+    <!-- Enter existing PIN Popup -->
     <div data-role="popup" id="enterPasscodePopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
 			<h1>Login</h1>
 		</div>
 		<div role="main" class="ui-corner-bottom ui-content">
 			<h3 class="ui-title">Enter your 3 digit passcode below:</h3>
-			<input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinVerifyInput" value="3 Digit Passcode Input" step="1" min="0" max="999" url="" />
+            <p id="incorrectFormatMessage_authenticate" style="color:red">Your passcode was not 3 digits.</p>
+            <p id="failedToAuthenticate_authenticate" style="color:red">Incorrect passcode. Try again.</p>
+			<input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinAuthenticateInput" value="" step="1" min="0" max="999" url="" />
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" onclick="pinSubmitted()" data-transition="flow" data-theme="b">OK</a>
+			<a href="#" data-role="button" data-inline="true" onclick="pinSubmitted(0)" data-transition="flow" data-theme="b">OK</a>
 		</div>
 	</div>
 

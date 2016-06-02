@@ -436,6 +436,16 @@
             }
         }
 
+        String.prototype.toHHMMSS = function () {
+            var sec_num = parseInt(this, 10);
+            var minutes = Math.floor((sec_num) / 60);
+            var seconds = sec_num - (minutes * 60);
+
+            if (minutes < 10) { minutes = "0" + minutes; }
+            if (seconds < 10) { seconds = "0" + seconds; }
+            return minutes + ':' + seconds;
+        }
+
         // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
         function refreshPacerButtonData() {
             var newPacer = [];  // in order to store array objects, you must create this variable like this
@@ -460,7 +470,7 @@
                                 color: colorArray[singlePacerSet[2] % colorArray.length],
                                 colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
                                 name: singlePacerSet[3],
-                                activeText: singlePacerSet[3] + " - " + singlePacerSet[1] + " sec lap",
+                                activeText: singlePacerSet[3] + " - " + (singlePacerSet[1] * 1609.344 / trackDistanceInMeters).toString().toHHMMSS() + " mile pace",
                                 inactiveText: singlePacerSet[3] + " - inactive"
                             };
 

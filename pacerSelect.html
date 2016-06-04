@@ -34,7 +34,7 @@
     <script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
     <script>
         var isDeveloperMode = true;
-        var isVerificationEnabled = false;     // If false, this will allow the user to click through the app without being attached to any DB or web server
+        var isVerificationEnabled = true;     // If false, this will allow the user to click through the app without being attached to any DB or web server
 
         // Globals specific to the client's track and desired permissions
         var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
@@ -127,7 +127,7 @@
                 if (isDeveloperMode == true) {
                     alert("Sent the command to start the pacer.");
                 }
-                // $("#startPopup").popup("close");
+                $("#startPopup").popup("close");
                 if (isDeveloperMode == true) {
                     alert("Closed the start popup.");
                 }
@@ -197,11 +197,29 @@
         
         function requestPacer() {
             if (isDeveloperMode == true) {
-                alert("");
+                // alert("");
             }
             pinVar = prompt("Enter your passcode:", "");
             pinCreateAndAuthenticate(pinVar, 1);
             // if you got the alert, then both the masterPacerSelected and the pinVar should be set.
+        }
+        
+        function processAssignedPacer(num) {
+            if (num > -1) {
+                if (isDeveloperMode == true) {
+                    alert("We got out of the pinCreateAndAuthenticate function and it returned a number greater than -1 and masterPacerSelected was assigned that number which was: " + masterPacerSelected);
+                    alert("We also know that the masterUserPaceTime is: " + masterUserPaceTime);
+                    alert("We also know that the masterColorIndex is: " + masterColorIndex);
+                }
+                requestCommand(5, masterPacerSelected, masterColorIndex);
+                $("#startPopup").popup("open", { positionTo: "window" });
+                // requestCommand(7, masterPacerSelected, masterUserPaceTime);
+            }
+            else {
+                if (isDeveloperMode == true) {
+                    alert("the pinCreateAndAuthenticate function did not return a number greater than -1");
+                }
+            }
         }
         
         // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
@@ -385,32 +403,30 @@
             xhttp.onreadystatechange = function () {
                 if (xhttp.readyState == 4 && xhttp.status == 200) {
                     if (xhttp.responseText != "incorrect") {
+                        masterPacerSelected = Number(xhttp.responseText);
                         if (xhttp.responseText != "-1") {
-                            masterPacerSelected = Number(xhttp.responseText);
                             if (isDeveloperMode == true) {
-                                alert(masterPacerSelected);
+                                alert("VerifyPIN.php sent you the pacer number: " + masterPacerSelected);
                             }
                             else {
                                 // user alert
                             }
-                            if (isDeveloperMode == true) {
-                                alert("VerifyPIN.php sent you the pacer number: " + masterPacerSelected);
-                            }
-                            return masterPacerSelected;
+                            processAssignedPacer(masterPacerSelected);
 
                         }
                         else {
                             if (isDeveloperMode == true) {
                                 alert("verifyPIN.php sent you a -1...that means there's no pacers available");
                             }
-                            return xhttp.responseText;
+                            processAssignedPacer(xhttp.responseText);
                         }
                     }
                     else {
                         if (isDeveloperMode == true) {
                             alert("verifyPIN.php sent you the string - incorrect");
                         }
-                        return xhttp.responseText;  // This should be "incorrect"
+                        // should we assign masterPacerSelected the value of "-1" here?
+                        processAssignedPacer(xhttp.responseText);  // This should be "incorrect"
                     }
                 }
             };
@@ -425,7 +441,7 @@
             else {
                 xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
                 if (isDeveloperMode == true) {
-                    alert("You entered the following PIN: " + pinVar);
+                    alert("You went to the needNewPacer=1 request block and entered the following PIN: " + pinVar);
                 }
             }
             xhttp.send();
@@ -768,12 +784,10 @@
 
     <div class="ui-grid-b">
         <div class="ui-block-a"><button data-mini="true" style="background-color:blue; font-size: 16px" data-role="button" onclick="help()" >Help</button></div>
-        <div class="ui-block-b"><button id="startButton" data-mini="true" style="background-color:green; font-size: 16px" data-role="button" onclick="startTest()">Start</button></div>
+        <div class="ui-block-b"><button id="startButton" data-mini="true" style="background-color:green; font-size: 16px" data-role="button" onclick="requestPacer()">Start</button></div>
         <div class="ui-block-c"><button data-mini="true" style="background-color:red; font-size: 16px" onclick="quitRequested()" data-role="button">Exit</button></div>
     </div>
     <br /><br />
-
-    <a id="requestPacerButton" onclick="requestPacer()" style="font-size: 16px" data-role="button">Request Pacer</a>
 
     <div>
         <a id="optionsButton" onclick="" style="font-size: 16px" data-role="button">Options</a>

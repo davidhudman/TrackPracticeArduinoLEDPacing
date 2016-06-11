@@ -743,32 +743,38 @@
 
         // Determines if the PIN that the user entered is in a valid format
         function isPinFormatValid(new_pinVar) {
-            if (new_pinVar >= 0) {
-				if (new_pinVar == null) {
-					if (isDeveloperMode == true) {
-						alert("Your PIN is NULL because it is: " + new_pinVar + " so we should return false.");
-					}
-				}
-				if (isDeveloperMode == true) {
-					alert("Your PIN is greater than 0 because it is: " + new_pinVar);
-				}
-				// it looks like the string parse section should be moved here, but the variable declaration may need to be placed above the first "if" statement
-			}
+            var str = "";
+            str = new_pinVar.split("");
+            if (new_pinVar >= 0 && !isNaN(new_pinVar)) {
+                // invalid
+                if (new_pinVar == null) {
+                    if (isDeveloperMode == true) {
+                        alert("Your PIN is NULL because it is: " + new_pinVar + " so we should return false.");
+                    }
+                    return false;
+                }
+                else {
+                    // valid
+                    if (isDeveloperMode == true) {
+                        alert("Your PIN is greater than 0 because it is: " + new_pinVar);
+                    }
+                    // it looks like the string parse section should be moved here, but the variable declaration may need to be placed above the first "if" statement
+                    // string parse section
+                    if (str.length == 3) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            }
+            // invalid
 			else {
 				if (isDeveloperMode == true) {
-					alert("Your PIN is NOT greater than 0 because it is: " + new_pinVar);
+					alert("Your PIN is NOT greater than 0 or it isn't a number because it is: " + new_pinVar);
 				}
+				return false;
 			}
-			
-			// string parse section
-			var str = "";
-            str = new_pinVar.split("");
-            if (str.length == 3) {
-				return true;
-            }
-            else {
-                return false;
-            }
         }
 
     </script>

@@ -210,39 +210,41 @@
                 if (isDeveloperMode == true) {
                     // alert("The startButton's startNotReset attribute is currently: " + $("#startButton").attr("startNotReset"));
                 }
-
-                // Task: Trigger a popup to verify with the user that their pacer is going to restart
                 $("#restartPopup").popup("open");
             }
             else {
-                pinVar = -1;
-                pinVar = prompt("Enter your 3 digit passcode:", "");
-
-                if (isPinFormatValid(pinVar) == true) {
-                    pinCreateAndAuthenticate(pinVar, 1);
-                }
-                else {
-                    alert("Your PIN is not 3 digits. You entered: " + pinVar);
-                }
-                // if you got the alert, then both the masterPacerSelected and the pinVar should be set.
+                $("#createPasscodePopup").popup("open");
+                $("#incorrectFormatMessage_create").hide();
             }
-		}
+        }
+
+
         
-        function processAssignedPacer(num, is_new_pacer) {
+        function processAssignedPacer(pacerIndexReturned, is_new_pacer) {
             if (is_new_pacer == "1") {
-                if (num > -1) {
+                if (pacerIndexReturned > -1) {
                     if (isDeveloperMode == true) {
                         alert("We got out of the pinCreateAndAuthenticate function and it returned a number greater than -1 and masterPacerSelected was assigned that number which was: " + masterPacerSelected);
                         alert("We also know that the masterUserPaceTime is: " + masterUserPaceTime);
                         alert("We also know that the masterColorIndex is: " + masterColorIndex);
                     }
                     requestCommand(5, masterPacerSelected, masterColorIndex);
+                    if (isDeveloperMode == true) {
+                        // alert("Closing the createPasscodePopup");
+                    }
+                    // $("#createPasscodePopup").popup("close");
+                    if (isDeveloperMode == true) {
+                        alert("Opening the startPopup");
+                    }
                     $("#startPopup").popup("open", { positionTo: "window" });
                     // requestCommand(7, masterPacerSelected, masterUserPaceTime);
                 }
                 else {
                     if (isDeveloperMode == true) {
-                        alert("the pinCreateAndAuthenticate function did not return a number greater than -1");
+                        alert("the pinCreateAndAuthenticate function did not return a number greater than -1. There may not be any pacers available or you entered something that was invalid.");
+                    }
+                    else {
+                        alert("There may not be any pacers available or you entered something that was invalid.");
                     }
                 }
             }
@@ -251,7 +253,7 @@
                     alert("You are in the processAssignedPacer function and this is authenticating an existing pacer.");
                 }
 
-                if (num != -1) {
+                if (pacerIndexReturned != -1) {
                     if (isDeveloperMode == true) {
                         alert("Your existing pacer was successfully authenticated.");
                     }
@@ -363,38 +365,16 @@
             // isNewPacer == 0 : authenticate
             // isNewPacer == 1 : create
             if (isNewPacer == 1) {      // new pacer
+                pinVar = -1;
                 pinVar = $("#pinVerifyInput").val();
 
                 if (isPinFormatValid(pinVar)) {                 // if the PIN is formatted correctly
                     // loading screen
-
-                    // submit for approval
-                    if (pinCreateAndAuthenticate(pinVar, isNewPacer) != "-1") {                     // if the PIN matches the database, change to the page - PHP call
-                        if (isDeveloperMode == true) {
-                            alert("the function pinCreateAndAuthenticate defintely returned something other than -1");
-                        }
-                        $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
-                        $('#loginButton').hide();                                                       // hide the Login button
-                        $('#optionsButton').show();                                                     // show the options button
-
-                        if (isDeveloperMode == true) {
-                            alert("about to call start popup");
-                        }
-                        // now we need to show the start popup
-                        $("#createPasscodePopup").popup("close");
-                        $("#startPopup").popup("open");
-                        if (isDeveloperMode == true) {
-                            alert("Called start popup");
-                        }
-                        start();
-                    }
-                    else {
-                        // Error / bug: Technically, there may not be any pacers available, but the user will take over the last pacer index
-                        alert("No pacers available");
-                    }
+                    pinCreateAndAuthenticate(pinVar, isNewPacer);
                 }
                 else { // if the PIN isn't formatted correctly
                     $("#incorrectFormatMessage_create").show();
+                    // alert("Your PIN is not 3 digits. You entered: " + pinVar);
                 }
             }
             else { // isNewPacer = 0    // authenticate existing pacer
@@ -409,37 +389,10 @@
 
                     // probably need a loading screen here
                     
-                    // show testingSimplePacerControl
                 }
                 else { // if the PIN isn't formatted correctly
                     $("#incorrectFormatMessage_authenticate").show();
                 }
-
-
-                //-----------------
-                /*if (isPinFormatValid(pinVar)) {     // if the PIN is formatted correctly, proceed
-                    if (pinCreateAndAuthenticate(pinVar, isNewPacer) != "incorrect") {                     // if the PIN matches the database, change to the page - PHP call
-                        $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
-                            transition: "slide"
-                        });
-
-                        $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
-                        $('#timeInputLink_controlView').text(masterUserTimeEnteredString);              // change time input button to whatever the time is
-                        $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
-                        $('#loginButton').hide();                                                       // hide the Login button
-                        $('#optionsButton').show();                                                     // show the options button
-                    }
-                    else {
-                        // alert("The passcode that you entered does not match our records.");
-                        // This should just be a message below the textbox, not an alert
-                        $("#failedToAuthenticate_authenticate").show();
-                    }
-                }
-                else {
-                    // alert("The passcode that you entered was not 3 digits.");
-                    // This should just be a message below the textbox, not an alert
-                    $("#incorrectFormatMessage_authenticate").show();
-                }*/
             }
         }
 
@@ -945,7 +898,7 @@
             <p id="incorrectFormatMessage_create" style="color:red">Your passcode was not 3 digits.</p>
 			<input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinVerifyInput" value="" step="1" min="0" max="999" url="" />
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" onclick="pinSubmitted(1)" data-transition="flow" data-theme="b">OK</a>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" onclick="pinSubmitted(1)" data-transition="flow" data-theme="b">OK</a>
 		</div>
 	</div>
 </div>

@@ -132,6 +132,7 @@
                     alert("Closed the start popup.");
                 }
                 $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
+                $("#startButton").attr("startNotReset", "0");	                                // set the startButton's startNotReset attribute to "0", indicating that it is a reset button now
                 $('#loginButton').hide();                                                       // hide the Login button
                 $('#optionsButton').show();                                                     // show the options button
             // }
@@ -155,10 +156,11 @@
             userTimeInputDistanceString = "mile";
 			
 			// close popup
-			$("#quitPopup").popup("close");
+			// $("#quitPopup").popup("close");
 
             // Reset buttons to normal
-            $('#startButton').text("Start");                                                // change "Start" button to "Restart"
+			$('#startButton').text("Start");                                                // change "Start" button to "Restart"
+			$("#startButton").attr("startNotReset", "1");	                                // set the startButton's startNotReset attribute to "1", indicating that it is a start button now
             $('#loginButton').show();                                                       // hide the Login button
             $('#optionsButton').hide();                                                     // show the options button
 
@@ -199,44 +201,78 @@
             refreshPacerButtonData();
         }
         
-        function requestPacer() {
-			if (isDeveloperMode == true) {
-				// someVar = 1;
-				someVar = $("#startButton").attr("startNotReset");
-				
-				alert("The startButton's startNotReset attribute is currently: " + $("#startButton").attr("startNotReset"));
-				
-				$("#startButton").attr("startNotReset", "0");	// set the startButton's startNotReset attribute to "0"
-				
-				alert("The startButton's startNotReset attribute is now: " + $("#startButton").attr("startNotReset"));
-				// if ($("#startButton").attr("startNotReset") == 1)
-			}
-			pinVar = -1;
-			pinVar = prompt("Enter your passcode:", "");
-			
-			if (isPinFormatValid(pinVar) == true) {
-				pinCreateAndAuthenticate(pinVar, 1);
-			}
-			else {
-				alert("Your PIN is not 3 digits. You entered: " + pinVar);
-			}
-			// if you got the alert, then both the masterPacerSelected and the pinVar should be set.
+        function reset() {
+            requestCommand(2, masterPacerSelected, 0);
+        }
+
+        function requestPacerOrRestart() {
+            if ($("#startButton").attr("startNotReset") == "0") {
+                if (isDeveloperMode == true) {
+                    // alert("The startButton's startNotReset attribute is currently: " + $("#startButton").attr("startNotReset"));
+                }
+
+                // Task: Trigger a popup to verify with the user that their pacer is going to restart
+                $("#restartPopup").popup("open");
+            }
+            else {
+                pinVar = -1;
+                pinVar = prompt("Enter your 3 digit passcode:", "");
+
+                if (isPinFormatValid(pinVar) == true) {
+                    pinCreateAndAuthenticate(pinVar, 1);
+                }
+                else {
+                    alert("Your PIN is not 3 digits. You entered: " + pinVar);
+                }
+                // if you got the alert, then both the masterPacerSelected and the pinVar should be set.
+            }
 		}
         
-        function processAssignedPacer(num) {
-            if (num > -1) {
-                if (isDeveloperMode == true) {
-                    alert("We got out of the pinCreateAndAuthenticate function and it returned a number greater than -1 and masterPacerSelected was assigned that number which was: " + masterPacerSelected);
-                    alert("We also know that the masterUserPaceTime is: " + masterUserPaceTime);
-                    alert("We also know that the masterColorIndex is: " + masterColorIndex);
+        function processAssignedPacer(num, is_new_pacer) {
+            if (is_new_pacer == "1") {
+                if (num > -1) {
+                    if (isDeveloperMode == true) {
+                        alert("We got out of the pinCreateAndAuthenticate function and it returned a number greater than -1 and masterPacerSelected was assigned that number which was: " + masterPacerSelected);
+                        alert("We also know that the masterUserPaceTime is: " + masterUserPaceTime);
+                        alert("We also know that the masterColorIndex is: " + masterColorIndex);
+                    }
+                    requestCommand(5, masterPacerSelected, masterColorIndex);
+                    $("#startPopup").popup("open", { positionTo: "window" });
+                    // requestCommand(7, masterPacerSelected, masterUserPaceTime);
                 }
-                requestCommand(5, masterPacerSelected, masterColorIndex);
-                $("#startPopup").popup("open", { positionTo: "window" });
-                // requestCommand(7, masterPacerSelected, masterUserPaceTime);
+                else {
+                    if (isDeveloperMode == true) {
+                        alert("the pinCreateAndAuthenticate function did not return a number greater than -1");
+                    }
+                }
             }
             else {
                 if (isDeveloperMode == true) {
-                    alert("the pinCreateAndAuthenticate function did not return a number greater than -1");
+                    alert("You are in the processAssignedPacer function and this is authenticating an existing pacer.");
+                }
+
+                if (num != -1) {
+                    if (isDeveloperMode == true) {
+                        alert("Your existing pacer was successfully authenticated.");
+                    }
+                    $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
+                        transition: "slide"
+                    });
+
+                    $("#enterPasscodePopup").popup("close");
+
+                    $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
+                    $('#timeInputLink_controlView').text(masterUserTimeEnteredString);              // change time input button to whatever the time is
+                    $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
+                    $('#loginButton').hide();                                                       // hide the Login button
+                    $('#optionsButton').show();                                                     // show the options button
+                    $("#startButton").attr("startNotReset", "0");
+                }
+                else {
+                    if (isDeveloperMode == true) {
+                        alert("Your existing pacer failed to authenticate.");
+                    }
+                    $("#failedToAuthenticate_authenticate").show();
                 }
             }
         }
@@ -361,12 +397,16 @@
                     $("#incorrectFormatMessage_create").show();
                 }
             }
-            /*else { // isNewPacer = 0    // authenticate existing pacer
+            else { // isNewPacer = 0    // authenticate existing pacer
                 pinVar = $("#pinAuthenticateInput").val();
+                if (isDeveloperMode == true) {
+                    alert("The passcode you input was: " + pinVar);
+                }
+
 
                 if (isPinFormatValid(pinVar)) {                 // if the PIN is formatted correctly
-                    $("#enterPasscodePopup").popup("close");
-                    
+                    pinCreateAndAuthenticate(pinVar, isNewPacer);
+
                     // probably need a loading screen here
                     
                     // show testingSimplePacerControl
@@ -377,7 +417,7 @@
 
 
                 //-----------------
-                if (isPinFormatValid(pinVar)) {     // if the PIN is formatted correctly, proceed
+                /*if (isPinFormatValid(pinVar)) {     // if the PIN is formatted correctly, proceed
                     if (pinCreateAndAuthenticate(pinVar, isNewPacer) != "incorrect") {                     // if the PIN matches the database, change to the page - PHP call
                         $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
                             transition: "slide"
@@ -399,8 +439,8 @@
                     // alert("The passcode that you entered was not 3 digits.");
                     // This should just be a message below the textbox, not an alert
                     $("#incorrectFormatMessage_authenticate").show();
-                }
-            }*/
+                }*/
+            }
         }
 
         // Resets the Yun to whatever pacers are currently in the database (useful after a reboot)
@@ -423,14 +463,14 @@
                 if (xhttp.readyState == 4 && xhttp.status == 200) {
                     if (xhttp.responseText != "incorrect") {
                         masterPacerSelected = Number(xhttp.responseText);
-                        if (xhttp.responseText != "-1") {
+                        if (xhttp.responseText != "-1") {       // This could be creating a new pacer or authenticating an existing pacer
                             if (isDeveloperMode == true) {
                                 alert("VerifyPIN.php sent you the pacer number: " + masterPacerSelected);
                             }
                             else {
                                 // user alert
                             }
-                            processAssignedPacer(masterPacerSelected);
+                            processAssignedPacer(masterPacerSelected, isNewPacer);
 
                         }
                         else {
@@ -444,8 +484,8 @@
                         if (isDeveloperMode == true) {
                             alert("verifyPIN.php sent you the string - incorrect");
                         }
-                        // should we assign masterPacerSelected the value of "-1" here?
-                        // processAssignedPacer(xhttp.responseText);  // This should be "incorrect"
+                        // should we assign masterPacerSelected the value of "-1" here? - no, we shouldn't because the user might try to enter the password again and we need them to be able to
+                        processAssignedPacer(-1, 0);  // This should be "incorrect"
                     }
                 }
             };
@@ -827,7 +867,7 @@
 
     <div class="ui-grid-b">
         <div class="ui-block-a"><button data-mini="true" style="background-color:blue; font-size: 16px" data-role="button" onclick="help()" >Help</button></div>
-        <div class="ui-block-b"><button id="startButton" data-mini="true" style="background-color:green; font-size: 16px" data-role="button" startNotReset="1" onclick="requestPacer()">Start</button></div>
+        <div class="ui-block-b"><button id="startButton" data-mini="true" style="background-color:green; font-size: 16px" data-role="button" startNotReset="1" onclick="requestPacerOrRestart()">Start</button></div>
         <div class="ui-block-c"><button data-mini="true" style="background-color:red; font-size: 16px" onclick="quitRequested()" data-role="button">Exit</button></div>
     </div>
     <br /><br />
@@ -866,6 +906,19 @@
 			</p>
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
 			<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="start()">OK</a>
+		</div>
+	</div>
+
+    <!-- Restart Popup/Modal-->
+    <div data-role="popup" id="restartPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Restart?</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">Are you sure you want to restart?</h3>
+			<p>If your pacer is running, this will reset it and it will restart after a 10 second traffic light countdown</p>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="reset()">OK</a>
 		</div>
 	</div>
 

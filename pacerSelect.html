@@ -146,12 +146,16 @@
 
         function quit() {
             // request function to exit a pacer
+			requestCommand(0, masterPacerSelected, -1);
 
             // Reset master variables to original values
             masterColorIndex = 1;
             masterUserPaceTime = "-1";
             userTimeInputDistance = 1609.344;
             userTimeInputDistanceString = "mile";
+			
+			// close popup
+			$("#quitPopup").popup("close");
 
             // Reset buttons to normal
             $('#startButton').text("Start");                                                // change "Start" button to "Restart"
@@ -196,13 +200,28 @@
         }
         
         function requestPacer() {
-            if (isDeveloperMode == true) {
-                // alert("");
-            }
-            pinVar = prompt("Enter your passcode:", "");
-            pinCreateAndAuthenticate(pinVar, 1);
-            // if you got the alert, then both the masterPacerSelected and the pinVar should be set.
-        }
+			if (isDeveloperMode == true) {
+				// someVar = 1;
+				someVar = $("#startButton").attr("startNotReset");
+				
+				alert("The startButton's startNotReset attribute is currently: " + $("#startButton").attr("startNotReset"));
+				
+				$("#startButton").attr("startNotReset", "0");	// set the startButton's startNotReset attribute to "0"
+				
+				alert("The startButton's startNotReset attribute is now: " + $("#startButton").attr("startNotReset"));
+				// if ($("#startButton").attr("startNotReset") == 1)
+			}
+			pinVar = -1;
+			pinVar = prompt("Enter your passcode:", "");
+			
+			if (isPinFormatValid(pinVar) == true) {
+				pinCreateAndAuthenticate(pinVar, 1);
+			}
+			else {
+				alert("Your PIN is not 3 digits. You entered: " + pinVar);
+			}
+			// if you got the alert, then both the masterPacerSelected and the pinVar should be set.
+		}
         
         function processAssignedPacer(num) {
             if (num > -1) {
@@ -418,7 +437,7 @@
                             if (isDeveloperMode == true) {
                                 alert("verifyPIN.php sent you a -1...that means there's no pacers available");
                             }
-                            processAssignedPacer(xhttp.responseText);
+                            // processAssignedPacer(xhttp.responseText);
                         }
                     }
                     else {
@@ -426,7 +445,7 @@
                             alert("verifyPIN.php sent you the string - incorrect");
                         }
                         // should we assign masterPacerSelected the value of "-1" here?
-                        processAssignedPacer(xhttp.responseText);  // This should be "incorrect"
+                        // processAssignedPacer(xhttp.responseText);  // This should be "incorrect"
                     }
                 }
             };
@@ -724,10 +743,28 @@
 
         // Determines if the PIN that the user entered is in a valid format
         function isPinFormatValid(new_pinVar) {
-            var str = "";
+            if (new_pinVar >= 0) {
+				if (new_pinVar == null) {
+					if (isDeveloperMode == true) {
+						alert("Your PIN is NULL because it is: " + new_pinVar + " so we should return false.");
+					}
+				}
+				if (isDeveloperMode == true) {
+					alert("Your PIN is greater than 0 because it is: " + new_pinVar);
+				}
+				// it looks like the string parse section should be moved here, but the variable declaration may need to be placed above the first "if" statement
+			}
+			else {
+				if (isDeveloperMode == true) {
+					alert("Your PIN is NOT greater than 0 because it is: " + new_pinVar);
+				}
+			}
+			
+			// string parse section
+			var str = "";
             str = new_pinVar.split("");
             if (str.length == 3) {
-                return true;
+				return true;
             }
             else {
                 return false;
@@ -784,7 +821,7 @@
 
     <div class="ui-grid-b">
         <div class="ui-block-a"><button data-mini="true" style="background-color:blue; font-size: 16px" data-role="button" onclick="help()" >Help</button></div>
-        <div class="ui-block-b"><button id="startButton" data-mini="true" style="background-color:green; font-size: 16px" data-role="button" onclick="requestPacer()">Start</button></div>
+        <div class="ui-block-b"><button id="startButton" data-mini="true" style="background-color:green; font-size: 16px" data-role="button" startNotReset="1" onclick="requestPacer()">Start</button></div>
         <div class="ui-block-c"><button data-mini="true" style="background-color:red; font-size: 16px" onclick="quitRequested()" data-role="button">Exit</button></div>
     </div>
     <br /><br />

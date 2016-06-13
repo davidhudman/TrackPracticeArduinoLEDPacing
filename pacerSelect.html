@@ -123,9 +123,9 @@
                 if (isDeveloperMode == true) {
                     alert("About to send the command to start the pacer.");
                 }
-                requestCommand(7, masterPacerSelected, masterUserPaceTime);
+                requestCommand(7, masterPacerSelected, (masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2));
                 if (isDeveloperMode == true) {
-                    alert("Sent the command to start the pacer.");
+                    alert("Sent the command to start the pacer and it's time for a " + userTimeInputDistance + " was " + masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance) + " and the actual rounded value sent was " + (masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2));
                 }
                 $("#startPopup").popup("close");
                 if (isDeveloperMode == true) {
@@ -279,88 +279,6 @@
             }
         }
         
-        // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
-        function refreshPacerButtonData() {
-            // alert("made it to refreshpacerbuttondata function");
-            var newPacer = [];  // in order to store array objects, you must create this variable like this
-
-            if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
-                // get lapTime, name, and color from PHP
-                var request = new XMLHttpRequest();
-                request.onreadystatechange = function () {
-                    // alert("made it to refreshpacerbuttondata response.");
-                    if (request.readyState == 4 && request.status == 200) {
-                        // split up the feedback
-                        pacerGroupSet = request.responseText.split("#");
-                        // alert(pacerGroupSet);
-                        // alert(pacerGroupSet[0] + "<br>" + pacerGroupSet[1] + "<br>" + pacerGroupSet[2] + "<br>");
-                        
-                        for (i = 0; i < pacerGroupSet.length; i++) {
-                            // split up the already split pieces
-                            singlePacerSet = pacerGroupSet[i].split(",");
-
-                            // make your newPacer variable out of what you just split up
-                            newPacer[i] = {
-                                index: singlePacerSet[0],
-                                lapTime: singlePacerSet[1],
-                                lapSecs: singlePacerSet[1] % 60,
-                                lapMins: (singlePacerSet[1] - (singlePacerSet[1] % 60)) / 60,
-                                color: colorArray[singlePacerSet[2] % colorArray.length],
-                                colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
-                                name: singlePacerSet[3],
-                                activeText: singlePacerSet[3] + " - " + (singlePacerSet[1] * 1609.344 / trackDistanceInMeters).toString().toHHMMSS() + " mile pace",
-                                inactiveText: singlePacerSet[3] + " - inactive"
-                            };
-
-                            // newPacer[masterPacerSelected].color, (newPacer[masterPacerSelected].lapTime * 1609.344 / trackDistanceInMeters).toString(), .toHHMMSS()
-
-                            
-                            // update the buttons
-                            $("#existPacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
-                            if (singlePacerSet[2] % colorArray.length == "1" || singlePacerSet[2] % colorArray.length == "4") {
-                                $("#existPacerButton" + i).css('color', 'black');
-                            }
-                            if (singlePacerSet[1] == "0") {
-                                $("#existPacerButton" + i).text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
-                            }
-                            
-
-                            // update other text fields - used in Coach Mode
-                            //if (masterPacerSelected == i) {
-                            //    if (masterPacerSelected != 99) {
-                            //        // update pacerSelect button for Coach Mode
-                            //        $("#pacerSelect").text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
-                            //        if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
-                            //            $("#pacerSelect").css('color', 'white');
-                            //        }
-                            //        if (singlePacerSet[1] == "0") {
-                            //            $("#pacerSelect").text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
-                            //        }
-                            //    }
-                            //}
-                        }
-                    }
-                }
-                request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
-                request.send();
-                // alert("made it to refreshpacerbuttondata request.");
-            }
-            else {
-                // if verification is off, fill the buttons with some made up data
-                for (i = 0; i < 10; i++) {
-                    if (i < 6) {
-                        $("#existPacerButton" + i).text("Pacer" + i + " - " + "0" + (i + 1) + ":00 mile pace").attr('style', "background-color:" + colorArray[i + 1]);
-                        if (i + 1 % colorArray.length == "1" || i + 1 % colorArray.length == "4") {
-                            $("#existPacerButton" + i).css('color', 'black');
-                        }
-                    }
-                    else {
-                        $("#existPacerButton" + i).text("Pacer" + i + " - inactive").attr('style', "background-color:black").css('color', 'white');
-                    }
-                }
-            }
-        }
-        
         function pinSubmitted(isNewPacer) {
             // isNewPacer == 0 : authenticate
             // isNewPacer == 1 : create
@@ -481,6 +399,88 @@
 
                 request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
                 request.send();
+            }
+        }
+
+        // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
+        function refreshPacerButtonData() {
+            // alert("made it to refreshpacerbuttondata function");
+            var newPacer = [];  // in order to store array objects, you must create this variable like this
+
+            if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
+                // get lapTime, name, and color from PHP
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function () {
+                    // alert("made it to refreshpacerbuttondata response.");
+                    if (request.readyState == 4 && request.status == 200) {
+                        // split up the feedback
+                        pacerGroupSet = request.responseText.split("#");
+                        // alert(pacerGroupSet);
+                        // alert(pacerGroupSet[0] + "<br>" + pacerGroupSet[1] + "<br>" + pacerGroupSet[2] + "<br>");
+
+                        for (i = 0; i < pacerGroupSet.length; i++) {
+                            // split up the already split pieces
+                            singlePacerSet = pacerGroupSet[i].split(",");
+
+                            // make your newPacer variable out of what you just split up
+                            newPacer[i] = {
+                                index: singlePacerSet[0],
+                                lapTime: singlePacerSet[1],
+                                lapSecs: singlePacerSet[1] % 60,
+                                lapMins: (singlePacerSet[1] - (singlePacerSet[1] % 60)) / 60,
+                                color: colorArray[singlePacerSet[2] % colorArray.length],
+                                colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
+                                name: singlePacerSet[3],
+                                activeText: singlePacerSet[3] + " - " + (singlePacerSet[1] * 1609.344 / trackDistanceInMeters).toString().toHHMMSS() + " mile pace",
+                                inactiveText: singlePacerSet[3] + " - inactive"
+                            };
+
+                            // newPacer[masterPacerSelected].color, (newPacer[masterPacerSelected].lapTime * 1609.344 / trackDistanceInMeters).toString(), .toHHMMSS()
+
+
+                            // update the buttons
+                            $("#existPacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+                            if (singlePacerSet[2] % colorArray.length == "1" || singlePacerSet[2] % colorArray.length == "4") {
+                                $("#existPacerButton" + i).css('color', 'black');
+                            }
+                            if (singlePacerSet[1] == "0") {
+                                $("#existPacerButton" + i).text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
+                            }
+
+
+                            // update other text fields - used in Coach Mode
+                            //if (masterPacerSelected == i) {
+                            //    if (masterPacerSelected != 99) {
+                            //        // update pacerSelect button for Coach Mode
+                            //        $("#pacerSelect").text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+                            //        if (singlePacerSet[2] % colorArray.length == "2" || singlePacerSet[2] % colorArray.length == "6" || singlePacerSet[2] % colorArray.length == "7") {
+                            //            $("#pacerSelect").css('color', 'white');
+                            //        }
+                            //        if (singlePacerSet[1] == "0") {
+                            //            $("#pacerSelect").text(newPacer[i].inactiveText).attr('style', "background-color:black").css('color', 'white');
+                            //        }
+                            //    }
+                            //}
+                        }
+                    }
+                }
+                request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
+                request.send();
+                // alert("made it to refreshpacerbuttondata request.");
+            }
+            else {
+                // if verification is off, fill the buttons with some made up data
+                for (i = 0; i < 10; i++) {
+                    if (i < 6) {
+                        $("#existPacerButton" + i).text("Pacer" + i + " - " + "0" + (i + 1) + ":00 mile pace").attr('style', "background-color:" + colorArray[i + 1]);
+                        if (i + 1 % colorArray.length == "1" || i + 1 % colorArray.length == "4") {
+                            $("#existPacerButton" + i).css('color', 'black');
+                        }
+                    }
+                    else {
+                        $("#existPacerButton" + i).text("Pacer" + i + " - inactive").attr('style', "background-color:black").css('color', 'white');
+                    }
+                }
             }
         }
 
@@ -712,7 +712,7 @@
 
                 if (val == colorArray.length)
                     val = 1;
-                else
+                elseS
                     val++;
 
                 $("#colorRange").val(val);
@@ -839,6 +839,19 @@
 			<h3 class="ui-title">Enter your time and hit the start button.</h3>
 			<p>If you already created a pacer and it's still running, hit the button titled "Already created a pacer? Login."</p>
 			<a href="#" data-role="button" data-rel="back" data-transition="flow" data-theme="b">Close</a>
+		</div>
+	</div>
+
+    <!-- Update Popup/Modal-->
+    <div data-role="popup" id="updatePopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Update?</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">Do you want to update your pacer to reflect the changes?</h3>
+			<p>Channges will take effect immediately.</p>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
+			<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="update()">OK</a>
 		</div>
 	</div>
 

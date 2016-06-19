@@ -692,35 +692,86 @@
             $("#timeInputLink_controlView").text("Enter your " + userTimeInputDistanceString + " time:");
         }
 
-        // change the button text whenever the user enters new text
+        // change the button text whenever the user enters new text or verify that the user wants to change to the new time when the pacer is already running
         function timeInputChanged(val) {
-            // split the string "x:yy" and save it as a single digit = "x*60 + y"
-            timeArray = val.split(":");
-            masterUserPaceTime = (Number(timeArray[0]) * 60) + Number(timeArray[1]);    // This ensures that a correctly formatted number goes into the global variable masterUserPaceTime
+            if ($("#startButton").attr("startNotReset") == "0") {
+                $('#timeInputFlipBox_controlView').datebox('close');      // we may have to close the JTSage date box before we're allowed to open the popup
+                // $("#updatePopup").popup("open");                                               // open the new popup
+                $("#updatePopup").attr("updatedProperty", "time");                             // send updatePopup the new value: "updatePopup" newColorIndex="0"; updatedProperty="color" updatedPropertyValue="0"
+                $("#updatePopup").attr("updatedPropertyValue", val);
+                var confirmVariable = confirm("Do you want to update your pacer to reflect the changes? Your pacer's time will change immediately.");
+                if (confirmVariable == true) {
+                    updatePacerAttribute();
+                }
+            }
+            else {
+                // split the string "x:yy" and save it as a single digit = "x*60 + y"
+                timeArray = val.split(":");
+                masterUserPaceTime = (Number(timeArray[0]) * 60) + Number(timeArray[1]);    // This ensures that a correctly formatted number goes into the global variable masterUserPaceTime
 
-            // change the value of the buttons
-            $("#timeInputLink").text(val);
-            $("#timeInputLink_controlView").text(val);
+                // change the value of the buttons
+                $("#timeInputLink").text(val);
+                $("#timeInputLink_controlView").text(val);
+            }
+        }
+        
+        function updatePacerAttribute() {
+            if ($("#updatePopup").attr("updatedProperty") == "color") {
+                masterColorIndex = Number($("#updatePopup").attr("updatedPropertyValue"));
+                $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown back to the new value and refresh it
+                $("#updatePopup").popup("close");
+                requestCommand(5, masterPacerSelected, masterColorIndex);
+            }
+            if ($("#updatePopup").attr("updatedProperty") == "time") {
+                var newTime;
+                timeArray = $("#updatePopup").attr("updatedPropertyValue").split(":");
+                newTime = (Number(timeArray[0]) * 60) + Number(timeArray[1]);
+
+                var timeDifference;
+                if (masterUserPaceTime > newTime) {
+                    timeDifference = -1 * (masterUserPaceTime - newTime);
+                }
+                else {
+                    timeDifference = 1 * (newTime - masterUserPaceTime);
+                }
+
+                masterUserPaceTime = newTime;
+                // change the value of the buttons
+                $("#timeInputLink").text($("#updatePopup").attr("updatedPropertyValue"));
+                $("#timeInputLink_controlView").text($("#updatePopup").attr("updatedPropertyValue"));
+
+                timeDifference = (timeDifference * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2);
+                $("#updatePopup").popup("close");
+                requestCommand(8, masterPacerSelected, timeDifference);
+            }
         }
         
         function colorChanged(val) {
-            val = Number(val);  // cast it from a string to a number and it will represent the index of the color in the colorArray
-            masterColorIndex = val;
+            if ($("#startButton").attr("startNotReset") == "0") {
+                var newColor = val;
+                $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown back to what it was and refresh it
+                $("#updatePopup").popup("open");                                                // open the new popup
+                $("#updatePopup").attr("updatedProperty", "color");                             // send updatePopup the new value: "updatePopup" newColorIndex="0"; updatedProperty="color" updatedPropertyValue="0"
+                $("#updatePopup").attr("updatedPropertyValue", newColor);
+            }
+            else {
+                val = Number(val);  // cast it from a string to a number and it will represent the index of the color in the colorArray
+                masterColorIndex = val;
 
-            if (val == -1) {
-                val = $("#colorRange").val();
+                if (val == -1) {
+                    val = $("#colorRange").val();
 
-                if (val == colorArray.length)
-                    val = 1;
-                elseS
+                    if (val == colorArray.length)
+                        val = 1;
+                    elseS
                     val++;
 
-                $("#colorRange").val(val);
+                    $("#colorRange").val(val);
+                }
+                $("#colorText").text("Pacer color: " + colorArray[val]);
+                $("#colorText").css("background-color", colorArray[val]);
+                $("#colorDiv").css("background-color", colorArray[val]);
             }
-            $("#colorText").text("Pacer color: " + colorArray[val]);
-            $("#colorText").css("background-color", colorArray[val]);
-            $("#colorDiv").css("background-color", colorArray[val]);
-            // $(".ui-slider").css("background-color", colorArray[val]);
         }
 
         // initialize the colorButtons with text and color
@@ -843,7 +894,7 @@
 	</div>
 
     <!-- Update Popup/Modal-->
-    <div data-role="popup" id="updatePopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
+    <div data-role="popup" id="updatePopup" updatedProperty="color" updatedPropertyValue="0" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
 			<h1>Update?</h1>
 		</div>
@@ -851,7 +902,7 @@
 			<h3 class="ui-title">Do you want to update your pacer to reflect the changes?</h3>
 			<p>Channges will take effect immediately.</p>
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="update()">OK</a>
+			<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="updatePacerAttribute()">OK</a>
 		</div>
 	</div>
 

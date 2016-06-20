@@ -265,6 +265,7 @@
 
                     $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
                     $('#timeInputLink_controlView').text(masterUserTimeEnteredString);              // change time input button to whatever the time is
+                    $('#timeInputFlipBox_controlView').datebox('setTheDate', masterUserTimeEnteredString);
                     $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
                     $('#loginButton').hide();                                                       // hide the Login button
                     $('#optionsButton').show();                                                     // show the options button

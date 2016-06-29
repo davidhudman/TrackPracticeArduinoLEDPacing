@@ -34,7 +34,7 @@
     <script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
     <script>
         var isDeveloperMode = false;
-        var isVerificationEnabled = true;     // If false, this will allow the user to click through the app without being attached to any DB or web server
+        var isVerificationEnabled = false;     // If false, this will allow the user to click through the app without being attached to any DB or web server
 
         // Globals specific to the client's track and desired permissions
         var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
@@ -111,6 +111,7 @@
                 $(":mobile-pagecontainer").pagecontainer("change", "#createPasscodeDiv", {
                     transition: "slide"
                 });
+                $("#createPasscodeDiv").attr("newPacer", "1");
                 $("#incorrectFormatMessage_create").hide();
             }
             else {
@@ -204,17 +205,23 @@
         }
 
         function requestPacerOrRestart() {
+            // We're resetting the pacer
             if ($("#startButton").attr("startNotReset") == "0") {
                 if (isDeveloperMode == true) {
                     // alert("The startButton's startNotReset attribute is currently: " + $("#startButton").attr("startNotReset"));
                 }
                 $("#restartPopup").popup("open");
             }
+                // We're starting the pacer
             else {
                 // $("#createPasscodePopup").popup("open");
                 $(":mobile-pagecontainer").pagecontainer("change", "#createPasscodeDiv", {
                     transition: "pop"
                 });
+
+                // set the attribute to indicate that it's a new pacer
+                $("#createPasscodeDiv").attr("newPacer", "1");
+
                 $("#incorrectFormatMessage_create").hide();
             }
         }
@@ -263,7 +270,7 @@
                         transition: "slide"
                     });
 
-                    $("#enterPasscodePopup").popup("close");
+                    // $("#enterPasscodePopup").popup("close");
 
                     $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
                     $('#timeInputLink_controlView').text(masterUserTimeEnteredString);              // change time input button to whatever the time is
@@ -285,8 +292,9 @@
         function pinSubmitted(isNewPacer, pin) {
             // isNewPacer == 0 : authenticate
             // isNewPacer == 1 : create
+            isNewPacer = isNewPacer || $("#createPasscodeDiv").attr("newPacer");
             pin = combined || 0;
-            if (isNewPacer == 1) {      // new pacer
+            if (isNewPacer == 1 || isNewPacer == "1") {      // new pacer
                 pinVar = -1;
                 pinVar = pin;
 
@@ -557,7 +565,8 @@
                         // $("#confirmPasscodeHeader").text("Submit " + combined + "?");
                         // $('#confirmPasscodeButton').attr("value", "1");
 
-                        pinSubmitted(1, combined);
+                        alert("remove: made it to pin submitted call");
+                        pinSubmitted();
 
                         // call normal view
                     }
@@ -600,7 +609,12 @@
                         alert("Your mile time in seconds is: " + masterUserPaceTime + ", 9,10: " + this.text.substring(9, 10) + ", 10,11: " + this.text.substring(10, 11) + ", 11,12: " + this.text.substring(11, 12) + ", 12,13: " + this.text.substring(12, 13) + ", 13,14: " + this.text.substring(13, 14));
                     }
 
-                    $("#enterPasscodePopup").popup("open");
+                    // $("#enterPasscodePopup").popup("open");
+                    $(":mobile-pagecontainer").pagecontainer("change", "#createPasscodeDiv", {
+                        transition: "slide"
+                    });
+                    $("#createPasscodeDiv").attr("newPacer", "0");
+
                     $("#incorrectFormatMessage_authenticate").hide();
                     $("#failedToAuthenticate_authenticate").hide();
 
@@ -1011,13 +1025,14 @@
 </div>
 
 <!-- Create new PIN page -->
-<div data-role="page" id="createPasscodeDiv" style="" data-theme="b">
+<div data-role="page" id="createPasscodeDiv" newPacer="1" style="" data-theme="b">
 	<div data-role="content" style="max-width: 400px; min-width: 250px; margin: auto;">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
 			<h1>Create Login</h1>
 		</div>
 		<h3 style="text-align:center;">Enter a 3 digit passcode</h3>
-		<p id="incorrectFormatMessage_create" style="color:red; text-align:center;">Passcode was not 3 digits.</p>
+		<p id="incorrectFormatMessage_authenticate" style="color:red; text-align:center;">Passcode was not 3 digits.</p>
+		<p id="failedToAuthenticate_authenticate" style="color:red">Incorrect passcode. Try again.</p>
 		<h2 id="passcodeDisplay" style="text-align: center;" value="***">***</h2>
 		<br /><br />
 		<div class="ui-grid-b" style="margin: 0 20px 0 20px;">
@@ -1050,14 +1065,14 @@
 			<div role="main" class="ui-corner-bottom ui-content">
 				<h3 id="confirmPasscodeHeader" class="ui-title"></h3>
 				<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-				<a href="#" id="confirmPasscodeButton" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="pinSubmitted(1)">OK</a>
+				<a href="#" id="confirmPasscodeButton" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="pinSubmitted()">OK</a>
 			</div>
 		</div>
 	</div>
 </div>
 
 <!-- Confirm Start page -->
-<div data-role="page" id="confirmStartDiv" style="" data-theme="b">
+<div data-role="page" id="confirmStartDiv" value="1" style="" data-theme="b">
 	<div data-role="content" style="max-width: 400px; min-width: 250px; margin: auto;">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
 			<h1>Begin?</h1>
@@ -1135,8 +1150,8 @@
 		</div>
 		<div role="main" class="ui-corner-bottom ui-content">
 			<h3 class="ui-title">Enter your 3 digit passcode below:</h3>
-            <p id="incorrectFormatMessage_authenticate" style="color:red">Your passcode was not 3 digits.</p>
-            <p id="failedToAuthenticate_authenticate" style="color:red">Incorrect passcode. Try again.</p>
+            <p id="P1" style="color:red">Your passcode was not 3 digits.</p>
+            <p id="P2" style="color:red">Incorrect passcode. Try again.</p>
 			<input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinAuthenticateInput" value="" step="1" min="0" max="999" url="" />
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
 			<a href="#" data-role="button" data-inline="true" onclick="pinSubmitted(0)" data-transition="flow" data-theme="b">OK</a>

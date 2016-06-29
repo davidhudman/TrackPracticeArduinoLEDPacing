@@ -34,7 +34,7 @@
     <script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
     <script>
         var isDeveloperMode = false;
-        var isVerificationEnabled = false;     // If false, this will allow the user to click through the app without being attached to any DB or web server
+        var isVerificationEnabled = true;     // If false, this will allow the user to click through the app without being attached to any DB or web server
 
         // Globals specific to the client's track and desired permissions
         var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
@@ -65,6 +65,7 @@
         var masterUserTimeEnteredString = "-1";
         var pinVar = -1;
         var newPacer = [];
+        var combined; // combined string of passcode being submitted
 
         colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 
@@ -118,7 +119,9 @@
         }
 
         function quitRequested() {
-            $("#quitPopup").popup("open");
+            $(":mobile-pagecontainer").pagecontainer("change", "#confirmExitDiv", {
+                transition: "pop"
+            });
         }
 
         function start() {
@@ -130,10 +133,6 @@
             if (isDeveloperMode == true) {
                 alert("Sent the command to start the pacer and it's time for a " + userTimeInputDistance + " was " + masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance) + " and the actual rounded value sent was " + (masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2));
             }
-            // $("#startPopup").popup("close");
-            if (isDeveloperMode == true) {
-                // alert("Closed the start popup.");
-            }
 
             testingSimplePacerControlViewCalled();
 
@@ -142,13 +141,6 @@
             $('#loginButton').hide();                                                       // hide the Login button
             $('#optionsButton').show();                                                     // show the options button
             // }
-        }
-        // masterPacerSelected, masterUserPaceTime, pinVar
-        function startTest() {
-            if (isDeveloperMode == true) {
-                alert("MasterPacerSelected: " + masterPacerSelected + " masterUserPaceTime: " + masterUserPaceTime + " pinVar: " + pinVar);
-            }
-            requestCommand("7", masterPacerSelected.toString(), masterUserPaceTime.toString());
         }
 
         function quit() {
@@ -162,7 +154,7 @@
             userTimeInputDistanceString = "mile";
 
             // close popup
-            // $("#quitPopup").popup("close");
+            // testingSimplePacerControlViewCalled();
 
             // Reset buttons to normal
             $('#startButton').text("Start");                                                // change "Start" button to "Restart"
@@ -202,7 +194,7 @@
         // Take the user to the view with the existing pacer buttons so they can choose theirs
         function login() {
             $(":mobile-pagecontainer").pagecontainer("change", "#pacerButtonView_existing", {
-                transition: "slide"
+                transition: "pop"
             });
             refreshPacerButtonData();
         }
@@ -221,7 +213,7 @@
             else {
                 // $("#createPasscodePopup").popup("open");
                 $(":mobile-pagecontainer").pagecontainer("change", "#createPasscodeDiv", {
-                    transition: "slide"
+                    transition: "pop"
                 });
                 $("#incorrectFormatMessage_create").hide();
             }
@@ -238,18 +230,16 @@
                         alert("We also know that the masterColorIndex is: " + masterColorIndex);
                     }
                     requestCommand(5, masterPacerSelected, masterColorIndex);
-                    if (isDeveloperMode == true) {
-                        // alert("Closing the createPasscodePopup");
-                    }
-                    $(":mobile-pagecontainer").pagecontainer("change", "#confirmStartDiv", {
-                        transition: "slide"
-                    });
-                    if (isDeveloperMode == true) {
-                        // alert("Opening the startPopup");
-                    }
 
-                    // $("#startPopup").popup("open", { positionTo: "window" });
-                    // requestCommand(7, masterPacerSelected, masterUserPaceTime);
+                    $(":mobile-pagecontainer").pagecontainer("change", "#confirmStartDiv", {
+                        transition: "pop"
+                    });
+
+                    // show Pacer Info to allow the user to confirm
+                    $("#confirmStartDivPacerTime").text("Time: " + masterUserTimeEnteredString);
+                    $("#confirmStartDivPacerColor").text("Color: " + colorArray[masterColorIndex]);
+                    $("#confirmStartDivPacerPasscode").text("Passcode: " + combined);
+
                 }
                 else {
                     if (isDeveloperMode == true) {
@@ -295,7 +285,7 @@
         function pinSubmitted(isNewPacer, pin) {
             // isNewPacer == 0 : authenticate
             // isNewPacer == 1 : create
-            pin = pin || 0;
+            pin = combined || 0;
             if (isNewPacer == 1) {      // new pacer
                 pinVar = -1;
                 pinVar = pin;
@@ -345,8 +335,12 @@
 
         // Takes you a view where the user can edit their new pacer
         function pinCreateAndAuthenticate(pinVar, isNewPacer) {
-            if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
+            // If verification is enabled, do the normal verification
+            if (isVerificationEnabled == true) {
+                // create the request
                 var xhttp = new XMLHttpRequest();
+
+                // handle the request
                 xhttp.onreadystatechange = function () {
                     if (xhttp.readyState == 4 && xhttp.status == 200) {
                         if (xhttp.responseText != "incorrect") {
@@ -379,6 +373,7 @@
                 };
                 // Authenticate Existing PIN
                 if (isNewPacer == 0) {
+                    // send the request
                     xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected, true);
                     if (isDeveloperMode == true) {
                         alert("You entered the following PIN: " + pinVar);
@@ -386,6 +381,7 @@
                 }
                     // Create New PIN
                 else {
+                    // send the request
                     xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
                     if (isDeveloperMode == true) {
                         alert("You went to the needNewPacer=1 request block and entered the following PIN: " + pinVar);
@@ -393,20 +389,27 @@
                 }
                 xhttp.send();
             }
-            else {		// verification mode is disabled
-                processAssignedPacer(10, isNewPacer);	// this will only work for creating a new pacer
+                // if verification mode is disabled, allow the user to click through the app
+            else {
+                processAssignedPacer(10, isNewPacer);
             }
         }
 
         // sends GET request for the commands that the Yun will accept; parameters: x - command, y - pacerIndex, z - value
         function requestCommand(x, y, z) {
-            if (masterPacerSelected == 99) {		// If you're in "Coach Mode" where you can control all pacers at once, as well as update the database just like below
+            // If you're in "Coach Mode" where you can control all pacers at once
+            if (masterPacerSelected == 99) {
                 y = masterPacerSelected;
             }
-            if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
+            // If verification is enabled, do the normal verification
+            if (isVerificationEnabled == true) {
+                // create the request
                 var request = new XMLHttpRequest();
+
+                // handle the request
                 request.onreadystatechange = function () {
                     if (request.readyState == 4 && request.status == 200) {
+                        // confirm whether or not the request was successful
                         if (isDeveloperMode == true) {
                             alert(request.responseText);
                         }
@@ -418,9 +421,12 @@
                     }
                 };
 
+                // send the request
                 request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
                 request.send();
             }
+
+            // if verification mode isn't enabled, allow the user to click through the app
         }
 
         // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
@@ -429,15 +435,14 @@
             var newPacer = [];  // in order to store array objects, you must create this variable like this
 
             if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
-                // get lapTime, name, and color from PHP
+                // Create the request
                 var request = new XMLHttpRequest();
+
+                // Handle the request - get lapTime, name, and color from PHP
                 request.onreadystatechange = function () {
-                    // alert("made it to refreshpacerbuttondata response.");
                     if (request.readyState == 4 && request.status == 200) {
                         // split up the feedback
                         pacerGroupSet = request.responseText.split("#");
-                        // alert(pacerGroupSet);
-                        // alert(pacerGroupSet[0] + "<br>" + pacerGroupSet[1] + "<br>" + pacerGroupSet[2] + "<br>");
 
                         for (i = 0; i < pacerGroupSet.length; i++) {
                             // split up the already split pieces
@@ -459,7 +464,7 @@
                             // newPacer[masterPacerSelected].color, (newPacer[masterPacerSelected].lapTime * 1609.344 / trackDistanceInMeters).toString(), .toHHMMSS()
 
 
-                            // update the buttons
+                            // update the view - buttons
                             $("#existPacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
                             if (singlePacerSet[2] % colorArray.length == "1" || singlePacerSet[2] % colorArray.length == "4") {
                                 $("#existPacerButton" + i).css('color', 'black');
@@ -485,12 +490,13 @@
                         }
                     }
                 }
+
+                // send the request
                 request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
                 request.send();
-                // alert("made it to refreshpacerbuttondata request.");
             }
             else {
-                // if verification is off, fill the buttons with some made up data
+                // if verification mode is off, fill the buttons with some made up data
                 for (i = 0; i < 10; i++) {
                     if (i < 6) {
                         $("#existPacerButton" + i).text("Pacer" + i + " - " + "0" + (i + 1) + ":00 mile pace").attr('style', "background-color:" + colorArray[i + 1]);
@@ -511,10 +517,8 @@
 
         $(document).ready(function () {
             colorButtonInitialize();
-            // testPopupTrigger_onclick();
 
             $('#timeInput').hide();
-            $("#colorText").hide();
             $('#timeInput_controlView').hide();
             $('#optionsButton').hide();
 
@@ -543,9 +547,19 @@
                         if (isDeveloperMode == true) {
                             alert("Your passcode was entered: " + combined)
                         }
+
+                        // update view element(s) - text and value attribute
                         $('#passcodeDisplay').attr("value", "***");
                         $('#passcodeDisplay').text("***");
+
+                        // call popup to confirm passcode before submitting  
+                        // $("#confirmPasscodePopup").popup("open");
+                        // $("#confirmPasscodeHeader").text("Submit " + combined + "?");
+                        // $('#confirmPasscodeButton').attr("value", "1");
+
                         pinSubmitted(1, combined);
+
+                        // call normal view
                     }
                 }
             });
@@ -741,20 +755,30 @@
 
         // change the button text whenever the user enters new text or verify that the user wants to change to the new time when the pacer is already running
         function timeInputChanged(val) {
+
+            // Updating existing pacer
             if ($("#startButton").attr("startNotReset") == "0") {
-                $('#timeInputFlipBox_controlView').datebox('close');      // we may have to close the JTSage date box before we're allowed to open the popup
-                // $("#updatePopup").popup("open");                                               // open the new popup
-                $("#updatePopup").attr("updatedProperty", "time");                             // send updatePopup the new value: "updatePopup" newColorIndex="0"; updatedProperty="color" updatedPropertyValue="0"
-                $("#updatePopup").attr("updatedPropertyValue", val);
-                var confirmVariable = confirm("Do you want to update your pacer to reflect the changes? Your pacer's time will change immediately.");
-                if (confirmVariable == true) {
-                    updatePacerAttribute();
-                }
+
+                // close the JTSage date box
+                $('#timeInputFlipBox_controlView').datebox('close');
+
+                // Transition to new box
+                $(":mobile-pagecontainer").pagecontainer("change", "#confirmUpdateDiv", {
+                    transition: "pop"
+                });
+
+                // send confirmUpdateDiv the new value: "confirmUpdateDiv" newColorIndex="0"; updatedProperty="color" updatedPropertyValue="0"
+                $("#confirmUpdateDiv").attr("updatedProperty", "time");
+                $("#confirmUpdateDiv").attr("updatedPropertyValue", val);
             }
+
+                // Creating new pacer
             else {
+
                 // split the string "x:yy" and save it as a single digit = "x*60 + y"
                 timeArray = val.split(":");
                 masterUserPaceTime = (Number(timeArray[0]) * 60) + Number(timeArray[1]);    // This ensures that a correctly formatted number goes into the global variable masterUserPaceTime
+                masterUserTimeEnteredString = val;
 
                 // change the value of the buttons
                 $("#timeInputLink").text(val);
@@ -762,62 +786,91 @@
             }
         }
 
+        // Handle the request from the user to update their pacer with its new values
         function updatePacerAttribute() {
-            if ($("#updatePopup").attr("updatedProperty") == "color") {
-                masterColorIndex = Number($("#updatePopup").attr("updatedPropertyValue"));
+
+            // user wants to update their color
+            if ($("#confirmUpdateDiv").attr("updatedProperty") == "color") {
+
+                // set masterColorIndex with the new color
+                masterColorIndex = Number($("#confirmUpdateDiv").attr("updatedPropertyValue"));
+
+                // update the view's element(s) - dropdown
                 $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown back to the new value and refresh it
-                $("#updatePopup").popup("close");
+
+                // change back to the correct view
+                testingSimplePacerControlViewCalled();
+
+                // send the request to Arduino
                 requestCommand(5, masterPacerSelected, masterColorIndex);
             }
-            if ($("#updatePopup").attr("updatedProperty") == "time") {
+
+            // user wants to update their time
+            if ($("#confirmUpdateDiv").attr("updatedProperty") == "time") {
+
+                // create a variable to hold the newly entered time
                 var newTime;
-                timeArray = $("#updatePopup").attr("updatedPropertyValue").split(":");
+
+                // parse the entered time
+                timeArray = $("#confirmUpdateDiv").attr("updatedPropertyValue").split(":");
+
+                // assign the parsed time to the variable
                 newTime = (Number(timeArray[0]) * 60) + Number(timeArray[1]);
 
-                var timeDifference;
-                if (masterUserPaceTime > newTime) {
-                    timeDifference = -1 * (masterUserPaceTime - newTime);
-                }
-                else {
-                    timeDifference = 1 * (newTime - masterUserPaceTime);
+                // create a new variable to hold the time difference
+                var timeDifference = 1 * (newTime - masterUserPaceTime);
+                if (isDeveloperMode == true) {
+                    alert("timeDifference is: " + timeDifference + " but it would have been: " + (newTime - masterUserPaceTime) + " or " + (-1 * (masterUserPaceTime - newTime)))
                 }
 
+                // set masterUserPaceTime with the newTime
                 masterUserPaceTime = newTime;
-                // change the value of the buttons
-                $("#timeInputLink").text($("#updatePopup").attr("updatedPropertyValue"));
-                $("#timeInputLink_controlView").text($("#updatePopup").attr("updatedPropertyValue"));
 
+                // update the view's element(s) - buttons
+                $("#timeInputLink").text($("#confirmUpdateDiv").attr("updatedPropertyValue"));
+                $("#timeInputLink_controlView").text($("#confirmUpdateDiv").attr("updatedPropertyValue"));
+
+                // convert timeDifference to a lap time
                 timeDifference = (timeDifference * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2);
-                $("#updatePopup").popup("close");
+
+                // change back to the correct view
+                testingSimplePacerControlViewCalled();
+
+                // send the request to Arduino
                 requestCommand(8, masterPacerSelected, timeDifference);
             }
         }
 
+        // respond to the user changing the view's color element - dropdown
         function colorChanged(val) {
+
+            // Updating existing pacer
             if ($("#startButton").attr("startNotReset") == "0") {
+
+                // Create a new variable to hold the new color and assign it the user's new color index
                 var newColor = val;
-                $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown back to what it was and refresh it
-                $("#updatePopup").popup("open");                                                // open the new popup
-                $("#updatePopup").attr("updatedProperty", "color");                             // send updatePopup the new value: "updatePopup" newColorIndex="0"; updatedProperty="color" updatedPropertyValue="0"
-                $("#updatePopup").attr("updatedPropertyValue", newColor);
+
+                // change the color select dropdown back to what it was and refresh it
+                $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');
+
+                // navigate to the confirm update page
+                $(":mobile-pagecontainer").pagecontainer("change", "#confirmUpdateDiv", {
+                    transition: "pop"
+                });
+
+                // send the user's new values to the confirm update div: "confirmUpdateDiv" newColorIndex="0"; updatedProperty="color" updatedPropertyValue="0"
+                $("#confirmUpdateDiv").attr("updatedProperty", "color");
+                $("#confirmUpdateDiv").attr("updatedPropertyValue", newColor);
             }
+
+                // Creating new pacer
             else {
-                val = Number(val);  // cast it from a string to a number and it will represent the index of the color in the colorArray
+
+                // cast val from a string to a number and it will represent the index of the color in the colorArray
+                val = Number(val);
                 masterColorIndex = val;
 
-                if (val == -1) {
-                    val = $("#colorRange").val();
-
-                    if (val == colorArray.length)
-                        val = 1;
-                    elseS
-                    val++;
-
-                    $("#colorRange").val(val);
-                }
-                $("#colorText").text("Pacer color: " + colorArray[val]);
-                $("#colorText").css("background-color", colorArray[val]);
-                $("#colorDiv").css("background-color", colorArray[val]);
+                // update the view's element(s) - dropdown - not necessary since the dropdown updates itself
             }
         }
 
@@ -943,39 +996,6 @@
 		</div>
 	</div>
 
-    <!-- Update Popup/Modal-->
-    <div data-role="popup" id="updatePopup" updatedProperty="color" updatedPropertyValue="0" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
-		<div data-role="header" data-theme="a" class="ui-corner-top">
-			<h1>Update?</h1>
-		</div>
-		<div role="main" class="ui-corner-bottom ui-content">
-			<h3 class="ui-title">Do you want to update your pacer to reflect the changes?</h3>
-			<p>Channges will take effect immediately.</p>
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="updatePacerAttribute()">OK</a>
-		</div>
-	</div>
-
-    <!-- Start Popup/Modal-->
-    <div data-role="popup" id="startPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
-		<div data-role="header" data-theme="a" class="ui-corner-top">
-			<h1>Begin?</h1>
-		</div>
-		<div role="main" class="ui-corner-bottom ui-content">
-			<h3 class="ui-title">Are you ready to start running?</h3>
-			<p>After you click OK, you will see a traffic light countdown: 
-                <ul>
-                    <li>The 3rd light turns RED</li>
-                    <li>The 2nd light turns YELLOW</li>
-                    <li>When the 1st light turns on with your color, you can start running.</li>
-                </ul>
-
-			</p>
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="start()">OK</a>
-		</div>
-	</div>
-
     <!-- Restart Popup/Modal-->
     <div data-role="popup" id="restartPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
@@ -986,33 +1006,6 @@
 			<p>If your pacer is running, this will reset it and it will restart after a 10 second traffic light countdown</p>
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="reset()">OK</a>
-		</div>
-	</div>
-
-    <!-- Exit Popup/Modal-->
-    <div data-role="popup" id="quitPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
-		<div data-role="header" data-theme="a" class="ui-corner-top">
-			<h1>Exit?</h1>
-		</div>
-		<div role="main" class="ui-corner-bottom ui-content">
-			<h3 class="ui-title">Are you sure you want to quit?</h3>
-			<p>If your pacer is running, this will stop it from running and allow someone else to use it.</p>
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="quit()">OK</a>
-		</div>
-	</div>
-
-    <!-- Old Create new PIN Popup -->
-    <div data-role="popup" id="old_remove_createPasscodePopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
-		<div data-role="header" data-theme="a" class="ui-corner-top">
-			<h1>Create Login</h1>
-		</div>
-		<div role="main" class="ui-corner-bottom ui-content">
-			<h3 class="ui-title">Create your 3 digit passcode below:</h3>
-            <p id="oldincorrectFormatMessage_create" style="color:red">Your passcode was not 3 digits.</p>
-			<input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="oldpinVerifyInput" value="" step="1" min="0" max="999" url="" />
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" data-rel="back" onclick="pinSubmitted(1)" data-transition="flow" data-theme="b">OK</a>
 		</div>
 	</div>
 </div>
@@ -1048,6 +1041,18 @@
 			<div class="ui-block-c"><button data-mini="true" style="font-size: 16px" data-role="button">&nbsp;</button></div>
 		</div>
 		<a href="#" data-role="button" data-rel="back" data-theme="a">Cancel</a>
+		
+		<!-- Confirm PIN Popup/Modal-->
+		<div data-role="popup" id="confirmPasscodePopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
+			<div data-role="header" data-theme="a" class="ui-corner-top">
+				<h1>Passcode OK?</h1>
+			</div>
+			<div role="main" class="ui-corner-bottom ui-content">
+				<h3 id="confirmPasscodeHeader" class="ui-title"></h3>
+				<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
+				<a href="#" id="confirmPasscodeButton" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="pinSubmitted(1)">OK</a>
+			</div>
+		</div>
 	</div>
 </div>
 
@@ -1058,6 +1063,10 @@
 			<h1>Begin?</h1>
 		</div>
 		<h3 style="text-align:center;">Are you ready to start running?</h3>
+		<h3 style="text-align:center;" id="confirmStartDivPacerTime" ></h3>
+		<h3 style="text-align:center;" id="confirmStartDivPacerColor" ></h3>
+		<h3 style="text-align:center;" id="confirmStartDivPacerPasscode" ></h3>
+		<br /><br />
 		<p>After you click OK, you will see a traffic light countdown: 
 			<ul>
 				<li>The 3rd light turns RED</li>
@@ -1069,10 +1078,40 @@
 		<!--<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
 		<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="start()">OK</a>-->
 		<div class="ui-grid-a" style="margin: 0 20px 0 20px;">
-			<div class="ui-block-a"><button data-mini="true" style="font-size: 16px" data-role="button">Cancel</button></div>
-			<div class="ui-block-b"><button data-mini="true" style="font-size: 16px" data-role="button" onclick="start()">OK</button></div>
+			<div class="ui-block-a"><a data-mini="true" style="font-size: 16px" data-role="button" data-rel="back" >Cancel</a></div>
+			<div class="ui-block-b"><a data-mini="true" style="font-size: 16px" data-role="button" onclick="start()">OK</a></div>
 		</div>
 		
+	</div>
+</div>
+
+<!-- Confirm Exit page -->
+<div data-role="page" id="confirmExitDiv" style="" data-theme="b">
+	<div data-role="content" style="max-width: 400px; min-width: 250px; margin: auto;">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Exit?</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">Are you sure you want to quit?</h3>
+			<p>If your pacer is running, this will stop it from running and allow someone else to use it.</p>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="quit()">OK</a>
+		</div>
+	</div>
+</div>
+
+<!-- Confirm Update page -->
+<div data-role="page" id="confirmUpdateDiv" updatedProperty="color" updatedPropertyValue="0" style="" data-theme="b">
+	<div data-role="content" style="max-width: 400px; min-width: 250px; margin: auto;">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Update?</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">Do you want to update your pacer to reflect the changes?</h3>
+			<p>Channges will take effect immediately.</p>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
+			<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="updatePacerAttribute()">OK</a>
+		</div>
 	</div>
 </div>
 

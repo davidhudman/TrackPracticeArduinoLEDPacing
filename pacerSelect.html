@@ -66,6 +66,7 @@
         var pinVar = -1;
         var newPacer = [];
         var combined; // combined string of passcode being submitted
+        var isNewPacer = true;
 
         colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 
@@ -111,7 +112,6 @@
                 $(":mobile-pagecontainer").pagecontainer("change", "#createPasscodeDiv", {
                     transition: "slide"
                 });
-                $("#createPasscodeDiv").attr("newPacer", "1");
                 $("#incorrectFormatMessage_create").hide();
             }
             else {
@@ -205,30 +205,28 @@
         }
 
         function requestPacerOrRestart() {
-            // We're resetting the pacer
+            // restart
             if ($("#startButton").attr("startNotReset") == "0") {
                 if (isDeveloperMode == true) {
                     // alert("The startButton's startNotReset attribute is currently: " + $("#startButton").attr("startNotReset"));
                 }
                 $("#restartPopup").popup("open");
             }
-                // We're starting the pacer
+                // start
             else {
-                // $("#createPasscodePopup").popup("open");
+                isNewPacer = true;
                 $(":mobile-pagecontainer").pagecontainer("change", "#createPasscodeDiv", {
                     transition: "pop"
                 });
-
-                // set the attribute to indicate that it's a new pacer
-                $("#createPasscodeDiv").attr("newPacer", "1");
-
-                $("#incorrectFormatMessage_create").hide();
+                $("#incorrectFormatMessage").hide();
+                $("#failedToAuthenticate").hide();
             }
         }
 
 
 
         function processAssignedPacer(pacerIndexReturned, is_new_pacer) {
+            // new pacer
             if (is_new_pacer == "1") {
                 if (pacerIndexReturned > -1) {
                     if (isDeveloperMode == true) {
@@ -238,6 +236,11 @@
                     }
                     requestCommand(5, masterPacerSelected, masterColorIndex);
 
+                    // update view element(s) - text and value attribute
+                    $('#passcodeDisplay').attr("value", "***");
+                    $('#passcodeDisplay').text("***");
+
+                    // change to the correct view
                     $(":mobile-pagecontainer").pagecontainer("change", "#confirmStartDiv", {
                         transition: "pop"
                     });
@@ -257,6 +260,7 @@
                     }
                 }
             }
+                // existing pacer
             else {
                 if (isDeveloperMode == true) {
                     alert("You are in the processAssignedPacer function and this is authenticating an existing pacer.");
@@ -266,11 +270,15 @@
                     if (isDeveloperMode == true) {
                         alert("Your existing pacer was successfully authenticated.");
                     }
+
+                    // update view element(s) - text and value attribute
+                    $('#passcodeDisplay').attr("value", "***");
+                    $('#passcodeDisplay').text("***");
+
+                    // change to the correct view
                     $(":mobile-pagecontainer").pagecontainer("change", "#testingSimplePacerControl", {
                         transition: "slide"
                     });
-
-                    // $("#enterPasscodePopup").popup("close");
 
                     $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
                     $('#timeInputLink_controlView').text(masterUserTimeEnteredString);              // change time input button to whatever the time is
@@ -284,24 +292,23 @@
                     if (isDeveloperMode == true) {
                         alert("Your existing pacer failed to authenticate.");
                     }
-                    $("#failedToAuthenticate_authenticate").show();
+                    $("#failedToAuthenticate").show();
                 }
             }
         }
 
-        function pinSubmitted(isNewPacer, pin) {
+        function pinSubmitted(is_New_Pacer, pin) {
             // isNewPacer == 0 : authenticate
             // isNewPacer == 1 : create
-            isNewPacer = isNewPacer || $("#createPasscodeDiv").attr("newPacer");
             pin = combined || 0;
-            if (isNewPacer == 1 || isNewPacer == "1") {      // new pacer
+            if (is_New_Pacer == 1) {      // new pacer
                 pinVar = -1;
                 pinVar = pin;
 
                 if (isPinFormatValid(pinVar)) {                 // if the PIN is formatted correctly
                     // loading screen
                     // $("#createPasscodePopup").popup('close');
-                    pinCreateAndAuthenticate(pinVar, isNewPacer);
+                    pinCreateAndAuthenticate(pinVar, is_New_Pacer);
                 }
                 else { // if the PIN isn't formatted correctly
                     $("#incorrectFormatMessage_create").show();
@@ -309,7 +316,7 @@
                 }
             }
             else { // isNewPacer = 0    // authenticate existing pacer
-                pinVar = $("#pinAuthenticateInput").val();
+                pinVar = pin
                 if (isDeveloperMode == true) {
                     alert("The passcode you input was: " + pinVar);
                 }
@@ -317,13 +324,13 @@
 
                 if (isPinFormatValid(pinVar)) {                 // if the PIN is formatted correctly
                     // $("#createPasscodePopup").popup('close');
-                    pinCreateAndAuthenticate(pinVar, isNewPacer);
+                    pinCreateAndAuthenticate(pinVar, is_New_Pacer);
 
                     // probably need a loading screen here
 
                 }
                 else { // if the PIN isn't formatted correctly
-                    $("#incorrectFormatMessage_authenticate").show();
+                    $("#incorrectFormatMessage").show();
                 }
             }
         }
@@ -342,7 +349,7 @@
         };
 
         // Takes you a view where the user can edit their new pacer
-        function pinCreateAndAuthenticate(pinVar, isNewPacer) {
+        function pinCreateAndAuthenticate(pinVar, is_New_Pacer) {
             // If verification is enabled, do the normal verification
             if (isVerificationEnabled == true) {
                 // create the request
@@ -360,7 +367,7 @@
                                 else {
                                     // user alert
                                 }
-                                processAssignedPacer(masterPacerSelected, isNewPacer);
+                                processAssignedPacer(masterPacerSelected, is_New_Pacer);
 
                             }
                             else {
@@ -380,7 +387,7 @@
                     }
                 };
                 // Authenticate Existing PIN
-                if (isNewPacer == 0) {
+                if (is_New_Pacer == 0) {
                     // send the request
                     xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected, true);
                     if (isDeveloperMode == true) {
@@ -399,7 +406,7 @@
             }
                 // if verification mode is disabled, allow the user to click through the app
             else {
-                processAssignedPacer(10, isNewPacer);
+                processAssignedPacer(10, is_New_Pacer);
             }
         }
 
@@ -557,16 +564,22 @@
                         }
 
                         // update view element(s) - text and value attribute
-                        $('#passcodeDisplay').attr("value", "***");
-                        $('#passcodeDisplay').text("***");
+                        // $('#passcodeDisplay').attr("value", "***");
+                        // $('#passcodeDisplay').text("***");
 
                         // call popup to confirm passcode before submitting  
                         // $("#confirmPasscodePopup").popup("open");
                         // $("#confirmPasscodeHeader").text("Submit " + combined + "?");
                         // $('#confirmPasscodeButton').attr("value", "1");
 
-                        alert("remove: made it to pin submitted call");
-                        pinSubmitted();
+
+                        if (isNewPacer == true) {
+                            pinSubmitted(1, combined);
+                        }
+                        else {
+                            pinSubmitted(0, combined);
+                        }
+
 
                         // call normal view
                     }
@@ -585,8 +598,8 @@
 
             // Hide Alert messages and remove any pre-existing text when the field is clicked
             $("#pinAuthenticateInput").click(function () {
-                $("#incorrectFormatMessage_authenticate").hide();
-                $("#failedToAuthenticate_authenticate").hide();
+                $("#incorrectFormatMessage").hide();
+                $("#failedToAuthenticate").hide();
                 $("#pinAuthenticateInput").val("");
             });
 
@@ -599,7 +612,10 @@
             // Click Handlers
             $(".existPacerButtonClass").click(function () {
                 if (this.text.substring(9, 17) != "inactive") {     // if the pacer is active
-                    // alert("made it to Pacertext: " + this.text.substring(9,17));
+                    // set global isNewPacer to false
+                    isNewPacer = false;
+
+                    // change the master color, pacer index, pace time, etc.
                     masterPacerSelected = Number($(this).attr("otherNum"));
                     masterColorIndex = colorArray.indexOf(this.style.backgroundColor);
                     masterUserTimeEnteredString = this.text.substring(9, 14);
@@ -609,14 +625,12 @@
                         alert("Your mile time in seconds is: " + masterUserPaceTime + ", 9,10: " + this.text.substring(9, 10) + ", 10,11: " + this.text.substring(10, 11) + ", 11,12: " + this.text.substring(11, 12) + ", 12,13: " + this.text.substring(12, 13) + ", 13,14: " + this.text.substring(13, 14));
                     }
 
-                    // $("#enterPasscodePopup").popup("open");
+                    // show the view to enter your password
                     $(":mobile-pagecontainer").pagecontainer("change", "#createPasscodeDiv", {
-                        transition: "slide"
+                        transition: "pop"
                     });
-                    $("#createPasscodeDiv").attr("newPacer", "0");
-
-                    $("#incorrectFormatMessage_authenticate").hide();
-                    $("#failedToAuthenticate_authenticate").hide();
+                    $("#incorrectFormatMessage").hide();
+                    $("#failedToAuthenticate").hide();
 
                 }
                 else {  // if the pacer is inactive
@@ -1025,14 +1039,14 @@
 </div>
 
 <!-- Create new PIN page -->
-<div data-role="page" id="createPasscodeDiv" newPacer="1" style="" data-theme="b">
+<div data-role="page" id="createPasscodeDiv" style="" data-theme="b">
 	<div data-role="content" style="max-width: 400px; min-width: 250px; margin: auto;">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
 			<h1>Create Login</h1>
 		</div>
 		<h3 style="text-align:center;">Enter a 3 digit passcode</h3>
-		<p id="incorrectFormatMessage_authenticate" style="color:red; text-align:center;">Passcode was not 3 digits.</p>
-		<p id="failedToAuthenticate_authenticate" style="color:red">Incorrect passcode. Try again.</p>
+		<p id="incorrectFormatMessage" style="color:red; text-align:center;">Passcode was not 3 digits.</p>
+		<p id="failedToAuthenticate" style="color:red">Incorrect passcode. Try again.</p>
 		<h2 id="passcodeDisplay" style="text-align: center;" value="***">***</h2>
 		<br /><br />
 		<div class="ui-grid-b" style="margin: 0 20px 0 20px;">
@@ -1065,14 +1079,14 @@
 			<div role="main" class="ui-corner-bottom ui-content">
 				<h3 id="confirmPasscodeHeader" class="ui-title"></h3>
 				<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-				<a href="#" id="confirmPasscodeButton" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="pinSubmitted()">OK</a>
+				<a href="#" id="confirmPasscodeButton" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="pinSubmitted(1)">OK</a>
 			</div>
 		</div>
 	</div>
 </div>
 
 <!-- Confirm Start page -->
-<div data-role="page" id="confirmStartDiv" value="1" style="" data-theme="b">
+<div data-role="page" id="confirmStartDiv" style="" data-theme="b">
 	<div data-role="content" style="max-width: 400px; min-width: 250px; margin: auto;">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
 			<h1>Begin?</h1>
@@ -1150,8 +1164,8 @@
 		</div>
 		<div role="main" class="ui-corner-bottom ui-content">
 			<h3 class="ui-title">Enter your 3 digit passcode below:</h3>
-            <p id="P1" style="color:red">Your passcode was not 3 digits.</p>
-            <p id="P2" style="color:red">Incorrect passcode. Try again.</p>
+            <p id="incorrectFormatMessage_authenticate" style="color:red">Your passcode was not 3 digits.</p>
+            <p id="failedToAuthenticate_authenticate" style="color:red">Incorrect passcode. Try again.</p>
 			<input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinAuthenticateInput" value="" step="1" min="0" max="999" url="" />
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
 			<a href="#" data-role="button" data-inline="true" onclick="pinSubmitted(0)" data-transition="flow" data-theme="b">OK</a>

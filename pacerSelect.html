@@ -207,17 +207,22 @@
         function requestPacerOrRestart() {
             // restart
             if ($("#startButton").attr("startNotReset") == "0") {
-                if (isDeveloperMode == true) {
-                    // alert("The startButton's startNotReset attribute is currently: " + $("#startButton").attr("startNotReset"));
-                }
-                $("#restartPopup").popup("open");
+                // show the view to let the user confirm their restart
+                $(":mobile-pagecontainer").pagecontainer("change", "#confirmRestartDiv", {
+                    transition: "pop"
+                });
             }
                 // start
             else {
+                // set the global variable to indicate this is a new pacer
                 isNewPacer = true;
+
+                // show the view to let the user create a passocde
                 $(":mobile-pagecontainer").pagecontainer("change", "#createPasscodeDiv", {
                     transition: "pop"
                 });
+
+                // hide the error messages
                 $("#incorrectFormatMessage").hide();
                 $("#failedToAuthenticate").hide();
             }
@@ -1111,6 +1116,21 @@
 			<div class="ui-block-b"><a data-mini="true" style="font-size: 16px" data-role="button" onclick="start()">OK</a></div>
 		</div>
 		
+	</div>
+</div>
+
+<!-- Confirm Restart page -->
+<div data-role="page" id="confirmRestartDiv" style="" data-theme="b">
+	<div data-role="content" style="max-width: 400px; min-width: 250px; margin: auto;">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Restart?</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">Are you sure you want to restart?</h3>
+			<p>If your pacer is running, this will reset it and it will restart after a 10 second traffic light countdown</p>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="reset()">OK</a>
+		</div>	
 	</div>
 </div>
 

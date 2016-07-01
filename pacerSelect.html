@@ -51,7 +51,7 @@
         var isUserVisiblePermissionEnabled = true;
         var isUserSpeedChangePermissionEnabled = true;
         var isUserNameChangePermissionEnabled = true;
-		var isUserOptionsEnabled = false;
+        var isUserOptionsEnabled = false;
         var isDistanceChangePermissionEnabled = false;
 
         var pacerButton = [];
@@ -66,8 +66,8 @@
         var masterUserTimeEnteredString = "-1";
         var pinVar = -1;
         var newPacer = [];
-		var combined; // combined string of passcode being submitted
-		var isNewPacer = true;
+        var combined; // combined string of passcode being submitted
+        var isNewPacer = true;
 
         colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 
@@ -81,74 +81,74 @@
         // *****************
         // Click Handlers
         // *****************
-		
-		// showThisDiv("", "slide");
-		// showThisDiv("mainPacerControl", "slide");
-		
-		// Pops the Div that is passed to it so it appears like a popup
-		function showThisDiv(divToPop, transitionRequested) {
-			// if the function didn't ask for a specific type of transition
-			if (transitionRequested === undefined) {
-				
-				transitionRequested = 0;
-				
-				// just show the default transition - pop
-				$(":mobile-pagecontainer").pagecontainer("change", "#" + divToPop, {
-					transition: "pop"
-				});
-			} 
-			// if the function DID ask for a specific type of transition
-			else {
-				if (isDeveloperMode) {
-					alert("Going to the else statement for a specific transition requested.");
-				}
-				
-				// show what they asked for
-				$(":mobile-pagecontainer").pagecontainer("change", "#" + divToPop, {
-					transition: transitionRequested
-				});
-			}
-		}
-		
-		function quitRequested() {
-			showThisDiv("confirmExitDiv");
+
+        // showThisDiv("", "slide");
+        // showThisDiv("mainPacerControl", "slide");
+
+        // Pops the Div that is passed to it so it appears like a popup
+        function showThisDiv(divToPop, transitionRequested) {
+            // if the function didn't ask for a specific type of transition
+            if (transitionRequested === undefined) {
+
+                transitionRequested = 0;
+
+                // just show the default transition - pop
+                $(":mobile-pagecontainer").pagecontainer("change", "#" + divToPop, {
+                    transition: "pop"
+                });
+            }
+                // if the function DID ask for a specific type of transition
+            else {
+                if (isDeveloperMode) {
+                    alert("Going to the else statement for a specific transition requested.");
+                }
+
+                // show what they asked for
+                $(":mobile-pagecontainer").pagecontainer("change", "#" + divToPop, {
+                    transition: transitionRequested
+                });
+            }
+        }
+
+        function quitRequested() {
+            showThisDiv("confirmExitDiv");
         }
 
         function start() {
             // if ($('#startButton').val() == "Start") { - don't do this because you've already reset it to "Restart" by this point
-                if (isDeveloperMode == true) {
-                    alert("About to send the command to start the pacer.");
-                }
-                requestCommand(7, masterPacerSelected, (masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2));
-                if (isDeveloperMode == true) {
-                    alert("Sent the command to start the pacer and it's time for a " + userTimeInputDistance + " was " + masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance) + " and the actual rounded value sent was " + (masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2));
-                }
-				
-				showThisDiv("mainPacerControl", "slide");
-				
-                $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
-                $("#startButton").attr("startNotReset", "0");	                                // set the startButton's startNotReset attribute to "0", indicating that it is a reset button now
-                $('#loginButton').hide();                                                       // hide the Login button
-                $('#optionsButton').show();                                                     // show the options button
+            if (isDeveloperMode == true) {
+                alert("About to send the command to start the pacer.");
+            }
+            requestCommand(7, masterPacerSelected, (masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2));
+            if (isDeveloperMode == true) {
+                alert("Sent the command to start the pacer and it's time for a " + userTimeInputDistance + " was " + masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance) + " and the actual rounded value sent was " + (masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2));
+            }
+
+            showThisDiv("mainPacerControl", "slide");
+
+            $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
+            $("#startButton").attr("startNotReset", "0");	                                // set the startButton's startNotReset attribute to "0", indicating that it is a reset button now
+            $('#loginButton').hide();                                                       // hide the Login button
+            $('#optionsButton').show();                                                     // show the options button
             // }
         }
 
         function quit() {
             // request function to exit a pacer
-			requestCommand(0, masterPacerSelected, -1);
+            requestCommand(0, masterPacerSelected, -1);
 
             // Reset master variables to original values
             masterColorIndex = 1;
             masterUserPaceTime = "-1";
             userTimeInputDistance = 1609.344;
             userTimeInputDistanceString = "mile";
-			
-			// close popup
-			// showThisDiv("mainPacerControl", "slide");
+
+            // close popup
+            // showThisDiv("mainPacerControl", "slide");
 
             // Reset buttons to normal
-			$('#startButton').text("Start");                                                // change "Start" button to "Restart"
-			$("#startButton").attr("startNotReset", "1");	                                // set the startButton's startNotReset attribute to "1", indicating that it is a start button now
+            $('#startButton').text("Start");                                                // change "Start" button to "Restart"
+            $("#startButton").attr("startNotReset", "1");	                                // set the startButton's startNotReset attribute to "1", indicating that it is a start button now
             $('#loginButton').show();                                                       // hide the Login button
             $('#optionsButton').hide();                                                     // show the options button
 
@@ -156,7 +156,7 @@
             $("#distanceSelect_controlView").val("1").selectmenu('refresh');
             $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
             $('#timeInputLink_controlView').text("Enter Mile Time");                        // change time input button to whatever the time is
-            
+
         }
 
         // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
@@ -176,58 +176,54 @@
                 }, 500);
             }, 3000);*/
         }
-		
-		// Takes the user to the option menu or shows them a popup if they don't have permissions
-		function options() {
-			if (isUserOptionsEnabled) {
-				// take the user to the options interface
-			}
-			else {
-				// show the popup for disabled feature
-				showThisDiv("optionsNotEnabledDiv");
-			}
-		}
 
-        function testPopupTrigger_onclick() {
-            $("#isExistingPacerPopup").popup("open", { positionTo: "window" });
+        // Takes the user to the option menu or shows them a popup if they don't have permissions
+        function options() {
+            if (isUserOptionsEnabled) {
+                // take the user to the options interface
+            }
+            else {
+                // show the popup for disabled feature
+                showThisDiv("optionsNotEnabledDiv");
+            }
         }
 
         // Take the user to the view with the existing pacer buttons so they can choose theirs
         function login() {
             showThisDiv("pacerButtonView_existing");
-			
+
             refreshPacerButtonData();
         }
-        
+
         function reset() {
             requestCommand(2, masterPacerSelected, 0);
         }
 
         function requestPacerOrRestart() {
-			// restart
+            // restart
             if ($("#startButton").attr("startNotReset") == "0") {
-				// show the view to let the user confirm their restart
-				showThisDiv("confirmRestartDiv");
+                // show the view to let the user confirm their restart
+                showThisDiv("confirmRestartDiv");
             }
-			// start
+                // start
             else {
-				// set the global variable to indicate this is a new pacer
+                // set the global variable to indicate this is a new pacer
                 isNewPacer = true;
-				
-				// show the view to let the user create a passocde
-				showThisDiv("createPasscodeDiv");
-				
-				// hide the error messages
+
+                // show the view to let the user create a passocde
+                showThisDiv("createPasscodeDiv");
+
+                // hide the error messages
                 $("#incorrectFormatMessage").hide();
-				$("#failedToAuthenticate").hide();
+                $("#failedToAuthenticate").hide();
             }
         }
 
 
-        
+
         function processAssignedPacer(pacerIndexReturned, is_new_pacer) {
             // new pacer
-			if (is_new_pacer == "1") {
+            if (is_new_pacer == "1") {
                 if (pacerIndexReturned > -1) {
                     if (isDeveloperMode == true) {
                         alert("We got out of the pinCreateAndAuthenticate function and it returned a number greater than -1 and masterPacerSelected was assigned that number which was: " + masterPacerSelected);
@@ -235,19 +231,19 @@
                         alert("We also know that the masterColorIndex is: " + masterColorIndex);
                     }
                     requestCommand(5, masterPacerSelected, masterColorIndex);
-                    
-					// update view element(s) - text and value attribute
-					$('#passcodeDisplay').attr("value", "***");
-					$('#passcodeDisplay').text("***");
-					
-					// change to the correct view
+
+                    // update view element(s) - text and value attribute
+                    $('#passcodeDisplay').attr("value", "***");
+                    $('#passcodeDisplay').text("***");
+
+                    // change to the correct view
                     showThisDiv("confirmStartDiv");
-					
-					// show Pacer Info to allow the user to confirm
-					$("#confirmStartDivPacerTime").text("Time: " + masterUserTimeEnteredString);
-					$("#confirmStartDivPacerColor").text("Color: " + colorArray[masterColorIndex]);
-					$("#confirmStartDivPacerPasscode").text("Passcode: " + combined);
-					
+
+                    // show Pacer Info to allow the user to confirm
+                    $("#confirmStartDivPacerTime").text("Time: " + masterUserTimeEnteredString);
+                    $("#confirmStartDivPacerColor").text("Color: " + colorArray[masterColorIndex]);
+                    $("#confirmStartDivPacerPasscode").text("Passcode: " + combined);
+
                 }
                 else {
                     if (isDeveloperMode == true) {
@@ -258,7 +254,7 @@
                     }
                 }
             }
-			// existing pacer
+                // existing pacer
             else {
                 if (isDeveloperMode == true) {
                     alert("You are in the processAssignedPacer function and this is authenticating an existing pacer.");
@@ -268,13 +264,13 @@
                     if (isDeveloperMode == true) {
                         alert("Your existing pacer was successfully authenticated.");
                     }
-					
-					// update view element(s) - text and value attribute
-					$('#passcodeDisplay').attr("value", "***");
-					$('#passcodeDisplay').text("***");
-					
-					// change to the correct view
-					showThisDiv("mainPacerControl", "slide");
+
+                    // update view element(s) - text and value attribute
+                    $('#passcodeDisplay').attr("value", "***");
+                    $('#passcodeDisplay').text("***");
+
+                    // change to the correct view
+                    showThisDiv("mainPacerControl", "slide");
 
                     $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown to whatever color the pacer was that was selected
                     $('#timeInputLink_controlView').text(masterUserTimeEnteredString);              // change time input button to whatever the time is
@@ -292,11 +288,11 @@
                 }
             }
         }
-        
+
         function pinSubmitted(is_New_Pacer, pin) {
             // isNewPacer == 0 : authenticate
             // isNewPacer == 1 : create
-			pin = combined || 0;
+            pin = combined || 0;
             if (is_New_Pacer == 1) {      // new pacer
                 pinVar = -1;
                 pinVar = pin;
@@ -304,7 +300,7 @@
                 if (isPinFormatValid(pinVar)) {                 // if the PIN is formatted correctly
                     // loading screen
                     // $("#createPasscodePopup").popup('close');
-					pinCreateAndAuthenticate(pinVar, is_New_Pacer);
+                    pinCreateAndAuthenticate(pinVar, is_New_Pacer);
                 }
                 else { // if the PIN isn't formatted correctly
                     $("#incorrectFormatMessage_create").show();
@@ -320,10 +316,10 @@
 
                 if (isPinFormatValid(pinVar)) {                 // if the PIN is formatted correctly
                     // $("#createPasscodePopup").popup('close');
-					pinCreateAndAuthenticate(pinVar, is_New_Pacer);
+                    pinCreateAndAuthenticate(pinVar, is_New_Pacer);
 
                     // probably need a loading screen here
-                    
+
                 }
                 else { // if the PIN isn't formatted correctly
                     $("#incorrectFormatMessage").show();
@@ -347,82 +343,82 @@
         // Takes you a view where the user can edit their new pacer
         function pinCreateAndAuthenticate(pinVar, is_New_Pacer) {
             // If verification is enabled, do the normal verification
-			if (isVerificationEnabled == true) {
-				// create the request
-				var xhttp = new XMLHttpRequest();
-				
-				// handle the request
-				xhttp.onreadystatechange = function () {
-					if (xhttp.readyState == 4 && xhttp.status == 200) {
-						if (xhttp.responseText != "incorrect") {
-							masterPacerSelected = Number(xhttp.responseText);
-							if (xhttp.responseText != "-1") {       // This could be creating a new pacer or authenticating an existing pacer
-								if (isDeveloperMode == true) {
-									alert("VerifyPIN.php sent you the pacer number: " + masterPacerSelected);
-								}
-								else {
-									// user alert
-								}
-								processAssignedPacer(masterPacerSelected, is_New_Pacer);
+            if (isVerificationEnabled == true) {
+                // create the request
+                var xhttp = new XMLHttpRequest();
 
-							}
-							else {
-								if (isDeveloperMode == true) {
-									alert("verifyPIN.php sent you a -1...that means there's no pacers available");
-								}
-								// processAssignedPacer(xhttp.responseText);
-							}
-						}
-						else {
-							if (isDeveloperMode == true) {
-								alert("verifyPIN.php sent you the string - incorrect");
-							}
-							// should we assign masterPacerSelected the value of "-1" here? - no, we shouldn't because the user might try to enter the password again and we need them to be able to
-							processAssignedPacer(-1, 0);  // This should be "incorrect"
-						}
-					}
-				};
-				// Authenticate Existing PIN
-				if (is_New_Pacer == 0) {
-					// send the request
-					xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected, true);
-					if (isDeveloperMode == true) {
-						alert("You entered the following PIN: " + pinVar);
-					}
-				}
-				// Create New PIN
-				else {
-					// send the request
-					xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
-					if (isDeveloperMode == true) {
-						alert("You went to the needNewPacer=1 request block and entered the following PIN: " + pinVar);
-					}
-				}
-				xhttp.send();
-			}
-			// if verification mode is disabled, allow the user to click through the app
-			else {
-				processAssignedPacer(10, is_New_Pacer);
-			}
+                // handle the request
+                xhttp.onreadystatechange = function () {
+                    if (xhttp.readyState == 4 && xhttp.status == 200) {
+                        if (xhttp.responseText != "incorrect") {
+                            masterPacerSelected = Number(xhttp.responseText);
+                            if (xhttp.responseText != "-1") {       // This could be creating a new pacer or authenticating an existing pacer
+                                if (isDeveloperMode == true) {
+                                    alert("VerifyPIN.php sent you the pacer number: " + masterPacerSelected);
+                                }
+                                else {
+                                    // user alert
+                                }
+                                processAssignedPacer(masterPacerSelected, is_New_Pacer);
+
+                            }
+                            else {
+                                if (isDeveloperMode == true) {
+                                    alert("verifyPIN.php sent you a -1...that means there's no pacers available");
+                                }
+                                // processAssignedPacer(xhttp.responseText);
+                            }
+                        }
+                        else {
+                            if (isDeveloperMode == true) {
+                                alert("verifyPIN.php sent you the string - incorrect");
+                            }
+                            // should we assign masterPacerSelected the value of "-1" here? - no, we shouldn't because the user might try to enter the password again and we need them to be able to
+                            processAssignedPacer(-1, 0);  // This should be "incorrect"
+                        }
+                    }
+                };
+                // Authenticate Existing PIN
+                if (is_New_Pacer == 0) {
+                    // send the request
+                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected, true);
+                    if (isDeveloperMode == true) {
+                        alert("You entered the following PIN: " + pinVar);
+                    }
+                }
+                    // Create New PIN
+                else {
+                    // send the request
+                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
+                    if (isDeveloperMode == true) {
+                        alert("You went to the needNewPacer=1 request block and entered the following PIN: " + pinVar);
+                    }
+                }
+                xhttp.send();
+            }
+                // if verification mode is disabled, allow the user to click through the app
+            else {
+                processAssignedPacer(10, is_New_Pacer);
+            }
         }
 
         // sends GET request for the commands that the Yun will accept; parameters: x - command, y - pacerIndex, z - value
         function requestCommand(x, y, z) {
-			// If you're in "Coach Mode" where you can control all pacers at once
+            // If you're in "Coach Mode" where you can control all pacers at once
             if (masterPacerSelected == 99) {
                 y = masterPacerSelected;
             }
-			// If verification is enabled, do the normal verification
+            // If verification is enabled, do the normal verification
             if (isVerificationEnabled == true) {
-				// create the request
+                // create the request
                 var request = new XMLHttpRequest();
-				
-				// handle the request
+
+                // handle the request
                 request.onreadystatechange = function () {
                     if (request.readyState == 4 && request.status == 200) {
                         // confirm whether or not the request was successful
-						if (isDeveloperMode == true) {
-							alert(request.responseText);
+                        if (isDeveloperMode == true) {
+                            alert(request.responseText);
                         }
                         else {
                             if (request.responseText.substr(0, 8) == "USER MSG") {
@@ -433,11 +429,11 @@
                 };
 
                 // send the request
-				request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
+                request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
                 request.send();
             }
-			
-			// if verification mode isn't enabled, allow the user to click through the app
+
+            // if verification mode isn't enabled, allow the user to click through the app
         }
 
         // Refreshes the pacerButtons with what is currently in the database - also refreshes text fields
@@ -448,8 +444,8 @@
             if (isVerificationEnabled == true) {    // If verification is enabled, do the normal verification, but if it isn't, allow the user to click through the app
                 // Create the request
                 var request = new XMLHttpRequest();
-				
-				// Handle the request - get lapTime, name, and color from PHP
+
+                // Handle the request - get lapTime, name, and color from PHP
                 request.onreadystatechange = function () {
                     if (request.readyState == 4 && request.status == 200) {
                         // split up the feedback
@@ -501,8 +497,8 @@
                         }
                     }
                 }
-				
-				// send the request
+
+                // send the request
                 request.open("GET", "updatePacers.php?updatePacerButtonsNeeded=1", true);
                 request.send();
             }
@@ -537,50 +533,50 @@
                 // hide that button
                 $('#distanceSelectDiv_controlView').hide();
             }
-					
-			$(".myNumPad").click(function () {
-				buttonValue = $(this).attr("value");
-				passcodeDisplayValue = $('#passcodeDisplay').text();
-				combined = passcodeDisplayValue + buttonValue;
-				
-				if (passcodeDisplayValue == "***" || passcodeDisplayValue.length < 3) {
-				
-					if (passcodeDisplayValue == "***") {
-						$('#passcodeDisplay').attr("value", buttonValue);
-						$('#passcodeDisplay').text(buttonValue);
-					}
-					else {
-						$('#passcodeDisplay').attr("value", passcodeDisplayValue + buttonValue);
-						$('#passcodeDisplay').text(passcodeDisplayValue + buttonValue);
-					}
-					
-					if (combined.length == 3) {
-						if (isDeveloperMode == true) {
-							alert("Your passcode was entered: " + combined)
-						}
-						
-						// update view element(s) - text and value attribute
-						// $('#passcodeDisplay').attr("value", "***");
-						// $('#passcodeDisplay').text("***");
-						
-						// call popup to confirm passcode before submitting  
-						// $("#confirmPasscodePopup").popup("open");
-						// $("#confirmPasscodeHeader").text("Submit " + combined + "?");
-						// $('#confirmPasscodeButton').attr("value", "1");
-						
-						
-						if (isNewPacer == true) {
-							pinSubmitted(1, combined);
-						}
-						else {
-							pinSubmitted(0, combined);
-						}
-						
-						
-						// call normal view
-					}
-				}
-			});
+
+            $(".myNumPad").click(function () {
+                buttonValue = $(this).attr("value");
+                passcodeDisplayValue = $('#passcodeDisplay').text();
+                combined = passcodeDisplayValue + buttonValue;
+
+                if (passcodeDisplayValue == "***" || passcodeDisplayValue.length < 3) {
+
+                    if (passcodeDisplayValue == "***") {
+                        $('#passcodeDisplay').attr("value", buttonValue);
+                        $('#passcodeDisplay').text(buttonValue);
+                    }
+                    else {
+                        $('#passcodeDisplay').attr("value", passcodeDisplayValue + buttonValue);
+                        $('#passcodeDisplay').text(passcodeDisplayValue + buttonValue);
+                    }
+
+                    if (combined.length == 3) {
+                        if (isDeveloperMode == true) {
+                            alert("Your passcode was entered: " + combined)
+                        }
+
+                        // update view element(s) - text and value attribute
+                        // $('#passcodeDisplay').attr("value", "***");
+                        // $('#passcodeDisplay').text("***");
+
+                        // call popup to confirm passcode before submitting  
+                        // $("#confirmPasscodePopup").popup("open");
+                        // $("#confirmPasscodeHeader").text("Submit " + combined + "?");
+                        // $('#confirmPasscodeButton').attr("value", "1");
+
+
+                        if (isNewPacer == true) {
+                            pinSubmitted(1, combined);
+                        }
+                        else {
+                            pinSubmitted(0, combined);
+                        }
+
+
+                        // call normal view
+                    }
+                }
+            });
 
             // After clicking the "Click to enter time" button or the button that has the time on it, this will open the flip box
             $("#timeInputLink").click(function () {
@@ -604,14 +600,14 @@
                 $("#incorrectFormatMessage_create").hide();
                 $("#pinVerifyInput").val("");
             });
-            
+
             // Click Handlers
             $(".existPacerButtonClass").click(function () {
                 if (this.text.substring(9, 17) != "inactive") {     // if the pacer is active
                     // set global isNewPacer to false
-					isNewPacer = false;
-					
-					// change the master color, pacer index, pace time, etc.
+                    isNewPacer = false;
+
+                    // change the master color, pacer index, pace time, etc.
                     masterPacerSelected = Number($(this).attr("otherNum"));
                     masterColorIndex = colorArray.indexOf(this.style.backgroundColor);
                     masterUserTimeEnteredString = this.text.substring(9, 14);
@@ -622,8 +618,8 @@
                     }
 
                     // show the view to enter your password
-					showThisDiv("createPasscodeDiv");
-					
+                    showThisDiv("createPasscodeDiv");
+
                     $("#incorrectFormatMessage").hide();
                     $("#failedToAuthenticate").hide();
 
@@ -772,115 +768,115 @@
 
         // change the button text whenever the user enters new text or verify that the user wants to change to the new time when the pacer is already running
         function timeInputChanged(val) {
-			
-			// Updating existing pacer
+
+            // Updating existing pacer
             if ($("#startButton").attr("startNotReset") == "0") {
-                
-				// close the JTSage date box
-				$('#timeInputFlipBox_controlView').datebox('close');
-                
-				// Transition to new box
-				showThisDiv("confirmUpdateDiv");
-				
-				// send confirmUpdateDiv the new value: "confirmUpdateDiv" newColorIndex="0"; updatedProperty="color" updatedPropertyValue="0"
+
+                // close the JTSage date box
+                $('#timeInputFlipBox_controlView').datebox('close');
+
+                // Transition to new box
+                showThisDiv("confirmUpdateDiv");
+
+                // send confirmUpdateDiv the new value: "confirmUpdateDiv" newColorIndex="0"; updatedProperty="color" updatedPropertyValue="0"
                 $("#confirmUpdateDiv").attr("updatedProperty", "time");
                 $("#confirmUpdateDiv").attr("updatedPropertyValue", val);
             }
-			
-			// Creating new pacer
+
+                // Creating new pacer
             else {
-                
-				// split the string "x:yy" and save it as a single digit = "x*60 + y"
+
+                // split the string "x:yy" and save it as a single digit = "x*60 + y"
                 timeArray = val.split(":");
                 masterUserPaceTime = (Number(timeArray[0]) * 60) + Number(timeArray[1]);    // This ensures that a correctly formatted number goes into the global variable masterUserPaceTime
-				masterUserTimeEnteredString = val;
-                
-				// change the value of the buttons
+                masterUserTimeEnteredString = val;
+
+                // change the value of the buttons
                 $("#timeInputLink").text(val);
                 $("#timeInputLink_controlView").text(val);
             }
         }
-        
-		// Handle the request from the user to update their pacer with its new values
+
+        // Handle the request from the user to update their pacer with its new values
         function updatePacerAttribute() {
-			
-			// user wants to update their color
+
+            // user wants to update their color
             if ($("#confirmUpdateDiv").attr("updatedProperty") == "color") {
-				
-				// set masterColorIndex with the new color
+
+                // set masterColorIndex with the new color
                 masterColorIndex = Number($("#confirmUpdateDiv").attr("updatedPropertyValue"));
-                
-				// update the view's element(s) - dropdown
-				$("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown back to the new value and refresh it
-                
-				// change back to the correct view
-				showThisDiv("mainPacerControl", "slide");
-				
-				// send the request to Arduino
+
+                // update the view's element(s) - dropdown
+                $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');      // change the color select dropdown back to the new value and refresh it
+
+                // change back to the correct view
+                showThisDiv("mainPacerControl", "slide");
+
+                // send the request to Arduino
                 requestCommand(5, masterPacerSelected, masterColorIndex);
             }
-			
-			// user wants to update their time
+
+            // user wants to update their time
             if ($("#confirmUpdateDiv").attr("updatedProperty") == "time") {
-                
-				// create a variable to hold the newly entered time
-				var newTime;
-				
-				// parse the entered time
+
+                // create a variable to hold the newly entered time
+                var newTime;
+
+                // parse the entered time
                 timeArray = $("#confirmUpdateDiv").attr("updatedPropertyValue").split(":");
-                
-				// assign the parsed time to the variable
-				newTime = (Number(timeArray[0]) * 60) + Number(timeArray[1]);
+
+                // assign the parsed time to the variable
+                newTime = (Number(timeArray[0]) * 60) + Number(timeArray[1]);
 
                 // create a new variable to hold the time difference
-				var timeDifference = 1 * (newTime - masterUserPaceTime);
-				if (isDeveloperMode == true) {
-					alert("timeDifference is: " + timeDifference + " but it would have been: " + (newTime - masterUserPaceTime) + " or " + (-1 * (masterUserPaceTime - newTime)))
-				}
+                var timeDifference = 1 * (newTime - masterUserPaceTime);
+                if (isDeveloperMode == true) {
+                    alert("timeDifference is: " + timeDifference + " but it would have been: " + (newTime - masterUserPaceTime) + " or " + (-1 * (masterUserPaceTime - newTime)))
+                }
 
                 // set masterUserPaceTime with the newTime
-				masterUserPaceTime = newTime;
-                
-				// update the view's element(s) - buttons
+                masterUserPaceTime = newTime;
+
+                // update the view's element(s) - buttons
                 $("#timeInputLink").text($("#confirmUpdateDiv").attr("updatedPropertyValue"));
                 $("#timeInputLink_controlView").text($("#confirmUpdateDiv").attr("updatedPropertyValue"));
 
                 // convert timeDifference to a lap time
-				timeDifference = (timeDifference * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2);
-                
-				// change back to the correct view
-				showThisDiv("mainPacerControl", "slide");
-                
-				// send the request to Arduino
-				requestCommand(8, masterPacerSelected, timeDifference);
+                timeDifference = (timeDifference * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2);
+
+                // change back to the correct view
+                showThisDiv("mainPacerControl", "slide");
+
+                // send the request to Arduino
+                requestCommand(8, masterPacerSelected, timeDifference);
             }
         }
-        
-		// respond to the user changing the view's color element - dropdown
+
+        // respond to the user changing the view's color element - dropdown
         function colorChanged(val) {
-		
-			// Updating existing pacer
+
+            // Updating existing pacer
             if ($("#startButton").attr("startNotReset") == "0") {
-			
-				// Create a new variable to hold the new color and assign it the user's new color index
+
+                // Create a new variable to hold the new color and assign it the user's new color index
                 var newColor = val;
-				
-				// change the color select dropdown back to what it was and refresh it
+
+                // change the color select dropdown back to what it was and refresh it
                 $("#colorSelect_controlView").val(masterColorIndex).selectmenu('refresh');
-                
-				// navigate to the confirm update page
-				showThisDiv("confirmUpdateDiv");
-				
-				// send the user's new values to the confirm update div: "confirmUpdateDiv" newColorIndex="0"; updatedProperty="color" updatedPropertyValue="0"
+
+                // navigate to the confirm update page
+                showThisDiv("confirmUpdateDiv");
+
+                // send the user's new values to the confirm update div: "confirmUpdateDiv" newColorIndex="0"; updatedProperty="color" updatedPropertyValue="0"
                 $("#confirmUpdateDiv").attr("updatedProperty", "color");
                 $("#confirmUpdateDiv").attr("updatedPropertyValue", newColor);
             }
-			
-			// Creating new pacer
+
+                // Creating new pacer
             else {
-			
-				// cast val from a string to a number and it will represent the index of the color in the colorArray
-				val = Number(val);
+
+                // cast val from a string to a number and it will represent the index of the color in the colorArray
+                val = Number(val);
                 masterColorIndex = val;
 
                 // update the view's element(s) - dropdown - not necessary since the dropdown updates itself
@@ -925,13 +921,13 @@
                     }
                 }
             }
-            // invalid
-			else {
-				if (isDeveloperMode == true) {
-					alert("Your PIN is NOT greater than 0 or it isn't a number because it is: " + new_pinVar);
-				}
-				return false;
-			}
+                // invalid
+            else {
+                if (isDeveloperMode == true) {
+                    alert("Your PIN is NOT greater than 0 or it isn't a number because it is: " + new_pinVar);
+                }
+                return false;
+            }
         }
 
     </script>
@@ -967,9 +963,6 @@
 	<br /><br />
     
     <div id="colorSelectDiv_controlView" >
-        <!--<a href="#" data-inline="true" font-size: 24px" data-role="content">Test Button</a>-->
-        <!--<label data-inline="true" for="colorSelect_controlView" class="btn">Color:</label>-->
-        <!--<span class="ui-block-a" style="font-size: 24px">Pacer color:</span>-->
         <select data-role="button" onchange="colorChanged(this.value)" name="select-native-3" id="colorSelect_controlView" data-iconpos="none">
             <option value="1">Pacer color: White</option>
             <option value="2">Pacer color: Red</option>
@@ -1009,18 +1002,6 @@
 		</div>
 	</div>
 
-    <!-- Restart Popup/Modal-->
-    <div data-role="popup" id="restartPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
-		<div data-role="header" data-theme="a" class="ui-corner-top">
-			<h1>Restart?</h1>
-		</div>
-		<div role="main" class="ui-corner-bottom ui-content">
-			<h3 class="ui-title">Are you sure you want to restart?</h3>
-			<p>If your pacer is running, this will reset it and it will restart after a 10 second traffic light countdown</p>
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="reset()">OK</a>
-		</div>
-	</div>
 </div>
 
 <!-- Create new PIN page -->
@@ -1032,41 +1013,30 @@
 		<h3 style="text-align:center;">Enter a 3 digit passcode</h3>
 		<p id="incorrectFormatMessage" style="color:red; text-align:center;">Passcode was not 3 digits.</p>
 		<p id="failedToAuthenticate" style="color:red">Incorrect passcode. Try again.</p>
-		<h2 id="passcodeDisplay" style="text-align: center;" value="***">***</h2>
-		<br /><br />
+		<h1 id="passcodeDisplay" style="text-align: center;" value="***">***</h1>
+		
 		<div class="ui-grid-b" style="margin: 0 20px 0 20px;">
-			<div class="ui-block-a"><button value="1" class="myNumPad" data-mini="true" style="font-size: 16px" data-role="button">1</button></div>
-			<div class="ui-block-b"><button value="2" class="myNumPad" data-mini="true" style="font-size: 16px" data-role="button">2</button></div>
-			<div class="ui-block-c"><button value="3" class="myNumPad" data-mini="true" style="font-size: 16px" data-role="button">3</button></div>
+			<div class="ui-block-a"><button value="1" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">1</button></div>
+			<div class="ui-block-b"><button value="2" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">2</button></div>
+			<div class="ui-block-c"><button value="3" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">3</button></div>
 		</div>
 		<div class="ui-grid-b" style="margin: 0 20px 0 20px;">
-			<div class="ui-block-a"><button value="4" class="myNumPad" data-mini="true" style="font-size: 16px" data-role="button">4</button></div>
-			<div class="ui-block-b"><button value="5" class="myNumPad" data-mini="true" style="font-size: 16px" data-role="button">5</button></div>
-			<div class="ui-block-c"><button value="6" class="myNumPad" data-mini="true" style="font-size: 16px" data-role="button">6</button></div>
+			<div class="ui-block-a"><button value="4" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">4</button></div>
+			<div class="ui-block-b"><button value="5" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">5</button></div>
+			<div class="ui-block-c"><button value="6" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">6</button></div>
 		</div>
 		<div class="ui-grid-b" style="margin: 0 20px 0 20px;">
-			<div class="ui-block-a"><button value="7" class="myNumPad" data-mini="true" style="font-size: 16px" data-role="button">7</button></div>
-			<div class="ui-block-b"><button value="8" class="myNumPad" data-mini="true" style="font-size: 16px" data-role="button">8</button></div>
-			<div class="ui-block-c"><button value="9" class="myNumPad" data-mini="true" style="font-size: 16px" data-role="button">9</button></div>
+			<div class="ui-block-a"><button value="7" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">7</button></div>
+			<div class="ui-block-b"><button value="8" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">8</button></div>
+			<div class="ui-block-c"><button value="9" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">9</button></div>
 		</div>
 		<div class="ui-grid-b" style="margin: 0 20px 0 20px;">
-			<div class="ui-block-a"><button data-mini="true" style="font-size: 16px" data-role="button">&nbsp;</button></div>
-			<div class="ui-block-b"><button value="0" class="myNumPad" data-mini="true" style="font-size: 16px" data-role="button">0</button></div>
-			<div class="ui-block-c"><button data-mini="true" style="font-size: 16px" data-role="button">&nbsp;</button></div>
+			<div class="ui-block-a"><button data-mini="true" style="font-size: 24px" data-role="button">&nbsp;</button></div>
+			<div class="ui-block-b"><button value="0" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">0</button></div>
+			<div class="ui-block-c"><button data-mini="true" style="font-size: 24px" data-role="button">&nbsp;</button></div>
 		</div>
 		<a href="#" data-role="button" data-rel="back" data-theme="a">Cancel</a>
-		
-		<!-- Confirm PIN Popup/Modal-->
-		<div data-role="popup" id="confirmPasscodePopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
-			<div data-role="header" data-theme="a" class="ui-corner-top">
-				<h1>Passcode OK?</h1>
-			</div>
-			<div role="main" class="ui-corner-bottom ui-content">
-				<h3 id="confirmPasscodeHeader" class="ui-title"></h3>
-				<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-				<a href="#" id="confirmPasscodeButton" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="pinSubmitted(1)">OK</a>
-			</div>
-		</div>
+
 	</div>
 </div>
 
@@ -1169,21 +1139,6 @@
     <a href="#" id="existPacerButton7" class="btn existPacerButtonClass" colorIndex="0" otherNum="7" data-role="button" data-icon="star"></a>
     <a href="#" id="existPacerButton8" class="btn existPacerButtonClass" colorIndex="0" otherNum="8" data-role="button" data-icon="star"></a>
     <a href="#" id="existPacerButton9" class="btn existPacerButtonClass" colorIndex="0" otherNum="9" data-role="button" data-icon="star"></a>
-    
-    <!-- Enter existing PIN Popup -->
-    <div data-role="popup" id="enterPasscodePopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
-		<div data-role="header" data-theme="a" class="ui-corner-top">
-			<h1>Login</h1>
-		</div>
-		<div role="main" class="ui-corner-bottom ui-content">
-			<h3 class="ui-title">Enter your 3 digit passcode below:</h3>
-            <p id="incorrectFormatMessage_authenticate" style="color:red">Your passcode was not 3 digits.</p>
-            <p id="failedToAuthenticate_authenticate" style="color:red">Incorrect passcode. Try again.</p>
-			<input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinAuthenticateInput" value="" step="1" min="0" max="999" url="" />
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" onclick="pinSubmitted(0)" data-transition="flow" data-theme="b">OK</a>
-		</div>
-	</div>
 
     <!-- Please choose an active pacer or navigate back to the previous screen to create one-->
     <div data-role="popup" id="chooseActivePacerPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
@@ -1196,15 +1151,6 @@
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">OK</a>
 		</div>
 	</div>
-</div>
-
-<!-- Enter PIN View - Existing Pacer -->
-<div data-role="page" id="pinView_existing" class="contentElement advancedElement" >
-    <br /><br /><br />
-    <h3 for="enterPinSubmit" class="">Enter your 3 digit passcode: </h3>
-    <input type="number" pattern="[0-9]*" inputmode="numeric" name="name" id="pinEntryField" value="3 Digit Passcode Input" step="1" min="0" max="999" url="" />
-    <br /><br /><br />
-    <input id="enterPinSubmit" type="button" class="btn" otherNum="2" data-role="button" style="background-color:#f00" value="<h2>Enter!</h2>" />
 </div>
 
 <!-- Color Button View - New Pacer -->

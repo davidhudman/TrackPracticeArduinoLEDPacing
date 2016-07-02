@@ -33,19 +33,22 @@
     <link rel="stylesheet" href="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.css">
     <script src="Mobile-friendly-Numeric-Keypad-Plugin-For-jQuery-NumPad/jquery.numpad.js"></script>
     <script>
-        var isDeveloperMode = false;
-        var isVerificationEnabled = false;     // If false, this will allow the user to click through the app without being attached to any DB or web server
+        // mode variables
+        var isDeveloperMode = false;			// This will enable certain messages and alerts that are ideal for troubleshooting
+        var isVerificationEnabled = true;		// If false, this will allow the user to click through the app without being attached to any DB or web server
 
         // Globals specific to the client's track and desired permissions
         var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
         // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
         // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
         // var ipAddress = "http://192.168.1.244";      // IP address for Yun on Aaron's apt network
+
+        // Track Rules and Definitions
         var numPacers = 10;
         var lapTimeInputConstraints = [1, 900];
         var trackDistanceInMeters = 400;
-        var userTimeInputDistance = 1609.344; 			 // this allows the user to specify whether they want to input their pace as a lap pace (based on how long this track is), 400m pace, 1600m pace, or mile pace
-        var userTimeInputDistanceString = "mile";	    // a string that will indicate to the user what they chose (or what is default)
+
+        // user permissions
         var isUserBackwardsPermissionEnabled = true;
         var isUserWorkoutPermissionEnabled = true;
         var isUserVisiblePermissionEnabled = true;
@@ -54,21 +57,19 @@
         var isUserOptionsEnabled = false;
         var isDistanceChangePermissionEnabled = false;
 
-        var pacerButton = [];
-        var advancedButtonPressed = false;
-        var onCreateNewPacerViewSequence = false;
-        var onExistingPacerSequence = false;
-        var onCoachSequence = false;
-        var extrasMode = false;
+        // user variables
         var masterPacerSelected = -1;
         var masterColorIndex = 1;
         var masterUserPaceTime = "-1";
         var masterUserTimeEnteredString = "-1";
-        var pinVar = -1;
-        var newPacer = [];
-        var combined; // combined string of passcode being submitted
-        var isNewPacer = true;
+        var userTimeInputDistance = 1609.344; 			 // this allows the user to specify whether they want to input their pace as a lap pace (based on how long this track is), 400m pace, 1600m pace, or mile pace
+        var userTimeInputDistanceString = "mile";	    // a string that will indicate to the user what they chose (or what is default)
+        var pinVar = -1;								// this is used by requestCommand() to send the user's PIN for verification on each command
+        var combined; 									// combined string of passcode being submitted
 
+        // additional variables
+        var isNewPacer = true;							// used for sequencing rules with the different views
+        var newPacer = [];								// used for the refreshPacerButtonData() function
         colorArray = ["black", "white", "red", "orange", "yellow", "green", "blue", "purple"];
 
         // workout creation
@@ -77,6 +78,13 @@
         secondsRestArray = [];
         currentInterval = 0;
 
+        // deprecated variables
+        var pacerButton = [];
+        var advancedButtonPressed = false;
+        var onCreateNewPacerViewSequence = false;
+        var onExistingPacerSequence = false;
+        var onCoachSequence = false;
+        var extrasMode = false;
 
         // *****************
         // Click Handlers
@@ -161,6 +169,13 @@
 
         // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
         function help() {
+            // var ip = location.host;
+            // alert(ip);
+            $.getJSON("http://jsonip.com/?callback=?", function (data) {
+                // console.log(data);
+                alert(data.ip);
+            });
+
             // alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
             $("#helpPopup").popup("open");
 
@@ -212,6 +227,11 @@
 
                 // show the view to let the user create a passocde
                 showThisDiv("createPasscodeDiv");
+
+                // reset the passcode values and variables in the view and the global variable
+                $('#passcodeDisplay').attr("value", "***");
+                $('#passcodeDisplay').text("***");
+                combined = "";
 
                 // hide the error messages
                 $("#incorrectFormatMessage").hide();
@@ -294,6 +314,8 @@
             // isNewPacer == 1 : create
             pin = combined || 0;
             if (is_New_Pacer == 1) {      // new pacer
+
+                // this pinVar variable is used for requestCommand() so it must stay up to date in order for the commands to be valid
                 pinVar = -1;
                 pinVar = pin;
 
@@ -527,6 +549,8 @@
 
             $('#timeInput').hide();
             $('#timeInput_controlView').hide();
+            $("#incorrectFormatMessage").hide();
+            $("#failedToAuthenticate").hide();
             $('#optionsButton').hide();
 
             if (isDistanceChangePermissionEnabled == false) {
@@ -632,6 +656,12 @@
                     // show the view to enter your password
                     showThisDiv("createPasscodeDiv");
 
+                    // reset the passcode values and variables in the view and the global variable
+                    $('#passcodeDisplay').attr("value", "***");
+                    $('#passcodeDisplay').text("***");
+                    combined = "";
+
+                    // hide the error messages
                     $("#incorrectFormatMessage").hide();
                     $("#failedToAuthenticate").hide();
 

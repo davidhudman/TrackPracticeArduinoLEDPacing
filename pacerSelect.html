@@ -537,43 +537,55 @@
             $(".myNumPad").click(function () {
                 buttonValue = $(this).attr("value");
                 passcodeDisplayValue = $('#passcodeDisplay').text();
-                combined = passcodeDisplayValue + buttonValue;
 
-                if (passcodeDisplayValue == "***" || passcodeDisplayValue.length < 3) {
+                // if the display values are already "***", make sure that our global variable "combined" is blank
+                if (passcodeDisplayValue == "***") {
+                    combined = "";
+                }
 
-                    if (passcodeDisplayValue == "***") {
-                        $('#passcodeDisplay').attr("value", buttonValue);
-                        $('#passcodeDisplay').text(buttonValue);
-                    }
-                    else {
-                        $('#passcodeDisplay').attr("value", passcodeDisplayValue + buttonValue);
-                        $('#passcodeDisplay').text(passcodeDisplayValue + buttonValue);
-                    }
+                // if the user hit the "clear" button
+                if (buttonValue == "x") {
+                    // update the view
+                    $('#passcodeDisplay').attr("value", "***");
+                    $('#passcodeDisplay').text("***");
 
-                    if (combined.length == 3) {
-                        if (isDeveloperMode == true) {
-                            alert("Your passcode was entered: " + combined)
-                        }
+                    // change the global combined value back to blank
+                    combined = "";
+                }
+                    // if the user hit any number button
+                else {
+                    // if the user has currently entered less than 3 digits ("***" would indicate that they haven't entered anything)
+                    if (passcodeDisplayValue == "***" || passcodeDisplayValue.length < 3) {
 
-                        // update view element(s) - text and value attribute
-                        // $('#passcodeDisplay').attr("value", "***");
-                        // $('#passcodeDisplay').text("***");
-
-                        // call popup to confirm passcode before submitting  
-                        // $("#confirmPasscodePopup").popup("open");
-                        // $("#confirmPasscodeHeader").text("Submit " + combined + "?");
-                        // $('#confirmPasscodeButton').attr("value", "1");
-
-
-                        if (isNewPacer == true) {
-                            pinSubmitted(1, combined);
+                        if (passcodeDisplayValue == "***") {
+                            $('#passcodeDisplay').attr("value", buttonValue);
+                            $('#passcodeDisplay').text(buttonValue);
                         }
                         else {
-                            pinSubmitted(0, combined);
+                            // update the view and it's value
+                            $('#passcodeDisplay').attr("value", passcodeDisplayValue + buttonValue);
+                            $('#passcodeDisplay').text(passcodeDisplayValue + buttonValue);
+
+                            // set the value of our global variable to the combination or these to strings
+                            combined = passcodeDisplayValue + buttonValue;		// placing this inside the if statement will ensure that it doesn't get pressed an extra time
                         }
 
+                        if (combined.length == 3) {
+                            if (isDeveloperMode == true) {
+                                alert("Your passcode was entered: " + combined)
+                            }
 
-                        // call normal view
+                            // do something here to make the view inacessible so the user can't press anymore buttons
+
+                            // if this is a new pacer
+                            if (isNewPacer == true) {
+                                pinSubmitted(1, combined);
+                            }
+                                // if we're authenticating an existing pacer
+                            else {
+                                pinSubmitted(0, combined);
+                            }
+                        }
                     }
                 }
             });
@@ -1033,7 +1045,7 @@
 		<div class="ui-grid-b" style="margin: 0 20px 0 20px;">
 			<div class="ui-block-a"><button data-mini="true" style="font-size: 24px" data-role="button">&nbsp;</button></div>
 			<div class="ui-block-b"><button value="0" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">0</button></div>
-			<div class="ui-block-c"><button data-mini="true" style="font-size: 24px" data-role="button">&nbsp;</button></div>
+			<div class="ui-block-c"><button value="x" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">Clear</button></div>
 		</div>
 		<a href="#" data-role="button" data-rel="back" data-theme="a">Cancel</a>
 

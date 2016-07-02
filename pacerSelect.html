@@ -128,7 +128,9 @@
             if (isDeveloperMode == true) {
                 alert("About to send the command to start the pacer.");
             }
+
             requestCommand(7, masterPacerSelected, (masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2));
+
             if (isDeveloperMode == true) {
                 alert("Sent the command to start the pacer and it's time for a " + userTimeInputDistance + " was " + masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance) + " and the actual rounded value sent was " + (masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2));
             }
@@ -357,7 +359,7 @@
         };
 
         // Takes you a view where the user can edit their new pacer
-        function pinCreateAndAuthenticate(pinVar, is_New_Pacer) {
+        function pinCreateAndAuthenticate(pin_Var, is_New_Pacer) {
             // If verification is enabled, do the normal verification
             if (isVerificationEnabled == true) {
                 // create the request
@@ -397,17 +399,17 @@
                 // Authenticate Existing PIN
                 if (is_New_Pacer == 0) {
                     // send the request
-                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected, true);
+                    xhttp.open("GET", "verifyPIN.php?pin=" + pin_Var + "&pacerIndex=" + masterPacerSelected, true);
                     if (isDeveloperMode == true) {
-                        alert("You entered the following PIN: " + pinVar);
+                        alert("You entered the following PIN: " + pin_Var);
                     }
                 }
                     // Create New PIN
                 else {
                     // send the request
-                    xhttp.open("GET", "verifyPIN.php?pin=" + pinVar + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
+                    xhttp.open("GET", "verifyPIN.php?pin=" + pin_Var + "&pacerIndex=" + masterPacerSelected + "&needNewPacer=1", true);
                     if (isDeveloperMode == true) {
-                        alert("You went to the needNewPacer=1 request block and entered the following PIN: " + pinVar);
+                        alert("You went to the needNewPacer=1 request block and entered the following PIN: " + pin_Var);
                     }
                 }
                 xhttp.send();
@@ -444,9 +446,17 @@
                     }
                 };
 
-                // send the request
-                request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
-                request.send();
+                // if sending the "start" command, we want to also send a string that gives the exact pace and distance so there are no rounding errors
+                if (x == 7) {
+                    // send the request
+                    request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar + "&fourthCommand=" + masterUserTimeEnteredString + " per " + userTimeInputDistanceString, true);
+                    request.send();
+                }
+                else {
+                    // send the request
+                    request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
+                    request.send();
+                }
             }
 
             // if verification mode isn't enabled, allow the user to click through the app
@@ -480,15 +490,16 @@
                                 color: colorArray[singlePacerSet[2] % colorArray.length],
                                 colorText: "background-color:" + colorArray[singlePacerSet[2] % colorArray.length],
                                 name: singlePacerSet[3],
-                                activeText: singlePacerSet[3] + " - " + (singlePacerSet[1] * 1609.344 / trackDistanceInMeters).toString().toHHMMSS() + " mile pace",
-                                inactiveText: singlePacerSet[3] + " - inactive"
+                                // activeText: singlePacerSet[3] + " - " + (singlePacerSet[1] * 1609.344 / trackDistanceInMeters).toString().toHHMMSS() + " mile pace",
+                                // inactiveText: singlePacerSet[3] + " - inactive"
+                                inactiveText: "Pacer" + singlePacerSet[0] + " - inactive"
                             };
 
                             // newPacer[masterPacerSelected].color, (newPacer[masterPacerSelected].lapTime * 1609.344 / trackDistanceInMeters).toString(), .toHHMMSS()
 
 
                             // update the view - buttons
-                            $("#existPacerButton" + i).text(newPacer[i].activeText).attr('style', newPacer[i].colorText);
+                            $("#existPacerButton" + i).text(newPacer[i].name).attr('style', newPacer[i].colorText);
                             if (singlePacerSet[2] % colorArray.length == "1" || singlePacerSet[2] % colorArray.length == "4") {
                                 $("#existPacerButton" + i).css('color', 'black');
                             }
@@ -935,21 +946,21 @@
         }
 
         // Determines if the PIN that the user entered is in a valid format
-        function isPinFormatValid(new_pinVar) {
+        function isPinFormatValid(pin_Var) {
             var str = "";
-            str = new_pinVar.split("");
-            if (new_pinVar >= 0 && !isNaN(new_pinVar)) {
+            str = pin_Var.split("");
+            if (pin_Var >= 0 && !isNaN(pin_Var)) {
                 // invalid
-                if (new_pinVar == null) {
+                if (pin_Var == null) {
                     if (isDeveloperMode == true) {
-                        alert("Your PIN is NULL because it is: " + new_pinVar + " so we should return false.");
+                        alert("Your PIN is NULL because it is: " + pin_Var + " so we should return false.");
                     }
                     return false;
                 }
                 else {
                     // valid
                     if (isDeveloperMode == true) {
-                        alert("Your PIN is greater than 0 because it is: " + new_pinVar);
+                        alert("Your PIN is greater than 0 because it is: " + pin_Var);
                     }
                     // it looks like the string parse section should be moved here, but the variable declaration may need to be placed above the first "if" statement
                     // string parse section
@@ -964,7 +975,7 @@
                 // invalid
             else {
                 if (isDeveloperMode == true) {
-                    alert("Your PIN is NOT greater than 0 or it isn't a number because it is: " + new_pinVar);
+                    alert("Your PIN is NOT greater than 0 or it isn't a number because it is: " + pin_Var);
                 }
                 return false;
             }

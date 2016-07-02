@@ -15,7 +15,9 @@
 		    var isDeveloperMode = false;
 
 		    // Globals specific to the client's track and desired permissions.
-		    var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
+		    
+		    var ipAddress = "";
+		    // var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
 		    // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
 		    // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
 		    var numPacers = 10;
@@ -114,6 +116,10 @@
 		    }
 
 		    $(document).ready(function () {
+
+		        // set the global IP address variable to whatever host we just got the page from so we know where to send the requests to
+		        ipAddress = "http://" + location.host;
+
 		        // handles pacer action commands - clear, reset, backwards, new number of lights, change in speed, etc.
 		        $(".submitButton, .submitButton3, .speedChangeButton, #lightsSubmit, .simpleViewActionButtons").click(function () {
 		            var commandURL = parseInt($(this).attr("url"), 10);

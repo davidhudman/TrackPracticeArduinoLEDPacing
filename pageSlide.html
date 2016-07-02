@@ -37,7 +37,7 @@
         var isVerificationEnabled = true;     // If false, this will allow the user to click through the app without being attached to any DB or web server
 
         // Globals specific to the client's track and desired permissions
-        var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
+        // var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
         // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
         // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
         // var ipAddress = "http://192.168.1.244";      // IP address for Yun on Aaron's apt network
@@ -157,6 +157,9 @@
 
             $('#timeInput').hide();
             $("#colorText").hide();
+
+            // set the global IP address variable to whatever host we just got the page from so we know where to send the requests to
+            ipAddress = "http://" + location.host;
 
             $("#timeInputLink").click(function () {
                 $('#timeInputFlipBox').datebox('open');

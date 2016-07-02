@@ -33,6 +33,7 @@ if (empty($_REQUEST["command"])) {
 	$value = $_REQUEST["value"];
 	$command = $_REQUEST["command"];
 	$pin = $_REQUEST["pin"];
+	$fourthCommand = $_REQUEST["fourthCommand"];
 }
 else {
 	// do nothing - for some reason it always gets recognized as "empty" even though there are clearly parameters
@@ -40,6 +41,7 @@ else {
 	$value = $_REQUEST["value"];
 	$command = $_REQUEST["command"];
 	$pin = $_REQUEST["pin"];
+	$fourthCommand = $_REQUEST["fourthCommand"];
 }
 
 // If the pacerIndex is 99, we are in "Coach Mode" so it's not necessary to do a PIN check.
@@ -84,13 +86,19 @@ if ($pacerIndex == 99) {
 						$queryPacerIndex = $row['pacerIndex'];
 				}
 				$db->exec($query);
+				
 				// if there's a pacer available:
 				if ($queryPacerIndex != -1) {
+					// set the fourthCommand variable to the name that we want sent to the database for the pacer's name
+					$fourthCommand = 'Pacer' . $pacerIndex . ' - ' . $fourthCommand;
+
+					// remove testing: echo 'USER MSG: Sending the following SQL query: UPDATE Pin SET active=1, lapTime=' . $value . ', name=' . $fourthCommand . ' WHERE pacerIndex=' . $queryPacerIndex;
+
 					// do the arduino requests
-					arduinoCommandRequest($ipAddress, $command, $pacerIndex, $value, $fourthCommand);
-					
+					arduinoCommandRequest($ipAddress, $command, $pacerIndex, $value, -1);
+
 					// update the database
-					$results = $db->query('UPDATE Pin SET active=1, lapTime=' . $value . ' WHERE pacerIndex=' . $queryPacerIndex);
+					$results = $db->query('UPDATE Pin SET active=1, lapTime=' . $value . ', name="' . $fourthCommand . '" WHERE pacerIndex=' . $queryPacerIndex);
 					$db->exec($query);
 				}
 				else {
@@ -168,9 +176,13 @@ else {
 					arduinoCommandRequest($ipAddress, $command, $pacerIndex, $value, $fourthCommand);
 					break;
 				case 7:	// time
-					$results = $db->query('UPDATE Pin SET active=1, lapTime=' . $value . ' WHERE pacerIndex=' . $pacerIndex);
+					// set the fourthCommand variable to the name that we want sent to the database for the pacer's name
+					$fourthCommand = 'Pacer' . $pacerIndex . ' - ' . $fourthCommand;
+
+					echo 'Sending the following SQL query: UPDATE Pin SET active=1, lapTime=' . $value . ', name="' . $fourthCommand . '" WHERE pacerIndex=' . $pacerIndex;
+					$results = $db->query('UPDATE Pin SET active=1, lapTime=' . $value . ', name="' . $fourthCommand . '" WHERE pacerIndex=' . $pacerIndex);
 					$db->exec($query);
-					arduinoCommandRequest($ipAddress, $command, $pacerIndex, $value, $fourthCommand);
+					arduinoCommandRequest($ipAddress, $command, $pacerIndex, $value, "-1");
 					break;
 				case 8:	// change speed
 					$results = $db->query('SELECT * FROM Pin WHERE pacerIndex=' . $pacerIndex);
@@ -217,7 +229,13 @@ else {
 
 // send a GET reqest to the Arduino
 function arduinoCommandRequest($ipAddress_, $command_, $pacerIndex_, $value_, $fourthCommand_) {
-	file_get_contents($ipAddress_ . "/arduino/" . $command_ . "/" . $pacerIndex_ . "/" . $value_ . "/" . $fourthCommand_);
+	// if the value of fourthCommand is null, we don't want to send it to Arduino, because it will cause major delay problems
+	if ($fourthCommand == null) {
+		file_get_contents($ipAddress_ . "/arduino/" . $command_ . "/" . $pacerIndex_ . "/" . $value_ . "/" . "-1");
+	}
+	else {
+		file_get_contents($ipAddress_ . "/arduino/" . $command_ . "/" . $pacerIndex_ . "/" . $value_ . "/" . $fourthCommand_);
+	}
 	echo "Command made it through to Arduino.";
 }
 /*

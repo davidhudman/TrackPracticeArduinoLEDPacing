@@ -155,7 +155,7 @@
             userTimeInputDistanceString = "mile";
 
             // close popup
-            // showThisDiv("mainPacerControl", "slide");
+            showThisDiv("mainPacerControl", "slide");
 
             // Reset buttons to normal
             $('#startButton').text("Start");                                                // change "Start" button to "Restart"
@@ -208,30 +208,40 @@
 
         function reset() {
             requestCommand(2, masterPacerSelected, 0);
-        }
 
+            // change to the correct view - this should prevent unwanted delays associated with the request to arduino
+            showThisDiv("mainPacerControl", "slide");
+        }
+        
         function requestPacerOrRestart() {
             // restart
             if ($("#startButton").attr("startNotReset") == "0") {
                 // show the view to let the user confirm their restart
                 showThisDiv("confirmRestartDiv");
             }
-                // start
+            // start
             else {
-                // set the global variable to indicate this is a new pacer
-                isNewPacer = true;
+                // If time is set
+                if (masterUserPaceTime != "-1") {
+                    // set the global variable to indicate this is a new pacer
+                    isNewPacer = true;
 
-                // show the view to let the user create a passocde
-                showThisDiv("createPasscodeDiv");
+                    // show the view to let the user create a passocde
+                    showThisDiv("createPasscodeDiv");
 
-                // reset the passcode values and variables in the view and the global variable
-                $('#passcodeDisplay').attr("value", "***");
-                $('#passcodeDisplay').text("***");
-                combined = "";
+                    // reset the passcode values and variables in the view and the global variable
+                    $('#passcodeDisplay').attr("value", "***");
+                    $('#passcodeDisplay').text("***");
+                    combined = "";
 
-                // hide the error messages
-                $("#incorrectFormatMessage").hide();
-                $("#failedToAuthenticate").hide();
+                    // hide the error messages
+                    $("#incorrectFormatMessage").hide();
+                    $("#failedToAuthenticate").hide();
+                }
+                // else: tell the user to enter their time
+                else {
+                    $("#timeNotEnteredPopup").popup("open");
+                }
             }
         }
 
@@ -300,6 +310,11 @@
                     if (isDeveloperMode == true) {
                         alert("Your existing pacer failed to authenticate.");
                     }
+
+                    // update view element(s) - text and value attribute
+                    $('#passcodeDisplay').attr("value", "***");
+                    $('#passcodeDisplay').text("***");
+                    combined = "";
                     $("#failedToAuthenticate").show();
                 }
             }
@@ -1041,6 +1056,19 @@
         <a id="optionsButton" onclick="options()" style="font-size: 16px" data-role="button">Options</a>
 	</div>
 
+    
+    <!-- Time not entered Popup/Modal-->
+	<div data-role="popup" id="timeNotEnteredPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Alert</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">You must enter a time before you can begin.</h3>
+			<p>Enter your time and hit the start button. If you already created a pacer and it's still running, hit the button titled "Already created a pacer? Login."</p>
+			<a href="#" data-role="button" data-rel="back" data-transition="flow" data-theme="b">Close</a>
+		</div>
+	</div>
+
     <!-- Help Popup/Modal-->
 	<div data-role="popup" id="helpPopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
@@ -1058,12 +1086,9 @@
 <!-- Create new PIN page -->
 <div data-role="page" id="createPasscodeDiv" style="" data-theme="b">
 	<div data-role="content" style="max-width: 400px; min-width: 250px; margin: auto;">
-		<div data-role="header" data-theme="a" class="ui-corner-top">
-			<h1>Create Login</h1>
-		</div>
 		<h3 style="text-align:center;">Enter a 3 digit passcode</h3>
 		<p id="incorrectFormatMessage" style="color:red; text-align:center;">Passcode was not 3 digits.</p>
-		<p id="failedToAuthenticate" style="color:red">Incorrect passcode. Try again.</p>
+		<p id="failedToAuthenticate" style="color:red; text-align:center;">Incorrect passcode. Try again.</p>
 		<h1 id="passcodeDisplay" style="text-align: center;" value="***">***</h1>
 		
 		<div class="ui-grid-b" style="margin: 0 20px 0 20px;">
@@ -1130,7 +1155,7 @@
 			<h3 class="ui-title">Are you sure you want to restart?</h3>
 			<p>If your pacer is running, this will reset it and it will restart after a 10 second traffic light countdown</p>
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="reset()">OK</a>
+			<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="reset()">OK</a>
 		</div>	
 	</div>
 </div>
@@ -1145,7 +1170,7 @@
 			<h3 class="ui-title">Are you sure you want to quit?</h3>
 			<p>If your pacer is running, this will stop it from running and allow someone else to use it.</p>
 			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
-			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" onclick="quit()">OK</a>
+			<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="quit()">OK</a>
 		</div>
 	</div>
 </div>

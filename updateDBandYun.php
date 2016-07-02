@@ -7,10 +7,10 @@
 /* Functional code providing some limited validation */
 $db = new SQLite3('/mnt/sda1/arduino/www/TrackPractice/pacer.db');
 
-$ipAddress = "http://172.20.10.7";			// holds the ipAddress that needs to be used on the network that Yun is connected to: IP address for Yun on my iPhone hotspot network
+// $ipAddress = "http://172.20.10.7";			// holds the ipAddress that needs to be used on the network that Yun is connected to: IP address for Yun on my iPhone hotspot network
 // $ipAddress = "http://192.168.1.153";	// IP address for Yun on my home network
 // $ipAddress = "http://192.168.240.1";	// IP address for Yun on its own network
-
+$ipAddress = "http://" . $_SERVER['SERVER_NAME'];	// use whatever the server IP is that this PHP file is on
 
 $pacerIndex = -1;
 $value = -1;

@@ -38,7 +38,8 @@
         var isVerificationEnabled = true;		// If false, this will allow the user to click through the app without being attached to any DB or web server
 
         // Globals specific to the client's track and desired permissions
-        var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
+        var ipAddress = "";
+        // var ipAddress = "http://172.20.10.7";           // IP address for Yun on my iPhone hotspot network.
         // var ipAddress = "http://192.168.1.153";      // IP address for Yun on my home network
         // var ipAddress = "http://192.168.240.1";      // IP address for Yun on its own network.
         // var ipAddress = "http://192.168.1.244";      // IP address for Yun on Aaron's apt network
@@ -169,13 +170,6 @@
 
         // Displays an alert when the user clicks the help button, but this needs to be changed to be specific for each button.
         function help() {
-            // var ip = location.host;
-            // alert(ip);
-            $.getJSON("http://jsonip.com/?callback=?", function (data) {
-                // console.log(data);
-                alert(data.ip);
-            });
-
             // alert("Once you enter a valid lap time, click the green 'Go' Button.\n\nIn order to clear or exit your pacer, click the red 'Quit' button.\n\nIn order to restart your pacer, click the yellow 'Reset Countdown' button.")
             $("#helpPopup").popup("open");
 
@@ -553,11 +547,15 @@
             $("#failedToAuthenticate").hide();
             $('#optionsButton').hide();
 
+            // set the global IP address variable to whatever host we just got the page from so we know where to send the requests to
+            ipAddress = "http://" + location.host;
+
+            // check permissions to see if things need to be hidden
             if (isDistanceChangePermissionEnabled == false) {
-                // hide that button
                 $('#distanceSelectDiv_controlView').hide();
             }
 
+            // the click listeners for the custom number pad that I created
             $(".myNumPad").click(function () {
                 buttonValue = $(this).attr("value");
                 passcodeDisplayValue = $('#passcodeDisplay').text();
@@ -1075,7 +1073,7 @@
 		<div class="ui-grid-b" style="margin: 0 20px 0 20px;">
 			<div class="ui-block-a"><button data-mini="true" style="font-size: 24px" data-role="button">&nbsp;</button></div>
 			<div class="ui-block-b"><button value="0" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">0</button></div>
-			<div class="ui-block-c"><button value="x" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">Clear</button></div>
+			<div class="ui-block-c"><button value="x" class="myNumPad" data-mini="true" style="font-size: 24px" data-role="button">X</button></div>
 		</div>
 		<a href="#" data-role="button" data-rel="back" data-theme="a">Cancel</a>
 

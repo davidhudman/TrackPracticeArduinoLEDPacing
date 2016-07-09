@@ -57,6 +57,7 @@
         var isUserNameChangePermissionEnabled = true;
         var isUserOptionsEnabled = false;
         var isDistanceChangePermissionEnabled = false;
+        var isAllSpeedsPermissionEnabled = false;
 
         // user variables
         var masterPacerSelected = -1;
@@ -212,14 +213,14 @@
             // change to the correct view - this should prevent unwanted delays associated with the request to arduino
             showThisDiv("mainPacerControl", "slide");
         }
-        
+
         function requestPacerOrRestart() {
             // restart
             if ($("#startButton").attr("startNotReset") == "0") {
                 // show the view to let the user confirm their restart
                 showThisDiv("confirmRestartDiv");
             }
-            // start
+                // start
             else {
                 // If time is set
                 if (masterUserPaceTime != "-1") {
@@ -238,7 +239,7 @@
                     $("#incorrectFormatMessage").hide();
                     $("#failedToAuthenticate").hide();
                 }
-                // else: tell the user to enter their time
+                    // else: tell the user to enter their time
                 else {
                     $("#timeNotEnteredPopup").popup("open");
                 }
@@ -560,6 +561,70 @@
             }
         }
 
+        // This will alter the upper an lower limits of the JTSage Datebox based on the userTimeInputDistance
+        function setDurationLimits() {
+            if (!isDeveloperMode && !isAllSpeedsPermissionEnabled) {
+                switch (userTimeInputDistance) {
+                    case 0:
+                    default:
+                        $("#timeInputFlipBox_controlView").datebox("option", {
+                            minDur: "15",
+                            maxDur: "120",
+                            overrideSetDurationButtonLabel: "Set Lap Time"
+                        });
+
+                        $('#timeInputFlipBox_controlView').datebox('setTheDate', "2:00").datebox("refresh");
+                        $('#timeInputLink_controlView').text("Enter Lap Time");
+                        break;
+                    case 400:
+                        $("#timeInputFlipBox_controlView").datebox("option", {
+                            minDur: "35",
+                            maxDur: "300",
+                            overrideSetDurationButtonLabel: "Set 400m Time"
+                        });
+
+                        $('#timeInputFlipBox_controlView').datebox('setTheDate', "02:00").datebox("refresh");
+                        $('#timeInputLink_controlView').text("Enter 400m Time");
+                        break;
+                    case 1000:
+                        $("#timeInputFlipBox_controlView").datebox("option", {
+                            minDur: "90",
+                            maxDur: "750",
+                            overrideSetDurationButtonLabel: "Set 1km Time"
+                        });
+
+                        $('#timeInputFlipBox_controlView').datebox('setTheDate', "5:00").datebox("refresh");
+                        $('#timeInputLink_controlView').text("Enter 1km Time");
+                        break;
+                    case 1600:
+                        $("#timeInputFlipBox_controlView").datebox("option", {
+                            minDur: "150",
+                            maxDur: "1200",
+                            overrideSetDurationButtonLabel: "Set 1600m Time"
+                        });
+
+                        $('#timeInputFlipBox_controlView').datebox('setTheDate', "08:30").datebox("refresh");
+                        $('#timeInputLink_controlView').text("Enter 1600m Time");
+                        break;
+                    case 1609.344:
+                        $("#timeInputFlipBox_controlView").datebox("option", {
+                            minDur: "150",
+                            maxDur: "1200",
+                            overrideSetDurationButtonLabel: "Set Mile Time"
+                        });
+
+                        $('#timeInputFlipBox_controlView').datebox('setTheDate', "08:30").datebox("refresh");
+                        $('#timeInputLink_controlView').text("Enter Mile Time");
+                        break;
+                }
+            }
+            else {
+                $("#timeInputFlipBox_controlView").datebox("option", {
+                    minDur: "5"
+                });
+            }
+        }
+
         // *****************
         // End Click Handlers
         // *****************
@@ -573,11 +638,34 @@
             $("#failedToAuthenticate").hide();
             $('#optionsButton').hide();
 
+            setDurationLimits();
+            /* ************************************************* */
+            // Testing Section
+            /* ************************************************* */
+
+            // $('#timeInputFlipBox_controlView').trigger('options', {'method':'set', 'minDur':'10'});
+            // $('#timeInputFlipBox_controlView').data("options", {minDur: "10"});		// testing, please remove
+            // $("#timeInputFlipBox_controlView").data("options", {
+            //$("#timeInputFlipBox_controlView").datebox("option", {
+            //overrideSetDurationButtonLabel: "Set Mile Time"
+            //});
+
+            // $('#timeInputFlipBox_controlView').datebox('setTheDate', "08:30");
+
+            //$("#timeInputFlipBox_controlView").datebox("refresh");
+
+            // alert($('#timeInputFlipBox_controlView').data("options").minDur);		// testing, please remove
+            // $('#timeInputFlipBox_controlView').datebox('setTheDate', "08:30");
+            // $("#timeInput_controlView").load(location.href+" #timeInput_controlView>*","");
+            // alert($('#timeInputFlipBox_controlView').data("options").minDur);
+
+            /* ************************************************* */
+
             // set the global IP address variable to whatever host we just got the page from so we know where to send the requests to
             ipAddress = "http://" + location.host;
 
             // check permissions to see if things need to be hidden
-            if (isDistanceChangePermissionEnabled == false) {
+            if (!isDistanceChangePermissionEnabled) {
                 $('#distanceSelectDiv_controlView').hide();
             }
 
@@ -830,6 +918,7 @@
                     break;
             }
             $("#timeInputLink_controlView").text("Enter your " + userTimeInputDistanceString + " time:");
+            setDurationLimits();
         }
 
         // change the button text whenever the user enters new text or verify that the user wants to change to the new time when the pacer is already running
@@ -1007,7 +1096,7 @@
     <div id="timeInput_controlView" >
         <input name="timeInputFlipBox" id="timeInputFlipBox_controlView" type="text" data-role="datebox" onchange="timeInputChanged(this.value)" data-options='{
 				    "noButton": true, 
-				    "mode":"durationflipbox", 
+				    "mode":"durationflipbox",
 				    "overrideDurationFormat":"%DM:%DS", 
 				    "minDur":"5", 
 				    "maxDur":"900", 
@@ -1065,6 +1154,17 @@
 		<div role="main" class="ui-corner-bottom ui-content">
 			<h3 class="ui-title">You must enter a time before you can begin.</h3>
 			<p>Enter your time and hit the start button. If you already created a pacer and it's still running, hit the button titled "Already created a pacer? Login."</p>
+			<a href="#" data-role="button" data-rel="back" data-transition="flow" data-theme="b">Close</a>
+		</div>
+	</div>
+	
+	<!-- Invalid Time -->
+	<div data-role="popup" id="invalidTimePopup" data-overlay-theme="a" data-theme="b" style="max-width:400px;" class="ui-corner-all">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Invalid Time</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<p>You entered a time that is faster than Usain Bolt's 100 meter dash world record. Please enter a slower time.</p>
 			<a href="#" data-role="button" data-rel="back" data-transition="flow" data-theme="b">Close</a>
 		</div>
 	</div>

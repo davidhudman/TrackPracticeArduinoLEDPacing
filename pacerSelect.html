@@ -48,6 +48,7 @@
         var numPacers = 10;
         var lapTimeInputConstraints = [1, 900];
         var trackDistanceInMeters = 400;
+        var kioskMode = true;
 
         // user permissions
         var isUserBackwardsPermissionEnabled = true;
@@ -57,7 +58,7 @@
         var isUserNameChangePermissionEnabled = true;
         var isUserOptionsEnabled = false;
         var isDistanceChangePermissionEnabled = false;
-        var isAllSpeedsPermissionEnabled = false;
+        var isAllSpeedsPermissionEnabled = true;
 
         // user variables
         var masterPacerSelected = -1;
@@ -66,8 +67,7 @@
         var masterUserTimeEnteredString = "-1";
         var userTimeInputDistance = 1609.344; 			 // this allows the user to specify whether they want to input their pace as a lap pace (based on how long this track is), 400m pace, 1600m pace, or mile pace
         var userTimeInputDistanceString = "mile";	    // a string that will indicate to the user what they chose (or what is default)
-        var pinVar = -1;								// this is used by requestCommand() to send the user's PIN for verification on each command
-        var combined; 									// combined string of passcode being submitted
+        var masterUserPasscode = -1;
 
         // additional variables
         var isNewPacer = true;							// used for sequencing rules with the different views
@@ -87,6 +87,8 @@
         var onExistingPacerSequence = false;
         var onCoachSequence = false;
         var extrasMode = false;
+        var pinVar = -1;								// this is used by requestCommand() to send the user's PIN for verification on each command
+        var combined; 									// combined string of passcode being submitted
 
         // *****************
         // Click Handlers
@@ -120,6 +122,27 @@
             }
         }
 
+        // reset all user variables when a user leaves
+        function resetUserVariables() {
+            // user variables
+            masterPacerSelected = -1;
+            masterColorIndex = 1;
+            masterUserPaceTime = "-1";
+            masterUserTimeEnteredString = "-1";
+            userTimeInputDistance = 1609.344; 			 // this allows the user to specify whether they want to input their pace as a lap pace (based on how long this track is), 400m pace, 1600m pace, or mile pace
+            userTimeInputDistanceString = "mile";	    // a string that will indicate to the user what they chose (or what is default)
+            masterUserPasscode = -1;
+
+            // additional variables
+            isNewPacer = true;							// used for sequencing rules with the different views
+            
+            // workout creation
+            numMetersArray = [];
+            secondsLapPaceArray = [];
+            secondsRestArray = [];
+            currentInterval = 0;
+        }
+
         function quitRequested() {
             showThisDiv("confirmExitDiv");
         }
@@ -136,12 +159,33 @@
                 alert("Sent the command to start the pacer and it's time for a " + userTimeInputDistance + " was " + masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance) + " and the actual rounded value sent was " + (masterUserPaceTime * (trackDistanceInMeters / userTimeInputDistance)).toFixed(2));
             }
 
-            showThisDiv("mainPacerControl", "slide");
+            // if we're in kiosk mode, we want the next user to walk up to a fresh screen
+            if (kioskMode) {
+                
+                // show the acknowledgement that their pacer is counting down
+                showThisDiv("pacerStartedDiv", "slide");
 
-            $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
-            $("#startButton").attr("startNotReset", "0");	                                // set the startButton's startNotReset attribute to "0", indicating that it is a reset button now
-            $('#loginButton').hide();                                                       // hide the Login button
-            $('#optionsButton').show();                                                     // show the options button
+                // show the main screen after 7 seconds
+                setTimeout(function () {
+                    showThisDiv("mainPacerControl", "slide");
+
+                    // reset user variables
+                    resetUserVariables();
+
+                    // reload the page
+                    location.reload;
+
+                }, 7000);
+
+            }
+            else {
+                showThisDiv("mainPacerControl", "slide");
+
+                $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
+                $("#startButton").attr("startNotReset", "0");	                                // set the startButton's startNotReset attribute to "0", indicating that it is a reset button now
+                $('#loginButton').hide();                                                       // hide the Login button
+                $('#optionsButton').show();                                                     // show the options button
+            }
             // }
         }
 
@@ -150,10 +194,7 @@
             requestCommand(0, masterPacerSelected, -1);
 
             // Reset master variables to original values
-            masterColorIndex = 1;
-            masterUserPaceTime = "-1";
-            userTimeInputDistance = 1609.344;
-            userTimeInputDistanceString = "mile";
+            resetUserVariables();
 
             // close popup
             showThisDiv("mainPacerControl", "slide");
@@ -233,11 +274,11 @@
                     // reset the passcode values and variables in the view and the global variable
                     $('#passcodeDisplay').attr("value", "***");
                     $('#passcodeDisplay').text("***");
-                    combined = "";
+                    masterUserPasscode = "";
 
                     // hide the error messages
                     $("#incorrectFormatMessage").hide();
-                    $("#failedToAuthenticate").hide();
+                    $("#failedToAuthenticate").html("<br />");
                 }
                     // else: tell the user to enter their time
                 else {
@@ -269,7 +310,7 @@
                     // show Pacer Info to allow the user to confirm
                     $("#confirmStartDivPacerTime").text("Time: " + masterUserTimeEnteredString);
                     $("#confirmStartDivPacerColor").text("Color: " + colorArray[masterColorIndex]);
-                    $("#confirmStartDivPacerPasscode").text("Passcode: " + combined);
+                    $("#confirmStartDivPacerPasscode").text("Passcode: " + masterUserPasscode);
 
                 }
                 else {
@@ -315,8 +356,8 @@
                     // update view element(s) - text and value attribute
                     $('#passcodeDisplay').attr("value", "***");
                     $('#passcodeDisplay').text("***");
-                    combined = "";
-                    $("#failedToAuthenticate").show();
+                    masterUserPasscode = "";
+                    $("#failedToAuthenticate").text("Incorrect passcode. Try again.");
                 }
             }
         }
@@ -324,33 +365,33 @@
         function pinSubmitted(is_New_Pacer, pin) {
             // isNewPacer == 0 : authenticate
             // isNewPacer == 1 : create
-            pin = combined || 0;
+            pin = masterUserPasscode || 0;
             if (is_New_Pacer == 1) {      // new pacer
 
-                // this pinVar variable is used for requestCommand() so it must stay up to date in order for the commands to be valid
-                pinVar = -1;
-                pinVar = pin;
+                // this masterUserPasscode variable is used for requestCommand() so it must stay up to date in order for the commands to be valid
+                masterUserPasscode = -1;
+                masterUserPasscode = pin;
 
-                if (isPinFormatValid(pinVar)) {                 // if the PIN is formatted correctly
+                if (isPinFormatValid(masterUserPasscode)) {                 // if the PIN is formatted correctly
                     // loading screen
                     // $("#createPasscodePopup").popup('close');
-                    pinCreateAndAuthenticate(pinVar, is_New_Pacer);
+                    pinCreateAndAuthenticate(masterUserPasscode, is_New_Pacer);
                 }
                 else { // if the PIN isn't formatted correctly
                     $("#incorrectFormatMessage_create").show();
-                    // alert("Your PIN is not 3 digits. You entered: " + pinVar);
+                    // alert("Your PIN is not 3 digits. You entered: " + masterUserPasscode);
                 }
             }
             else { // isNewPacer = 0    // authenticate existing pacer
-                pinVar = pin
+                masterUserPasscode = pin
                 if (isDeveloperMode == true) {
-                    alert("The passcode you input was: " + pinVar);
+                    alert("The passcode you input was: " + masterUserPasscode);
                 }
 
 
-                if (isPinFormatValid(pinVar)) {                 // if the PIN is formatted correctly
+                if (isPinFormatValid(masterUserPasscode)) {                 // if the PIN is formatted correctly
                     // $("#createPasscodePopup").popup('close');
-                    pinCreateAndAuthenticate(pinVar, is_New_Pacer);
+                    pinCreateAndAuthenticate(masterUserPasscode, is_New_Pacer);
 
                     // probably need a loading screen here
 
@@ -465,12 +506,12 @@
                 // if sending the "start" command, we want to also send a string that gives the exact pace and distance so there are no rounding errors
                 if (x == 7) {
                     // send the request
-                    request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar + "&fourthCommand=" + masterUserTimeEnteredString + " per " + userTimeInputDistanceString, true);
+                    request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + masterUserPasscode + "&fourthCommand=" + masterUserTimeEnteredString + " per " + userTimeInputDistanceString, true);
                     request.send();
                 }
                 else {
                     // send the request
-                    request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + pinVar, true);
+                    request.open("GET", "updateDBandYun.php?command=" + x + "&pacerIndex=" + y + "&value=" + z + "&pin=" + masterUserPasscode, true);
                     request.send();
                 }
             }
@@ -635,7 +676,7 @@
             $('#timeInput').hide();
             $('#timeInput_controlView').hide();
             $("#incorrectFormatMessage").hide();
-            $("#failedToAuthenticate").hide();
+            $("#failedToAuthenticate").html("<br />");
             $('#optionsButton').hide();
 
             setDurationLimits();
@@ -674,9 +715,9 @@
                 buttonValue = $(this).attr("value");
                 passcodeDisplayValue = $('#passcodeDisplay').text();
 
-                // if the display values are already "***", make sure that our global variable "combined" is blank
+                // if the display values are already "***", make sure that our global variable "masterUserPasscode" is blank
                 if (passcodeDisplayValue == "***") {
-                    combined = "";
+                    masterUserPasscode = "";
                 }
 
                 // if the user hit the "clear" button
@@ -685,8 +726,8 @@
                     $('#passcodeDisplay').attr("value", "***");
                     $('#passcodeDisplay').text("***");
 
-                    // change the global combined value back to blank
-                    combined = "";
+                    // change the global masterUserPasscode value back to blank
+                    masterUserPasscode = "";
                 }
                     // if the user hit any number button
                 else {
@@ -703,23 +744,23 @@
                             $('#passcodeDisplay').text(passcodeDisplayValue + buttonValue);
 
                             // set the value of our global variable to the combination or these to strings
-                            combined = passcodeDisplayValue + buttonValue;		// placing this inside the if statement will ensure that it doesn't get pressed an extra time
+                            masterUserPasscode = passcodeDisplayValue + buttonValue;		// placing this inside the if statement will ensure that it doesn't get pressed an extra time
                         }
 
-                        if (combined.length == 3) {
+                        if (masterUserPasscode.length == 3) {
                             if (isDeveloperMode == true) {
-                                alert("Your passcode was entered: " + combined)
+                                alert("Your passcode was entered: " + masterUserPasscode)
                             }
 
                             // do something here to make the view inacessible so the user can't press anymore buttons
 
                             // if this is a new pacer
                             if (isNewPacer == true) {
-                                pinSubmitted(1, combined);
+                                pinSubmitted(1, masterUserPasscode);
                             }
                                 // if we're authenticating an existing pacer
                             else {
-                                pinSubmitted(0, combined);
+                                pinSubmitted(0, masterUserPasscode);
                             }
                         }
                     }
@@ -739,7 +780,7 @@
             // Hide Alert messages and remove any pre-existing text when the field is clicked
             $("#pinAuthenticateInput").click(function () {
                 $("#incorrectFormatMessage").hide();
-                $("#failedToAuthenticate").hide();
+                $("#failedToAuthenticate").html("<br />");
                 $("#pinAuthenticateInput").val("");
             });
 
@@ -771,11 +812,11 @@
                     // reset the passcode values and variables in the view and the global variable
                     $('#passcodeDisplay').attr("value", "***");
                     $('#passcodeDisplay').text("***");
-                    combined = "";
+                    masterUserPasscode = "";
 
                     // hide the error messages
                     $("#incorrectFormatMessage").hide();
-                    $("#failedToAuthenticate").hide();
+                    $("#failedToAuthenticate").html("<br />");
 
                 }
                 else {  // if the pacer is inactive
@@ -1299,6 +1340,18 @@
 		<div role="main" class="ui-corner-bottom ui-content">
 			<h3 class="ui-title">You don't have permission to access these features.</p>
 			<a href="#" data-role="button" data-rel="back" data-theme="a">OK</a>
+		</div>
+	</div>
+</div>
+
+<!-- Kiosk Mode Start Acknowledgement -->
+<div data-role="page" id="pacerStartedDiv" style="" data-theme="b">
+	<div data-role="content" style="max-width: 800px; min-width: 250px; margin: auto;">
+		<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Your pacer is counting down.</h1>
+		</div>
+		<div role="main" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">After the countdown, begin following your pace light. This screen will refresh so other users can create pacers, too.</h3>
 		</div>
 	</div>
 </div>

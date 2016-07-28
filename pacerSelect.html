@@ -135,7 +135,7 @@
 
             // additional variables
             isNewPacer = true;							// used for sequencing rules with the different views
-            
+
             // workout creation
             numMetersArray = [];
             secondsLapPaceArray = [];
@@ -161,7 +161,7 @@
 
             // if we're in kiosk mode, we want the next user to walk up to a fresh screen
             if (kioskMode) {
-                
+
                 // show the acknowledgement that their pacer is counting down
                 showThisDiv("pacerStartedDiv", "slide");
 
@@ -362,41 +362,40 @@
             }
         }
 
-        function pinSubmitted(is_New_Pacer, pin) {
+        function pinSubmitted(is_New_Pacer, passcode) {
             // isNewPacer == 0 : authenticate
             // isNewPacer == 1 : create
-            pin = masterUserPasscode || 0;
+            // passcode = masterUserPasscode || 0;
+            masterUserPasscode = passcode;
             if (is_New_Pacer == 1) {      // new pacer
 
-                // this masterUserPasscode variable is used for requestCommand() so it must stay up to date in order for the commands to be valid
-                masterUserPasscode = -1;
-                masterUserPasscode = pin;
+                if (isPinFormatValid(passcode)) {                 // if the passcode is formatted correctly
 
-                if (isPinFormatValid(masterUserPasscode)) {                 // if the PIN is formatted correctly
-                    // loading screen
-                    // $("#createPasscodePopup").popup('close');
-                    pinCreateAndAuthenticate(masterUserPasscode, is_New_Pacer);
+                    // call the function to authenticate
+                    pinCreateAndAuthenticate(passcode, is_New_Pacer);
+
+                    // show a loading screen
                 }
-                else { // if the PIN isn't formatted correctly
+                else { // if the passcode isn't formatted correctly. Should be impossible.
                     $("#incorrectFormatMessage_create").show();
-                    // alert("Your PIN is not 3 digits. You entered: " + masterUserPasscode);
+                    // alert("Your passcode is not 3 digits. You entered: " + passcode);
                 }
             }
             else { // isNewPacer = 0    // authenticate existing pacer
-                masterUserPasscode = pin
+
                 if (isDeveloperMode == true) {
-                    alert("The passcode you input was: " + masterUserPasscode);
+                    alert("The passcode you input was: " + passcode);
                 }
 
+                if (isPinFormatValid(passcode)) {                 // if the passcode is formatted correctly
 
-                if (isPinFormatValid(masterUserPasscode)) {                 // if the PIN is formatted correctly
-                    // $("#createPasscodePopup").popup('close');
-                    pinCreateAndAuthenticate(masterUserPasscode, is_New_Pacer);
+                    // call the function to authenticate
+                    pinCreateAndAuthenticate(passcode, is_New_Pacer);
 
-                    // probably need a loading screen here
+                    // show a loading screen
 
                 }
-                else { // if the PIN isn't formatted correctly
+                else { // if the passcode isn't formatted correctly. Should be impossible.
                     $("#incorrectFormatMessage").show();
                 }
             }

@@ -172,6 +172,12 @@
                     // reset user variables
                     resetUserVariables();
 
+                    // Refresh the time in the JTSage flip box where the user enters their mile time... this is actually does some redundant tasks but gets the job done
+                    setDurationLimits(true);
+
+                    // reset view ... just in case reloading the page doesn't work
+                    resetKioskView();
+
                     // reload the page
                     location.reload;
 
@@ -187,6 +193,20 @@
                 $('#optionsButton').show();                                                     // show the options button
             }
             // }
+        }
+
+        // Reset the buttons and variables associated with those buttons to the default values
+        function resetKioskView() {
+            // Reset buttons to normal
+            $('#startButton').text("Start");                                                // change "Start" button to "Restart"
+            $("#startButton").attr("startNotReset", "1");	                                // set the startButton's startNotReset attribute to "1", indicating that it is a start button now
+            $('#loginButton').show();                                                       // hide the Login button
+            $('#optionsButton').hide();                                                     // show the options button
+
+            // Reset fields to normal
+            $("#distanceSelect_controlView").val("1").selectmenu('refresh');
+            $("#colorSelect_controlView").val("1").selectmenu('refresh');      				// change the color select dropdown to the default value
+            $('#timeInputLink_controlView').text("Enter Mile Time");                        // change time input button to display a message for the user to enter their time
         }
 
         function quit() {
@@ -602,8 +622,8 @@
         }
 
         // This will alter the upper an lower limits of the JTSage Datebox based on the userTimeInputDistance
-        function setDurationLimits() {
-            if (!isDeveloperMode && !isAllSpeedsPermissionEnabled) {
+        function setDurationLimits(override_set_duration_limits) {
+            if ((!isDeveloperMode && !isAllSpeedsPermissionEnabled) || override_set_duration_limits) {
                 switch (userTimeInputDistance) {
                     case 0:
                     default:
@@ -656,6 +676,15 @@
                         $('#timeInputFlipBox_controlView').datebox('setTheDate', "08:30").datebox("refresh");
                         $('#timeInputLink_controlView').text("Enter Mile Time");
                         break;
+                }
+                // for development purposes only
+                if (override_set_duration_limits && isAllSpeedsPermissionEnabled) {
+                    $("#timeInputFlipBox_controlView").datebox("option", {
+                        minDur: "5",
+                        maxDur: "900",
+                        overrideSetDurationButtonLabel: "Set Mile Time"
+                    });
+                    $('#timeInputFlipBox_controlView').datebox('setTheDate', "00:06").datebox("refresh");
                 }
             }
             else {

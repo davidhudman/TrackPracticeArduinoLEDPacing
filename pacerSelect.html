@@ -165,27 +165,86 @@
                 // show the acknowledgement that their pacer is counting down
                 showThisDiv("pacerStartedDiv", "slide");
 
-                // show the main screen after 7 seconds
+                // Take your mark - red
+                $('#countdownMessage').text("Take your mark.");
+                $('#countdownMessage').attr('style', 'color: red; text-align: center;');
+
+                var i = 7;
+                secondsCountdown = setInterval(function () {
+                    $('#countdownSeconds').text("Start in: " + i);
+                    $('#countdownSeconds').attr('style', 'text-align: center;');
+                    i--;
+                    if (i == -1) {
+                        clearInterval(secondsCountdown);
+                    }
+                }, 1000);
+
                 setTimeout(function () {
-                    showThisDiv("mainPacerControl", "slide");
+                    
+                    // Get Ready - yellow
+                    $('#countdownMessage').text("Get Set.").css('color', 'yellow');
 
-                    // reset user variables
-                    resetUserVariables();
+                    setTimeout(function () {
 
-                    // Refresh the time in the JTSage flip box where the user enters their mile time... this is actually does some redundant tasks but gets the job done
-                    setDurationLimits(true);
+                        // Go! - green
+                        $('#countdownMessage').text("Go!").css({ 'color': 'green', "font-size": "400%" });
 
-                    // reset view ... just in case reloading the page doesn't work
-                    resetKioskView();
+                        // show the main screen after 7 seconds
+                        setTimeout(function () {
+                            showThisDiv("mainPacerControl", "slide");
 
-                    // reload the page
-                    location.reload;
+                            // reset user variables
+                            resetUserVariables();
 
-                }, 7000);
+                            // Refresh the time in the JTSage flip box where the user enters their mile time... this is actually does some redundant tasks but gets the job done
+                            setDurationLimits(true);
+
+                            // reset view ... just in case reloading the page doesn't work
+                            resetKioskView();
+
+                            // reload the page
+                            location.reload;
+
+                        }, 5000);
+                    }, 4000);
+                }, 4000);
 
             }
             else {
-                showThisDiv("mainPacerControl", "slide");
+                // show the acknowledgement that their pacer is counting down
+                showThisDiv("pacerStartedDiv", "slide");
+
+                // Take your mark - red
+                $('#countdownMessage').text("Take your mark.");
+                $('#countdownMessage').attr('style', 'color: red; text-align: center;');
+
+                var i = 7;
+                secondsCountdown = setInterval(function () {
+                    $('#countdownSeconds').text("Start in: " + i);
+                    $('#countdownSeconds').attr('style', 'text-align: center;');
+                    i--;
+                    if (i == -1) {
+                        clearInterval(secondsCountdown);
+                    }
+                }, 1000);
+
+                setTimeout(function () {
+
+                    // Get Ready - yellow
+                    $('#countdownMessage').text("Get Set.").css('color', 'yellow');
+
+                    setTimeout(function () {
+
+                        // Go! - green
+                        $('#countdownMessage').text("Go!").css('color', 'green');
+
+                        // show the main screen after 7 seconds
+                        setTimeout(function () {
+                            showThisDiv("mainPacerControl", "slide");
+
+                        }, 5000);
+                    }, 4000);
+                }, 4000);
 
                 $('#startButton').text("Restart");                                              // change "Start" button to "Restart"
                 $("#startButton").attr("startNotReset", "0");	                                // set the startButton's startNotReset attribute to "0", indicating that it is a reset button now
@@ -209,6 +268,34 @@
             $('#timeInputLink_controlView').text("Enter Mile Time");                        // change time input button to display a message for the user to enter their time
         }
 
+        // hides the exit button and rearranges to a two button grid
+        function hideExitButton() {
+            if (kioskMode) {
+                // hide exit button in kiosk mode
+                $('#exitButtonDiv').hide();
+
+                // remove the 3-element class
+                $('#mainPacerControlStartExitDiv').toggleClass("ui-grid-b", false);
+
+                // add the 2-element class
+                $('#mainPacerControlStartExitDiv').toggleClass("ui-grid-a", true);
+            }
+        }
+
+        // shows the exit button and rearranges to a three button grid
+        function showExitButton() {
+            if (kioskMode) {
+                // hide exit button in kiosk mode
+                $('#exitButtonDiv').show();
+
+                // remove the 2-element class
+                $('#mainPacerControlStartExitDiv').toggleClass("ui-grid-a", false);
+
+                // add the 3-element class
+                $('#mainPacerControlStartExitDiv').toggleClass("ui-grid-b", true);
+            }
+        }
+
         function quit() {
             // request function to exit a pacer
             requestCommand(0, masterPacerSelected, -1);
@@ -224,6 +311,7 @@
             $("#startButton").attr("startNotReset", "1");	                                // set the startButton's startNotReset attribute to "1", indicating that it is a start button now
             $('#loginButton').show();                                                       // hide the Login button
             $('#optionsButton').hide();                                                     // show the options button
+            hideExitButton();
 
             // Reset fields to normal
             $("#distanceSelect_controlView").val("1").selectmenu('refresh');
@@ -367,6 +455,8 @@
                     $('#loginButton').hide();                                                       // hide the Login button
                     $('#optionsButton').show();                                                     // show the options button
                     $("#startButton").attr("startNotReset", "0");
+
+                    showExitButton();
                 }
                 else {
                     if (isDeveloperMode == true) {
@@ -708,16 +798,7 @@
 
             setDurationLimits();
 
-            if (kioskMode) {
-                // hide exit button in kiosk mode
-                $('#exitButtonDiv').hide();
-
-                // remove the 3-element class
-                $('#mainPacerControlStartExitDiv').toggleClass("ui-grid-b", false);
-
-                // add the 2-element class
-                $('#mainPacerControlStartExitDiv').toggleClass("ui-grid-a", true);
-            }
+            hideExitButton();
             /* ************************************************* */
             // Testing Section
             /* ************************************************* */
@@ -1306,14 +1387,14 @@
 		<h3 style="text-align:center;" id="confirmStartDivPacerColor" ></h3>
 		<h3 style="text-align:center;" id="confirmStartDivPacerPasscode" ></h3>
 		<br /><br />
-		<p>After you click OK, you will see a traffic light countdown: 
+		<!--<p>After you click OK, you will see a traffic light countdown: 
 			<ul>
 				<li>The 3rd light turns RED</li>
 				<li>The 2nd light turns YELLOW</li>
 				<li>When the 1st light turns on with your color, you can start running.</li>
 			</ul>
 
-		</p>
+		</p>-->
 		<!--<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="a">Cancel</a>
 		<a href="#" data-role="button" data-inline="true" data-transition="flow" data-theme="b" onclick="start()">OK</a>-->
 		<div class="ui-grid-a" style="margin: 0 20px 0 20px;">
@@ -1386,11 +1467,15 @@
 <div data-role="page" id="pacerStartedDiv" style="" data-theme="b">
 	<div data-role="content" style="max-width: 800px; min-width: 250px; margin: auto;">
 		<div data-role="header" data-theme="a" class="ui-corner-top">
-			<h1>Your pacer is counting down.</h1>
+			<h1>Countdown</h1>
 		</div>
 		<div role="main" class="ui-corner-bottom ui-content">
-			<h3 class="ui-title">After the countdown, begin following your pace light. This screen will refresh so other users can create pacers, too.</h3>
+			<!--<h3 class="ui-title">After the countdown, begin following your pace light. This screen will refresh so other users can create pacers, too.</h3>-->
 		</div>
+        <div>
+            <h1 id="countdownSeconds"></h1>
+            <h1 id="countdownMessage"></h1>
+        </div>
 	</div>
 </div>
 

@@ -5,42 +5,28 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrackPractice", "prac090914
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1Arduino Atmel Chip Software", "1Arduino Atmel Chip Software", "{216D3DC2-5577-44AD-B93E-E778EEAB140A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1Arduino Yun Server Side", "1Arduino Yun Server Side", "{34E58211-8672-4B88-9D1D-BB3D4D14A693}"
-	ProjectSection(SolutionItems) = preProject
-		createPinTable.php = createPinTable.php
-		createWorkout.php = createWorkout.php
-		createWorkoutTable.php = createWorkoutTable.php
-		findOpenPacer.php = findOpenPacer.php
-		refreshDb.php = refreshDb.php
-		runWorkout.php = runWorkout.php
-		selectPin.php = selectPin.php
-		selectWorkout.php = selectWorkout.php
-		setAllWorkoutsToActive.php = setAllWorkoutsToActive.php
-		updateDBandYun.php = updateDBandYun.php
-		updatePacers.php = updatePacers.php
-		verifyPIN.php = verifyPIN.php
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1Deprecated Arduino Chip Software", "1Deprecated Arduino Chip Software", "{12984D4F-412F-4F98-88AE-4420BDEE0CA2}"
 	ProjectSection(SolutionItems) = preProject
-		TrackPracticeFastLED\TrackPracticeFastLED.ino = TrackPracticeFastLED\TrackPracticeFastLED.ino
-		..\TrackPracticeLPD8806\TrackPracticeLPD8806.ino = ..\TrackPracticeLPD8806\TrackPracticeLPD8806.ino
-		..\TrackPracticeWS2801\TrackPracticeWS2801.ino = ..\TrackPracticeWS2801\TrackPracticeWS2801.ino
+		Arduino Atmel Chip Software\Deprecated Arduino Chip Software\TrackPracticeFastLED.ino = Arduino Atmel Chip Software\Deprecated Arduino Chip Software\TrackPracticeFastLED.ino
+		Arduino Atmel Chip Software\Deprecated Arduino Chip Software\TrackPracticeLPD8806.ino = Arduino Atmel Chip Software\Deprecated Arduino Chip Software\TrackPracticeLPD8806.ino
+		Arduino Atmel Chip Software\Deprecated Arduino Chip Software\TrackPracticeWS2801.ino = Arduino Atmel Chip Software\Deprecated Arduino Chip Software\TrackPracticeWS2801.ino
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1User Mobile Web App", "1User Mobile Web App", "{4DB563BD-9D04-4999-9090-980ADB91190F}"
 	ProjectSection(SolutionItems) = preProject
-		index.html = index.html
+		User Mobile Web App\index.html = User Mobile Web App\index.html
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1Deprecated Web App", "1Deprecated Web App", "{2B4F6B7B-2C05-4A86-B7EE-574FC430AA71}"
 	ProjectSection(SolutionItems) = preProject
-		indexOriginalBackup.html = indexOriginalBackup.html
-		pacerSelect.html = pacerSelect.html
-		pageSlide.html = pageSlide.html
+		Deprecated\Deprecated Web App\index2.html = Deprecated\Deprecated Web App\index2.html
+		Deprecated\Deprecated Web App\index_old.html = Deprecated\Deprecated Web App\index_old.html
+		Deprecated\Deprecated Web App\indexOriginalBackup.html = Deprecated\Deprecated Web App\indexOriginalBackup.html
+		Deprecated\Deprecated Web App\pacerSelect.html = Deprecated\Deprecated Web App\pacerSelect.html
+		Deprecated\Deprecated Web App\pageSlide.html = Deprecated\Deprecated Web App\pageSlide.html
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2Arduino Yun Server Side", "2Arduino Yun Server Side", "{6F1C901B-CFB9-4BF3-A3A2-167B72225063}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Arduino Yun Server Side", "Arduino Yun Server Side", "{6F1C901B-CFB9-4BF3-A3A2-167B72225063}"
 	ProjectSection(SolutionItems) = preProject
 		Arduino Yun Server Side\createPinTable.php = Arduino Yun Server Side\createPinTable.php
 		Arduino Yun Server Side\createWorkout.php = Arduino Yun Server Side\createWorkout.php

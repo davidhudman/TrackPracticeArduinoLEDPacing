@@ -40,6 +40,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1Deprecated Web App", "1Dep
 		pageSlide.html = pageSlide.html
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2Arduino Yun Server Side", "2Arduino Yun Server Side", "{6F1C901B-CFB9-4BF3-A3A2-167B72225063}"
+	ProjectSection(SolutionItems) = preProject
+		Arduino Yun Server Side\createPinTable.php = Arduino Yun Server Side\createPinTable.php
+		Arduino Yun Server Side\createWorkout.php = Arduino Yun Server Side\createWorkout.php
+		Arduino Yun Server Side\createWorkoutTable.php = Arduino Yun Server Side\createWorkoutTable.php
+		Arduino Yun Server Side\findOpenPacer.php = Arduino Yun Server Side\findOpenPacer.php
+		Arduino Yun Server Side\index2.php = Arduino Yun Server Side\index2.php
+		Arduino Yun Server Side\phpinfo(2).php = Arduino Yun Server Side\phpinfo(2).php
+		Arduino Yun Server Side\phpinfo.php = Arduino Yun Server Side\phpinfo.php
+		Arduino Yun Server Side\refreshDb.php = Arduino Yun Server Side\refreshDb.php
+		Arduino Yun Server Side\runWorkout.php = Arduino Yun Server Side\runWorkout.php
+		Arduino Yun Server Side\selectPin.php = Arduino Yun Server Side\selectPin.php
+		Arduino Yun Server Side\selectWorkout.php = Arduino Yun Server Side\selectWorkout.php
+		Arduino Yun Server Side\setAllWorkoutsToActive.php = Arduino Yun Server Side\setAllWorkoutsToActive.php
+		Arduino Yun Server Side\updateDBandYun.php = Arduino Yun Server Side\updateDBandYun.php
+		Arduino Yun Server Side\updatePacers.php = Arduino Yun Server Side\updatePacers.php
+		Arduino Yun Server Side\verifyPIN.php = Arduino Yun Server Side\verifyPIN.php
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32

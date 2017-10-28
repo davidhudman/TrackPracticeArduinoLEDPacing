@@ -86,6 +86,6 @@ extern "C" void __cxa_pure_virtual() {;}
 #define portOutputRegister(P)
 #define portInputRegister(P)
 #define portModeRegister(P)
-#include <..\prac090914aTrackPractice\prac090914aTrackPractice.ino>
+#include <..\prac090914aTrackPractice\TrackPractice.ino>
 #include <..\prac090914aTrackPractice\resource.h>
 #endif

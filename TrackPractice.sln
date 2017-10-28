@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrackPractice", "prac090914aTrackPractice.vcxproj", "{DE382A08-AB50-433E-AAC3-B77B2C4609AD}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Arduino Atmel Chip Software", "Arduino Atmel Chip Software", "{216D3DC2-5577-44AD-B93E-E778EEAB140A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1Arduino Atmel Chip Software", "1Arduino Atmel Chip Software", "{216D3DC2-5577-44AD-B93E-E778EEAB140A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Arduino Yun Server Side", "Arduino Yun Server Side", "{34E58211-8672-4B88-9D1D-BB3D4D14A693}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1Arduino Yun Server Side", "1Arduino Yun Server Side", "{34E58211-8672-4B88-9D1D-BB3D4D14A693}"
 	ProjectSection(SolutionItems) = preProject
 		createPinTable.php = createPinTable.php
 		createWorkout.php = createWorkout.php
@@ -21,19 +21,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Arduino Yun Server Side", "
 		verifyPIN.php = verifyPIN.php
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deprecated Arduino Chip Software", "Deprecated Arduino Chip Software", "{12984D4F-412F-4F98-88AE-4420BDEE0CA2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1Deprecated Arduino Chip Software", "1Deprecated Arduino Chip Software", "{12984D4F-412F-4F98-88AE-4420BDEE0CA2}"
 	ProjectSection(SolutionItems) = preProject
 		TrackPracticeFastLED\TrackPracticeFastLED.ino = TrackPracticeFastLED\TrackPracticeFastLED.ino
 		..\TrackPracticeLPD8806\TrackPracticeLPD8806.ino = ..\TrackPracticeLPD8806\TrackPracticeLPD8806.ino
 		..\TrackPracticeWS2801\TrackPracticeWS2801.ino = ..\TrackPracticeWS2801\TrackPracticeWS2801.ino
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User Mobile Web App", "User Mobile Web App", "{4DB563BD-9D04-4999-9090-980ADB91190F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1User Mobile Web App", "1User Mobile Web App", "{4DB563BD-9D04-4999-9090-980ADB91190F}"
 	ProjectSection(SolutionItems) = preProject
 		index.html = index.html
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deprecated Web App", "Deprecated Web App", "{2B4F6B7B-2C05-4A86-B7EE-574FC430AA71}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1Deprecated Web App", "1Deprecated Web App", "{2B4F6B7B-2C05-4A86-B7EE-574FC430AA71}"
 	ProjectSection(SolutionItems) = preProject
 		indexOriginalBackup.html = indexOriginalBackup.html
 		pacerSelect.html = pacerSelect.html

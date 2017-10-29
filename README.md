@@ -1,8 +1,6 @@
-# README #
+# Track Practice LED Pacing #
 
-### What is this for? ###
-
-Pacing track athletes. See demo of [using the app in a workout](https://www.youtube.com/watch?v=brJRkPgrA1k) and of the [basic features](https://www.youtube.com/watch?v=GPfT1HgIodE)
+This system is used for pacing track athletes. See our track workout functionality in [this demo](https://www.youtube.com/watch?v=brJRkPgrA1k) and some of our [basic features](https://www.youtube.com/watch?v=GPfT1HgIodE)
 
 This allows for lights to pace runners as they go around a running track. It allows for users to send inputs (paces - like 70 seconds per lap) to the lights through their smartphones. The main .ino file is uploaded via your USB port to the Arduino. However, the Arduino Yun has its own special .ino file to handle wireless input.
 

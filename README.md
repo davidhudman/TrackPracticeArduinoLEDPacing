@@ -4,11 +4,9 @@ This system is used for pacing track athletes. See our track workout functionali
 
 [![](https://img.youtube.com/vi/brJRkPgrA1k/0.jpg)](https://www.youtube.com/watch?v=brJRkPgrA1k) 
 
-Some of our basic features below: 
+Some of our basic features [here](https://www.youtube.com/watch?v=GPfT1HgIodE) as well.
 
-[![](https://img.youtube.com/vi/GPfT1HgIodE/0.jpg)](https://www.youtube.com/watch?v=GPfT1HgIodE)
-
-This allows for lights to pace runners as they go around a running track. It allows for users to send inputs (paces - like 70 seconds per lap) to the lights through their smartphones.
+This project provides a way for lights to pace runners as they go around a running track. It allows for users to send inputs (paces - like a 3:59 mile) to the lights through their smartphones.
 
 [![](https://github.com/davidhudman/TrackPracticeArduinoLEDPacing/blob/master/Screenshots/TrackPracticeSS02.JPG)](https://github.com/davidhudman/TrackPracticeArduinoLEDPacing)
 

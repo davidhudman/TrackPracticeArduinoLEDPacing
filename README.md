@@ -15,7 +15,7 @@ This project provides a way for lights to pace runners as they go around a runni
 
 * Input and output can be sent and viewed by the user through the mobile web app. With the Arduino Yun setup, the web app is hosted on the Yun and made available to the user when connected to the shared wifi network - much like a splash page when connecting to Starbucks wifi.
 
-## Other Input Methods ##
+#### Other Input Methods ####
 * If you have the bluetooth chip, input/output can be sent/received through an app that is no longer on the Google Play Store. It appears that it can be downloaded from [here](http://arduino-bluetooth-terminal.soft112.com/), but that link has not been verified.
 * I've build some nodeJS functionality to talk over the serial ports (USB) and a wired connection to the Arduino. It uses the serialport library and the servi library.
 

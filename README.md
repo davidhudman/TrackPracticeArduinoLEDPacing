@@ -1,6 +1,8 @@
 # Track Practice LED Pacing #
 
-This system is used for pacing track athletes. See our track workout functionality below: [![](https://img.youtube.com/vi/brJRkPgrA1k/0.jpg)](https://www.youtube.com/watch?v=brJRkPgrA1k) Some of our basic features below: [![](https://img.youtube.com/vi/GPfT1HgIodE/0.jpg)](https://www.youtube.com/watch?v=GPfT1HgIodE)
+This system is used for pacing track athletes. See our track workout functionality below: [![](https://img.youtube.com/vi/brJRkPgrA1k/0.jpg)](https://www.youtube.com/watch?v=brJRkPgrA1k) 
+
+Some of our basic features below: [![](https://img.youtube.com/vi/GPfT1HgIodE/0.jpg)](https://www.youtube.com/watch?v=GPfT1HgIodE)
 
 This allows for lights to pace runners as they go around a running track. It allows for users to send inputs (paces - like 70 seconds per lap) to the lights through their smartphones.
 

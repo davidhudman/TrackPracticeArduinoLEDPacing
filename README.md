@@ -2,7 +2,7 @@
 
 This system is used for pacing track athletes. See our track workout functionality in the video below: 
 
-[![](https://img.youtube.com/vi/brJRkPgrA1k/0.jpg)](https://www.youtube.com/watch?v=brJRkPgrA1k) 
+[![](https://github.com/davidhudman/TrackPracticeArduinoLEDPacing/blob/master/Screenshots/TrackPracticeSS05.JPG)](https://www.youtube.com/watch?v=brJRkPgrA1k) 
 
 Some of our basic features are in [this video](https://www.youtube.com/watch?v=GPfT1HgIodE) as well.
 
